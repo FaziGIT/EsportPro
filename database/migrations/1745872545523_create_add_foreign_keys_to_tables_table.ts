@@ -40,7 +40,7 @@ export default class extends BaseSchema {
         .foreign('tournament_id')
         .references('id')
         .inTable('tournaments')
-        .onDelete('CASCADE')
+        .onDelete('SET NULL')
         .onUpdate('CASCADE')
 
       table
@@ -79,6 +79,13 @@ export default class extends BaseSchema {
         .inTable('teams')
         .onDelete('SET NULL')
         .onUpdate('CASCADE')
+
+      table
+        .foreign('game_id')
+        .references('id')
+        .inTable('games')
+        .onDelete('SET NULL')
+        .onUpdate('CASCADE')
     })
     
     this.schema.alterTable('teams', (table) => {
@@ -86,18 +93,11 @@ export default class extends BaseSchema {
         .foreign('tournament_id')
         .references('id')
         .inTable('tournaments')
-        .onDelete('CASCADE')
+        .onDelete('SET NULL')
         .onUpdate('CASCADE')
       })
   }
 
   async down() {
-    this.schema.alterTable('tournaments', (table) => {
-      table.dropForeign(['winner_id'])
-    })
-    
-    this.schema.alterTable('teams', (table) => {
-      table.dropForeign(['tournament_id'])
-    })
   }
 }

@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, hasOne, manyToMany } from '@adonisjs/lucid/orm'
+import { BaseModel, belongsTo, column, manyToMany } from '@adonisjs/lucid/orm'
 import Tournament from './tournament.js'
-import type { HasOne, ManyToMany } from '@adonisjs/lucid/types/relations'
+import type { BelongsTo, ManyToMany } from '@adonisjs/lucid/types/relations'
 import User from './user.js'
 
 export default class Team extends BaseModel {
@@ -14,8 +14,8 @@ export default class Team extends BaseModel {
   @column()
   declare isWinner: boolean
 
-  @hasOne(() => Tournament)
-  declare tournament: HasOne<typeof Tournament>
+  @belongsTo(() => Tournament)
+  declare tournament: BelongsTo<typeof Tournament>
 
   @manyToMany(() => User, {
     pivotTable: 'user_teams'

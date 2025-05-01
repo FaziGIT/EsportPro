@@ -23,6 +23,7 @@ export default class extends BaseSchema {
       table.dateTime('end_date').notNullable()
       
       table.integer('winner_id').unsigned().nullable()
+      table.integer('game_id').unsigned().notNullable()
 
       table.timestamp('created_at').notNullable()
       table.timestamp('updated_at').nullable()

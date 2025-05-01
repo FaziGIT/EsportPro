@@ -14,9 +14,7 @@ export default class extends BaseSchema {
       table.integer('score_team2').notNullable()
 
       table.integer('winner_id').unsigned().nullable()
-
       table.integer('next_match_id').unsigned().nullable()
-
       table.integer('tournament_id').unsigned().notNullable()
 
       table.timestamp('created_at').notNullable()

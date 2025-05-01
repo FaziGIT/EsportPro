@@ -1,18 +1,24 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, hasOne } from '@adonisjs/lucid/orm'
+import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
 import Team from './team.js'
-import type { HasOne } from '@adonisjs/lucid/types/relations'
+import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Tournament from './tournament.js'
 
 export default class Match extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
-  @hasOne(() => Team)
-  declare team1: HasOne<typeof Team>
+  @column()
+  declare team1Id: number
 
-  @hasOne(() => Team)
-  declare team2: HasOne<typeof Team>
+  @belongsTo(() => Team)
+  declare team1: BelongsTo<typeof Team>
+
+  @column()
+  declare team2Id: number
+
+  @belongsTo(() => Team)
+  declare team2: BelongsTo<typeof Team>
 
   @column()
   declare scoreTeam1: number
@@ -20,14 +26,24 @@ export default class Match extends BaseModel {
   @column()
   declare scoreTeam2: number
 
-  @hasOne(() => Team)
-  declare winner: HasOne<typeof Team>
+  @column()
+  declare winnerId: number | null
 
-  @hasOne(() => Match)
-  declare nextMatch: HasOne<typeof Match>
 
-  @hasOne(() => Tournament)
-  declare tournament: HasOne<typeof Tournament>
+  @belongsTo(() => Team)
+  declare winner: BelongsTo<typeof Team>
+
+  @column()
+  declare nextMatchId: number | null
+
+  @belongsTo(() => Match)
+  declare nextMatch: BelongsTo<typeof Match>
+
+  @column()
+  declare tournamentId: number
+  
+  @belongsTo(() => Tournament)
+  declare tournament: BelongsTo<typeof Tournament>
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

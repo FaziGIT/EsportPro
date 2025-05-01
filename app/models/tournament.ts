@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, hasMany, hasOne } from '@adonisjs/lucid/orm'
-import type { HasMany, HasOne } from '@adonisjs/lucid/types/relations'
+import { BaseModel, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Team from './team.js'
 import Game from './game.js'
 
@@ -53,14 +53,20 @@ export default class Tournament extends BaseModel {
   @column()
   declare endDate: DateTime
 
-  @hasOne(() => Team)
-  declare winner: HasOne<typeof Team>
+  @column()
+  declare winnerId: number | null
+
+  @belongsTo(() => Team)
+  declare winner: BelongsTo<typeof Team>
 
   @hasMany(() => Team)
   declare teams: HasMany<typeof Team>
 
-  @hasOne(() => Game)
-  declare game: HasOne<typeof Game>
+  @column()
+  declare gameId: number
+  
+  @belongsTo(() => Game)
+  declare game: BelongsTo<typeof Game>
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
