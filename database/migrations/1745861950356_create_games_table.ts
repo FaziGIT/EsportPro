@@ -9,6 +9,9 @@ export default class extends BaseSchema {
       table.string('name', 255).notNullable()
       table.string('platform', 255).notNullable()
       table.binary('image').notNullable()
+
+      table.timestamp('created_at').notNullable()
+      table.timestamp('updated_at').nullable()
     })
   }
 

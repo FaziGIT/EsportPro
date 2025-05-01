@@ -4,7 +4,6 @@ import type { BelongsTo, HasMany, HasOne } from '@adonisjs/lucid/types/relations
 import Team from './team.js'
 import Game from './game.js'
 import Channel from './channel.js'
-import Match from './match.js'
 
 export default class Tournament extends BaseModel {
   @column({ isPrimary: true })
@@ -72,21 +71,6 @@ export default class Tournament extends BaseModel {
 
   @hasOne(() => Channel)
   declare channel: HasOne<typeof Channel>
-
-  @hasMany(() => Match, {
-    foreignKey: 'team1Id',
-  })
-  declare matchesHasTeam1: HasMany<typeof Match>
-
-  @hasMany(() => Match, {
-    foreignKey: 'team2Id',
-  })
-  declare matchesHasTeam2: HasMany<typeof Match>
-
-  @hasMany(() => Match, {
-    foreignKey: 'winnerId',
-  })
-  declare matchesWon: HasMany<typeof Match>
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

@@ -41,7 +41,7 @@ export default class Match extends BaseModel {
   @hasMany(() => Match, {
     foreignKey: 'nextMatchId',
   })
-  declare matches: HasMany<typeof Match>
+  declare previousMatches: HasMany<typeof Match>
 
   @column()
   declare tournamentId: string

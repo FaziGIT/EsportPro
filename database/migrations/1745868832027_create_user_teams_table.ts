@@ -9,6 +9,9 @@ export default class extends BaseSchema {
 
       table.uuid('user_id').notNullable()
       table.uuid('team_id').notNullable()
+
+      table.timestamp('created_at').notNullable()
+      table.timestamp('updated_at').nullable()
     })
   }
 

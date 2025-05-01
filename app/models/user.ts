@@ -41,7 +41,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare favoriteGames: ManyToMany<typeof Game>
 
   @manyToMany(() => Game, {
-    pivotTable: 'user_games_infos',
+    pivotTable: 'user_game_infos',
   })
   declare gameInfos: ManyToMany<typeof Game>
 

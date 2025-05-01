@@ -9,7 +9,7 @@ export default class extends BaseSchema {
       table.string('name').notNullable()
       table.string('tier').notNullable()
       table.string('format').notNullable()
-      table.string('price').notNullable()
+      table.decimal('price').notNullable()
       table.string('rules').notNullable()
       table.integer('number_participants').notNullable()
       table.integer('number_players_per_team').notNullable()

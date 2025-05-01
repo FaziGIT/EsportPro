@@ -50,4 +50,13 @@ export default class Team extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
+
+  async getAllMatches() {
+    const [asTeam1, asTeam2] = await Promise.all([
+      Match.query().where('team1Id', this.id).orderBy('createdAt', 'desc'),
+      Match.query().where('team2Id', this.id).orderBy('createdAt', 'desc'),
+    ])
+
+    return [...asTeam1, ...asTeam2].sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis())
+  }
 }
