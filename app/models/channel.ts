@@ -6,7 +6,7 @@ import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 
 export default class Channel extends BaseModel {
   @column({ isPrimary: true })
-  declare id: number
+  declare id: string
 
   @column()
   declare name: string
@@ -15,10 +15,10 @@ export default class Channel extends BaseModel {
   declare entityType: 'tournament' | 'team' 
 
   @column()
-  declare tournamentId: number | null
+  declare tournamentId: string | null
   
   @column()
-  declare teamId: number | null
+  declare teamId: string | null
 
   @belongsTo(() => Tournament, {
     foreignKey: 'tournamentId',

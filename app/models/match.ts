@@ -6,16 +6,16 @@ import Tournament from './tournament.js'
 
 export default class Match extends BaseModel {
   @column({ isPrimary: true })
-  declare id: number
+  declare id: string
 
   @column()
-  declare team1Id: number
+  declare team1Id: string
 
   @belongsTo(() => Team)
   declare team1: BelongsTo<typeof Team>
 
   @column()
-  declare team2Id: number
+  declare team2Id: string
 
   @belongsTo(() => Team)
   declare team2: BelongsTo<typeof Team>
@@ -27,20 +27,20 @@ export default class Match extends BaseModel {
   declare scoreTeam2: number
 
   @column()
-  declare winnerId: number | null
+  declare winnerId: string | null
 
 
   @belongsTo(() => Team)
   declare winner: BelongsTo<typeof Team>
 
   @column()
-  declare nextMatchId: number | null
+  declare nextMatchId: string | null
 
   @belongsTo(() => Match)
   declare nextMatch: BelongsTo<typeof Match>
 
   @column()
-  declare tournamentId: number
+  declare tournamentId: string
   
   @belongsTo(() => Tournament)
   declare tournament: BelongsTo<typeof Tournament>

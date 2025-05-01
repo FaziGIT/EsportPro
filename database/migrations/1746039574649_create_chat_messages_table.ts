@@ -5,17 +5,17 @@ export default class extends BaseSchema {
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.increments('id')
+      table.uuid('id').primary().notNullable().defaultTo(this.db.rawQuery('gen_random_uuid()').knexQuery)
       table.string('content').notNullable()
 
       table
-        .integer('user_id')
+        .uuid('user_id')
         .references('id')
         .inTable('users')
         .onDelete('CASCADE')
 
       table
-        .integer('channel_id')
+        .uuid('channel_id')
         .references('id')
         .inTable('channels')
         .onDelete('CASCADE')

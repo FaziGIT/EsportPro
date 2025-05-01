@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 
 export default class Game extends BaseModel {
   @column({ isPrimary: true })
-  declare id: number
+  declare id: string
 
   @column()
   declare name: string

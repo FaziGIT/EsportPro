@@ -6,13 +6,13 @@ import User from './user.js'
 
 export default class ChatMessage extends BaseModel {
   @column({ isPrimary: true })
-  declare id: number
+  declare id: string
 
   @column()
   declare content: string
 
   @column()
-  declare userId: number
+  declare userId: string
   
   @belongsTo(() => User, {
     foreignKey: 'userId'
@@ -20,7 +20,7 @@ export default class ChatMessage extends BaseModel {
   declare user: BelongsTo<typeof User>
   
   @column()
-  declare channelId: number
+  declare channelId: string
   
   @belongsTo(() => Channel, {
     foreignKey: 'channelId'

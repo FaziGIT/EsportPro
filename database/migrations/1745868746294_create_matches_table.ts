@@ -5,17 +5,17 @@ export default class extends BaseSchema {
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.increments('id')
+      table.uuid('id').primary().notNullable().defaultTo(this.db.rawQuery('gen_random_uuid()').knexQuery)
 
-      table.integer('team1_id').unsigned().notNullable()
-      table.integer('team2_id').unsigned().notNullable()
+      table.uuid('team1_id').unsigned().notNullable()
+      table.uuid('team2_id').unsigned().notNullable()
 
       table.integer('score_team1').notNullable()
       table.integer('score_team2').notNullable()
 
-      table.integer('winner_id').unsigned().nullable()
-      table.integer('next_match_id').unsigned().nullable()
-      table.integer('tournament_id').unsigned().notNullable()
+      table.uuid('winner_id').unsigned().nullable()
+      table.uuid('next_match_id').unsigned().nullable()
+      table.uuid('tournament_id').unsigned().notNullable()
 
       table.timestamp('created_at').notNullable()
       table.timestamp('updated_at').nullable()

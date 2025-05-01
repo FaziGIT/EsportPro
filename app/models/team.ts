@@ -6,13 +6,16 @@ import User from './user.js'
 
 export default class Team extends BaseModel {
   @column({ isPrimary: true })
-  declare id: number
+  declare id: string
 
   @column()
   declare name: string
 
   @column()
   declare isWinner: boolean
+
+  @column()
+  declare tournamentId: string
 
   @belongsTo(() => Tournament)
   declare tournament: BelongsTo<typeof Tournament>

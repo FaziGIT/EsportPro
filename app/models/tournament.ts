@@ -6,7 +6,7 @@ import Game from './game.js'
 
 export default class Tournament extends BaseModel {
   @column({ isPrimary: true })
-  declare id: number
+  declare id: string
 
   @column()
   declare name: string
@@ -54,7 +54,7 @@ export default class Tournament extends BaseModel {
   declare endDate: DateTime
 
   @column()
-  declare winnerId: number | null
+  declare winnerId: string | null
 
   @belongsTo(() => Team)
   declare winner: BelongsTo<typeof Team>
@@ -63,7 +63,7 @@ export default class Tournament extends BaseModel {
   declare teams: HasMany<typeof Team>
 
   @column()
-  declare gameId: number
+  declare gameId: string
   
   @belongsTo(() => Game)
   declare game: BelongsTo<typeof Game>
