@@ -13,6 +13,9 @@ export default class extends BaseSchema {
       table.string('elo', 255).notNullable()
       table.string('pseudo', 255).notNullable()
       table.string('region', 255).notNullable()
+
+      table.timestamp('created_at').notNullable()
+      table.timestamp('updated_at').nullable()
     })
   }
 
