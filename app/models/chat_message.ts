@@ -13,18 +13,14 @@ export default class ChatMessage extends BaseModel {
 
   @column()
   declare userId: string
-  
-  @belongsTo(() => User, {
-    foreignKey: 'userId'
-  })
+
+  @belongsTo(() => User)
   declare user: BelongsTo<typeof User>
-  
+
   @column()
   declare channelId: string
-  
-  @belongsTo(() => Channel, {
-    foreignKey: 'channelId'
-  })
+
+  @belongsTo(() => Channel)
   declare channel: BelongsTo<typeof Channel>
 
   @column.dateTime({ autoCreate: true })

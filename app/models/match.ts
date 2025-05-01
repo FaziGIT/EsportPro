@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
-import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
+import { BaseModel, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
 import Team from './team.js'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Tournament from './tournament.js'
 
 export default class Match extends BaseModel {
@@ -29,7 +29,6 @@ export default class Match extends BaseModel {
   @column()
   declare winnerId: string | null
 
-
   @belongsTo(() => Team)
   declare winner: BelongsTo<typeof Team>
 
@@ -39,9 +38,14 @@ export default class Match extends BaseModel {
   @belongsTo(() => Match)
   declare nextMatch: BelongsTo<typeof Match>
 
+  @hasMany(() => Match, {
+    foreignKey: 'nextMatchId',
+  })
+  declare matches: HasMany<typeof Match>
+
   @column()
   declare tournamentId: string
-  
+
   @belongsTo(() => Tournament)
   declare tournament: BelongsTo<typeof Tournament>
 

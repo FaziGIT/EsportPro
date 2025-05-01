@@ -1,8 +1,9 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo, beforeSave } from '@adonisjs/lucid/orm'
+import { BaseModel, column, beforeSave, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import Tournament from './tournament.js'
 import Team from './team.js'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
+import ChatMessage from './chat_message.js'
 
 export default class Channel extends BaseModel {
   @column({ isPrimary: true })
@@ -12,25 +13,26 @@ export default class Channel extends BaseModel {
   declare name: string
 
   @column()
-  declare entityType: 'tournament' | 'team' 
+  declare entityType: 'tournament' | 'team'
 
   @column()
   declare tournamentId: string | null
-  
-  @column()
-  declare teamId: string | null
 
   @belongsTo(() => Tournament, {
-    foreignKey: 'tournamentId',
     onQuery: (query) => query.where('entityType', 'tournament'),
   })
   declare tournament: BelongsTo<typeof Tournament>
 
+  @column()
+  declare teamId: string | null
+
   @belongsTo(() => Team, {
-    foreignKey: 'teamId',
     onQuery: (query) => query.where('entityType', 'team'),
   })
   declare team: BelongsTo<typeof Team>
+
+  @hasMany(() => ChatMessage)
+  declare messages: HasMany<typeof ChatMessage>
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -43,11 +45,11 @@ export default class Channel extends BaseModel {
     if (channel.entityType && !['tournament', 'team'].includes(channel.entityType)) {
       throw new Error('entityType must be either "tournament" or "team"')
     }
-    
+
     if (channel.entityType === 'tournament' && channel.teamId !== null) {
       throw new Error('Un canal de type tournament ne peut pas avoir de team_id')
     }
-    
+
     if (channel.entityType === 'team' && channel.tournamentId !== null) {
       throw new Error('Un canal de type team ne peut pas avoir de tournament_id')
     }

@@ -5,7 +5,7 @@ export default class extends BaseSchema {
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.uuid('id').primary().notNullable().defaultTo(this.db.rawQuery('gen_random_uuid()').knexQuery)
+      table.uuid('id').primary().defaultTo(this.db.rawQuery('gen_random_uuid()').knexQuery)
       table.string('name').notNullable()
       table.string('tier').notNullable()
       table.string('format').notNullable()
@@ -21,7 +21,7 @@ export default class extends BaseSchema {
       table.binary('image').notNullable()
       table.dateTime('start_date').notNullable()
       table.dateTime('end_date').notNullable()
-      
+
       table.uuid('winner_id').nullable().defaultTo(null)
       table.uuid('game_id').notNullable()
 
