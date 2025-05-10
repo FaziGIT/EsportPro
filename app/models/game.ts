@@ -1,5 +1,7 @@
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { BaseModel, column, manyToMany } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
+import User from './user.js'
+import type { ManyToMany } from '@adonisjs/lucid/types/relations'
 
 export default class Game extends BaseModel {
   @column({ isPrimary: true })
@@ -13,6 +15,19 @@ export default class Game extends BaseModel {
 
   @column()
   declare image: Uint8Array
+
+  @manyToMany(() => User, {
+    pivotTable: 'bookmarks',
+    pivotTimestamps: { createdAt: true, updatedAt: false },
+  })
+  declare favoriteOfUsers: ManyToMany<typeof User>
+
+  @manyToMany(() => User, {
+    pivotTable: 'user_game_infos',
+    pivotColumns: ['elo', 'pseudo', 'region'],
+    pivotTimestamps: true,
+  })
+  declare users: ManyToMany<typeof User>
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

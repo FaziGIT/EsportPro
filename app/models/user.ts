@@ -7,6 +7,7 @@ import Game from './game.js'
 import type { HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 import Team from './team.js'
 import ChatMessage from './chat_message.js'
+import { UserRole } from '#enums/user_role'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -37,21 +38,28 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   @manyToMany(() => Game, {
     pivotTable: 'bookmarks',
+    pivotTimestamps: { createdAt: true, updatedAt: false },
   })
   declare favoriteGames: ManyToMany<typeof Game>
 
   @manyToMany(() => Game, {
     pivotTable: 'user_game_infos',
+    pivotColumns: ['elo', 'pseudo', 'region'],
+    pivotTimestamps: true,
   })
   declare gameInfos: ManyToMany<typeof Game>
 
   @manyToMany(() => Team, {
     pivotTable: 'user_teams',
+    pivotTimestamps: true,
   })
   declare teams: ManyToMany<typeof Team>
 
   @hasMany(() => ChatMessage)
   declare messages: HasMany<typeof ChatMessage>
+
+  @column()
+  declare role: UserRole
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

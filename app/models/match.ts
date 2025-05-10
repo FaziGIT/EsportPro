@@ -8,22 +8,22 @@ export default class Match extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
 
-  @column()
+  @column({ columnName: 'team1_id' })
   declare team1Id: string
 
   @belongsTo(() => Team)
   declare team1: BelongsTo<typeof Team>
 
-  @column()
+  @column({ columnName: 'team2_id' })
   declare team2Id: string
 
   @belongsTo(() => Team)
   declare team2: BelongsTo<typeof Team>
 
-  @column()
+  @column({ columnName: 'score_team_1' })
   declare scoreTeam1: number
 
-  @column()
+  @column({ columnName: 'score_team_2' })
   declare scoreTeam2: number
 
   @column()

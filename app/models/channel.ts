@@ -4,6 +4,7 @@ import Tournament from './tournament.js'
 import Team from './team.js'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import ChatMessage from './chat_message.js'
+import { ChannelEntityType } from '#enums/channel_entity_type'
 
 export default class Channel extends BaseModel {
   @column({ isPrimary: true })
@@ -13,7 +14,7 @@ export default class Channel extends BaseModel {
   declare name: string
 
   @column()
-  declare entityType: 'tournament' | 'team'
+  declare entityType: ChannelEntityType
 
   @column()
   declare tournamentId: string | null
@@ -42,15 +43,17 @@ export default class Channel extends BaseModel {
 
   @beforeSave()
   static validateEntityType(channel: Channel) {
-    if (channel.entityType && !['tournament', 'team'].includes(channel.entityType)) {
-      throw new Error('entityType must be either "tournament" or "team"')
+    if (channel.entityType && !Object.values(ChannelEntityType).includes(channel.entityType)) {
+      throw new Error(
+        `entityType doit être une des valeurs suivantes : ${Object.values(ChannelEntityType).join(', ')}`
+      )
     }
 
-    if (channel.entityType === 'tournament' && channel.teamId !== null) {
+    if (channel.entityType === ChannelEntityType.Tournament && channel.teamId !== null) {
       throw new Error('Un canal de type tournament ne peut pas avoir de team_id')
     }
 
-    if (channel.entityType === 'team' && channel.tournamentId !== null) {
+    if (channel.entityType === ChannelEntityType.Team && channel.tournamentId !== null) {
       throw new Error('Un canal de type team ne peut pas avoir de tournament_id')
     }
   }
