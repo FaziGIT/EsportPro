@@ -1,4 +1,3 @@
-import factory from '@adonisjs/lucid/factories'
 import Match from '#models/match'
 import Team from '#models/team'
 import { TeamFactory } from '#database/factories/team_factory'
