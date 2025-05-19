@@ -10,7 +10,7 @@ import logo from '../../img/logo2.png'
 
       <!-- Logo au centre -->
       <div class="flex justify-center w-1/3">
-        <img :src="logo" alt="Logo" class="w-36" />
+        <img :src="logo" alt="Logo" class="w-40" />
       </div>
 
       <!-- Section droite avec icônes sociales -->
