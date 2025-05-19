@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { defineProps } from 'vue'
-import Layout from '~/components/layout.vue'
+import Layout from '~/components/layouts/layout.vue'
 
 const props = defineProps({
   title: {

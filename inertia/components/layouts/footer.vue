@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import logo from '../img/logo2.png'
+import logo from '../../img/logo2.png'
 </script>
 
 <template>
-  <footer class="bg-[#CBD3CD] h-[130px] w-full mt-auto">
+  <footer class="bg-[#CBD3CD] h-[80px] w-full mt-auto">
     <div class="container mx-auto h-full px-6 flex items-center justify-between">
       <!-- Section gauche (vide pour équilibrer) -->
       <div class="w-1/3"></div>
 
       <!-- Logo au centre -->
       <div class="flex justify-center w-1/3">
-        <img :src="logo" alt="Logo" class="w-40" />
+        <img :src="logo" alt="Logo" class="w-36" />
       </div>
 
       <!-- Section droite avec icônes sociales -->

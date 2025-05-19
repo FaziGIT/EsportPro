@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import blackLogo from '../img/blackLogo.jpg'
+import blackLogo from '../../img/blackLogo.jpg'
 
 const isMenuOpen = ref(false)
 
