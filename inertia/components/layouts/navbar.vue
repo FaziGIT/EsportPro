@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { Link } from '@inertiajs/vue3'
 import blackLogo from '../../img/blackLogo.jpg'
 
 const isMenuOpen = ref(false)
@@ -63,7 +64,7 @@ function toggleMenu() {
           <div class="relative">
             <input
               type="text"
-              class="w-full py-2 px-4 bg-[#D6B7B0] rounded-md focus:outline-none focus:ring-2 focus:ring-white h-12"
+              class="w-full py-2 px-4 bg-white border-[#D6B7B0] border rounded-md focus:outline-none focus:ring-2 focus:ring-white h-12"
             />
             <div class="absolute inset-y-0 right-0 flex items-center !pr-3">
               <svg
@@ -78,7 +79,7 @@ function toggleMenu() {
                     fill-rule="evenodd"
                     clip-rule="evenodd"
                     d="M9.27025 16.0453C5.17296 16.0453 1.8515 12.7575 1.8515 8.69531C1.8515 4.63312 5.17296 1.33878 9.27025 1.33878C13.3675 1.33878 16.6897 4.63312 16.6897 8.69531C16.6897 12.7575 13.3675 16.0453 9.27025 16.0453ZM21.1439 19.8516L15.764 14.5162C17.1724 12.9741 18.0381 10.9397 18.0381 8.69531C18.0381 3.89156 14.1127 0 9.27025 0C4.42776 0 0.502441 3.89156 0.502441 8.69531C0.502441 13.4925 4.42776 17.3841 9.27025 17.3841C11.3625 17.3841 13.2816 16.6556 14.7889 15.4416L20.1903 20.7965C20.4541 21.059 20.8808 21.059 21.1439 20.7965C21.4077 20.5406 21.4077 20.1141 21.1439 19.8516Z"
-                    fill="white"
+                    fill="#D6B7B0"
                   />
                 </g>
                 <defs>
@@ -94,9 +95,12 @@ function toggleMenu() {
 
       <!-- Login Desktop -->
       <div class="flex items-center justify-end w-1/3">
-        <a href="#" class="px-9 py-2 text-white bg-[#D6B7B0] text-base font-bold rounded-md">
+        <Link
+          href="/login"
+          class="px-9 py-2 text-white bg-[#D6B7B0] text-base font-bold rounded-md"
+        >
           Log In
-        </a>
+        </Link>
       </div>
     </div>
 
@@ -159,12 +163,12 @@ function toggleMenu() {
 
           <!-- Login Mobile -->
           <div class="py-2">
-            <a
-              href="#"
+            <Link
+              href="/login"
               class="block px-4 py-2 text-center text-white bg-[#D6B7B0] text-base font-bold rounded-md transition-transform duration-300 hover:scale-105"
             >
               Log In
-            </a>
+            </Link>
           </div>
         </div>
       </div>
