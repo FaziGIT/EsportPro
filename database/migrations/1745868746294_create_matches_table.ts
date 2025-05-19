@@ -10,8 +10,8 @@ export default class extends BaseSchema {
       table.uuid('team1_id').unsigned().notNullable()
       table.uuid('team2_id').unsigned().notNullable()
 
-      table.integer('score_team1').notNullable()
-      table.integer('score_team2').notNullable()
+      table.integer('score_team_1').notNullable()
+      table.integer('score_team_2').notNullable()
 
       table.uuid('winner_id').unsigned().nullable()
       table.uuid('next_match_id').unsigned().nullable()

@@ -1,4 +1,5 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
+import { ChannelEntityTypeValues } from '#enums/channel_entity_type'
 
 export default class extends BaseSchema {
   protected tableName = 'channels'
@@ -7,7 +8,7 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.uuid('id').primary().defaultTo(this.db.rawQuery('gen_random_uuid()').knexQuery)
       table.string('name').notNullable()
-      table.enum('entity_type', ['tournament', 'team']).notNullable()
+      table.enu('entity_type', ChannelEntityTypeValues).notNullable()
 
       table.uuid('tournament_id').references('id').inTable('tournaments').onDelete('CASCADE')
 

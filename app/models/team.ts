@@ -24,6 +24,7 @@ export default class Team extends BaseModel {
 
   @manyToMany(() => User, {
     pivotTable: 'user_teams',
+    pivotTimestamps: true,
   })
   declare players: ManyToMany<typeof User>
 
