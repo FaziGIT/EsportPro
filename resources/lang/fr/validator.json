@@ -1,0 +1,15 @@
+{
+  "shared": {
+    "fields": {
+      "emailPseudo": "identifiant/e-mail",
+      "password": "mot de passe"
+    },
+    "messages": {
+      "required": "Le champ {field} est requis.",
+      "string": "Le champ {field} doit être une chaîne de caractères.",
+      "email": "Le champ {field} doit être une adresse e-mail valide.",
+      "emailPseudo.email": "Veuillez saisir une adresse e-mail valide pour votre identifiant/e-mail.",
+      "password.required": "Veuillez saisir votre mot de passe."
+    }
+  }
+}

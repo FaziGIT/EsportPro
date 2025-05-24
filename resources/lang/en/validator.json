@@ -1,0 +1,15 @@
+{
+  "shared": {
+    "fields": {
+      "emailPseudo": "username/email",
+      "password": "password"
+    },
+    "messages": {
+      "required": "The {field} field cannot be empty. Please fill it out.",
+      "string": "The {field} field must be a string.",
+      "email": "Please provide a valid email for the {field} field.",
+      "emailPseudo.email": "Please enter a valid email address for your username/email.",
+      "password.required": "Please enter your password."
+    }
+  }
+}
