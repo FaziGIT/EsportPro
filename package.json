@@ -72,7 +72,8 @@
     "pg": "^8.14.1",
     "reflect-metadata": "^0.2.2",
     "tailwindcss": "^4.1.7",
-    "vue": "^3.5.13"
+    "vue": "^3.5.13",
+    "vue3-carousel": "^0.15.1"
   },
   "hotHook": {
     "boundaries": [
