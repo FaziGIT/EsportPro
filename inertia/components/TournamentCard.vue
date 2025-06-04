@@ -67,8 +67,8 @@ const heartIconColor = computed(() => (isHovered.value ? '#5C4741' : '#D6B7B0'))
 </script>
 
 <template>
-  <div class="rounded-xl shadow-md bg-white overflow-hidden w-full max-w-sm border border-gray-200">
-    <div class="bg-gray-100 h-40 flex items-center justify-center">
+  <div class="flex flex-col justify-between w-96 h-96 min-w-80 rounded-xl shadow-md bg-white overflow-hidden border border-gray-200">
+    <div class="bg-gray-100 h-48 flex items-center justify-center">
 <!--      <img-->
 <!--        v-if="tournament.image && tournament.image.length > 0"-->
 <!--        :src="tournament.image"-->
@@ -80,28 +80,33 @@ const heartIconColor = computed(() => (isHovered.value ? '#5C4741' : '#D6B7B0'))
       </div>
     </div>
 
-    <div class="p-4">
-      <div class="flex items-center justify-between mb-2">
-        <h3 class="text-lg font-bold text-black mb-2 truncate max-w-[calc(100%-28px)]">
+    <div class="p-4 flex flex-col justify-between flex-grow">
+      <div class="flex items-start justify-between mb-2">
+        <h3 class="text-lg font-bold text-black truncate max-w-[calc(100%-28px)]">
           {{ tournament.name || 'Tournoi sans nom' }}
         </h3>
         <HeartIconSVG :color="heartIconColor" class="flex-shrink-0 cursor-pointer" @mouseenter="isHovered = true" @mouseleave="isHovered = false"/>
       </div>
-      <p class="text-sm text-gray-600">
-        {{ tournament.address || '' }} {{ tournament.city || '' }} {{ tournament.postalCode || '' }}
-        {{ tournament.country ? (', ' + tournament.country) : '' }}
+
+      <p class="text-sm text-gray-600 line-clamp-2">
+        {{ tournament.address || '' }} {{ tournament.city || '' }} {{ tournament.postalCode || '' }}{{ tournament.country ? ', ' + tournament.country : '' }}
       </p>
-      <div class="mt-2 flex flex-col">
-        <p class="text-sm text-gray-600">
-          {{ tournament.format || 'Format non défini' }}
-        </p>
-        <p class="text-sm text-gray-600">
-          Equipe de {{ tournament.numberPlayersPerTeam || 'encore inconnu' }}
-        </p>
+
+      <div class="mt-auto flex flex-row justify-between">
+        <div>
+          <p class="text-sm text-gray-600">
+            Equipe de {{ tournament.numberPlayersPerTeam || 'Encore inconnu' }}
+          </p>
+          <p class="text-sm text-gray-600">
+            {{ formattedDate }}
+          </p>
+        </div>
+        <div class="">
+          <p class="text-sm text-[#5C4741] font-semibold bg-[#CBD3CD] border-[#CBD3CD] border-2 rounded-md px-2 py-1 w-fit">
+            {{ tournament.format || 'Format non défini' }}
+          </p>
+        </div>
       </div>
-      <p class="text-sm text-gray-600 mr-2">
-        {{ formattedDate }}
-      </p>
     </div>
   </div>
 </template>

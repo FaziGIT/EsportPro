@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineProps, computed } from 'vue'
+import { defineProps } from 'vue'
 import Layout from '~/components/layouts/layout.vue'
 import TournamentCard from '~/components/TournamentCard.vue'
 import Tournament from '#models/tournament'
@@ -15,14 +15,6 @@ const props = defineProps({
   }
 })
 
-// Fonction pour découper les tournois en groupes de 3
-const chunkedTournaments = computed(() => {
-  const chunks = []
-  for (let i = 0; i < props.tournaments.length; i += 3) {
-    chunks.push(props.tournaments.slice(i, i + 3))
-  }
-  return chunks
-})
 </script>
 
 <template>
@@ -36,23 +28,18 @@ const chunkedTournaments = computed(() => {
 
     <div v-else class="py-8">
       <Carousel
-        :items-to-show="1"
+        :items-to-show="4"
         :wrap-around="true"
         :breakpoints="{
-          1024: { itemsToShow: 1 },
-          768: { itemsToShow: 1 },
-          480: { itemsToShow: 1 }
+          1280: { itemsToShow: 4 },
+          1024: { itemsToShow: 3 },
+          768: { itemsToShow: 2 },
+          0: { itemsToShow: 1 }
         }"
         class="tournament-carousel"
       >
-        <Slide v-for="(group, index) in chunkedTournaments" :key="index">
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <TournamentCard
-              v-for="tournament in group"
-              :key="tournament.id"
-              :tournament="tournament"
-            />
-          </div>
+        <Slide v-for="tournament in tournaments" :key="tournament.id" class="flex justify-center px-4">
+          <TournamentCard :tournament="tournament" />
         </Slide>
 
         <template #addons>
