@@ -19,8 +19,7 @@ const props = defineProps({
 
 <template>
   <Layout>
-    <p>{{ props.title }}</p>
-    <p>{{ props.description }}</p>
+    <p class="text-4xl font-semibold">Nos Tournois Actuels</p>
 
     <div v-if="tournaments.length === 0" class="text-center py-8 text-gray-500">
       Aucun tournoi n'est disponible pour le moment.
@@ -47,5 +46,25 @@ const props = defineProps({
         </template>
       </Carousel>
     </div>
+
+    <Carousel
+      :items-to-show="5"
+      :wrap-around="true"
+      :breakpoints="{
+          1280: { itemsToShow: 5 },
+          1024: { itemsToShow: 4 },
+          768: { itemsToShow: 3 },
+          0: { itemsToShow: 2 }
+        }"
+      class="tournament-carousel"
+    >
+      <Slide v-for="tournament in tournaments" :key="tournament.id" class="flex justify-center px-4">
+        <TournamentCard :tournament="tournament" />
+      </Slide>
+
+      <template #addons>
+        <Navigation />
+      </template>
+    </Carousel>
   </Layout>
 </template>
