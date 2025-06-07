@@ -18,16 +18,23 @@ const { t } = useI18n()
 <template>
   <Layout>
     <div class="flex mt-16 flex-col items-center">
-      <h1 class="text-6xl font-altone">{{ t('auth.register') }}</h1>
+      <h1 class="text-4xl md:text-6xl font-altone">{{ t('auth.register') }}</h1>
 
-      <form @submit.prevent="form.post('/register')">
-        <div class="flex w-[700px] border-[#779E7E] border rounded-xl mt-6">
-          <div class="w-1/2">
-            <img :src="background" alt="image background login page" />
+      <!-- Remplacer la div principale du formulaire dans les deux fichiers par celle-ci -->
+      <form @submit.prevent="form.post('/login')" class="w-full px-4 md:px-0 md:w-[700px]">
+        <div class="flex flex-col md:flex-row border-[#779E7E] border rounded-xl mt-6 md:h-[500px]">
+          <div class="w-full md:w-1/2 hidden md:block">
+            <img
+              :src="background"
+              class="h-full w-full object-cover rounded-l-xl"
+              alt="image background register and login page"
+            />
           </div>
-          <div class="w-1/2 flex flex-col items-center justify-center p-10">
+          <div class="w-full md:w-1/2 flex flex-col items-center justify-center p-6 md:p-10">
             <div class="flex flex-col items-start gap-1 w-full">
-              <label class="font-altone font-normal" for="email">{{ t('auth.pseudo') }}</label>
+              <label class="font-altone text-sm md:text-base font-normal" for="pseudo">{{
+                t('auth.pseudo')
+              }}</label>
               <input
                 type="text"
                 id="pseudo"
@@ -60,7 +67,9 @@ const { t } = useI18n()
               </div>
             </div>
             <div class="flex flex-col items-start mt-4 gap-1 w-full">
-              <label class="font-altone font-normal" for="email">{{ t('auth.email') }}</label>
+              <label class="font-altone text-sm md:text-base font-normal" for="email">{{
+                t('auth.email')
+              }}</label>
               <input
                 type="email"
                 id="email"
@@ -94,7 +103,9 @@ const { t } = useI18n()
             </div>
 
             <div class="flex flex-col items-start mt-4 gap-1 w-full">
-              <label class="font-altone font-normal" for="password">{{ t('auth.password') }}</label>
+              <label class="font-altone text-sm md:text-base font-normal" for="password">{{
+                t('auth.password')
+              }}</label>
               <input
                 type="password"
                 id="password"
