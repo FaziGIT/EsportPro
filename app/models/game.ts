@@ -26,6 +26,8 @@ export default class Game extends BaseModel {
     pivotTable: 'user_game_infos',
     pivotColumns: ['elo', 'pseudo', 'region'],
     pivotTimestamps: true,
+    pivotForeignKey: 'game_id',
+    pivotRelatedForeignKey: 'user_id',
   })
   declare users: ManyToMany<typeof User>
 

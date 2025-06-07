@@ -10,7 +10,7 @@ import ChatMessage from './chat_message.js'
 import { UserRole } from '#enums/user_role'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
-  uids: ['email'],
+  uids: ['email', 'pseudo'], // Fields to use for authentication
   passwordColumnName: 'password',
 })
 
@@ -46,6 +46,8 @@ export default class User extends compose(BaseModel, AuthFinder) {
     pivotTable: 'user_game_infos',
     pivotColumns: ['elo', 'pseudo', 'region'],
     pivotTimestamps: true,
+    pivotForeignKey: 'user_id',
+    pivotRelatedForeignKey: 'game_id',
   })
   declare gameInfos: ManyToMany<typeof Game>
 
