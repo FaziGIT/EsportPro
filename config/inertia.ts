@@ -23,11 +23,5 @@ const inertiaConfig = defineConfig({
 export default inertiaConfig
 
 declare module '@adonisjs/inertia/types' {
-  export interface SharedProps extends InferSharedProps<typeof inertiaConfig> {
-    i18n: {
-      locale: string
-      locales: string[]
-      t: (key: string, args?: Record<string, any>) => string
-    }
-  }
+  export interface SharedProps extends InferSharedProps<typeof inertiaConfig> {}
 }
