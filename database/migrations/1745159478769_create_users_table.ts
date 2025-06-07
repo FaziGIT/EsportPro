@@ -9,7 +9,7 @@ export default class extends BaseSchema {
       table.uuid('id').primary().defaultTo(this.db.rawQuery('gen_random_uuid()').knexQuery)
       table.string('first_name', 80).nullable()
       table.string('last_name', 80).nullable()
-      table.string('pseudo', 80).notNullable()
+      table.string('pseudo', 80).notNullable().unique()
       table.string('email', 254).notNullable().unique()
       table.string('password').notNullable()
       table.boolean('is_private').notNullable().defaultTo(false)
