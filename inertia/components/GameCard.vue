@@ -15,7 +15,7 @@ const heartIconColor = computed(() => (isHovered.value ? '#5C4741' : '#D6B7B0'))
 </script>
 
 <template>
-  <div class="flex flex-col justify-between w-96 h-96 min-w-80 rounded-xl shadow-md bg-white overflow-hidden border border-gray-200">
+  <div class="flex flex-col justify-between w-50 h-50 min-w-40 rounded-xl shadow-md bg-white overflow-hidden border border-gray-200">
     <div class="bg-gray-100 h-48 flex items-center justify-center">
 <!--      <img-->
 <!--        v-if="game.image && game.image.length > 0"-->
