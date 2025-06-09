@@ -3,6 +3,9 @@ import imageNotFound from '../img/Image-not-found.png'
 import { defineProps, computed, ref } from 'vue'
 import HeartIconSVG from '~/components/icons/HeartIconSVG.vue'
 import { DateTime } from 'luxon'
+import { useI18n } from '../../resources/js/composables/useI18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
   tournament: {
@@ -10,7 +13,6 @@ const props = defineProps({
     required: true,
   },
 })
-
 // const imageSource = computed(() => {
 //   if (!props.tournament.image || !props.tournament.image.length) {
 //     return imageNotFound
@@ -61,9 +63,9 @@ const formattedDate = computed(() => {
     return 'Date non spécifiée'
   }
 })
-
 const isHovered = ref(false)
 const heartIconColor = computed(() => (isHovered.value ? '#5C4741' : '#D6B7B0'))
+
 </script>
 
 <template>
@@ -83,7 +85,7 @@ const heartIconColor = computed(() => (isHovered.value ? '#5C4741' : '#D6B7B0'))
     <div class="p-4 flex flex-col justify-between flex-grow">
       <div class="flex items-start justify-between mb-2">
         <h3 class="text-lg font-bold text-black truncate max-w-[calc(100%-28px)]">
-          {{ tournament.name || 'Tournoi sans nom' }}
+          {{ tournament.name || t('i18n.tournamentNameUndefined') }}
         </h3>
         <HeartIconSVG :color="heartIconColor" class="flex-shrink-0 cursor-pointer" @mouseenter="isHovered = true" @mouseleave="isHovered = false"/>
       </div>
@@ -95,7 +97,7 @@ const heartIconColor = computed(() => (isHovered.value ? '#5C4741' : '#D6B7B0'))
       <div class="mt-auto flex flex-row justify-between">
         <div>
           <p class="text-sm text-gray-600">
-            Equipe de {{ tournament.numberPlayersPerTeam || 'Encore inconnu' }}
+            Equipe de {{ tournament.numberPlayersPerTeam || t('i18n.stillUnknown') }}
           </p>
           <p class="text-sm text-gray-600">
             {{ formattedDate }}
@@ -103,7 +105,7 @@ const heartIconColor = computed(() => (isHovered.value ? '#5C4741' : '#D6B7B0'))
         </div>
         <div class="">
           <p class="text-sm text-[#5C4741] font-semibold bg-[#CBD3CD] border-[#CBD3CD] border-2 rounded-md px-2 py-1 w-fit">
-            {{ tournament.format || 'Format non défini' }}
+            {{ tournament.format || t('i18n.undefinedFormat') }}
           </p>
         </div>
       </div>

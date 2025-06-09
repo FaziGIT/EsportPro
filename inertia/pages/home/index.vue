@@ -7,27 +7,30 @@ import Game from '#models/game'
 import { Carousel, Slide, Navigation } from 'vue3-carousel'
 import 'vue3-carousel/dist/carousel.css'
 import GameCard from '~/components/GameCard.vue'
+import { useI18n } from '../../../resources/js/composables/useI18n'
+
+const { t } = useI18n()
 
 defineProps({
   title: String,
   description: String,
   tournaments: {
     type: Array as () => Tournament[],
-    default: () => []
+    default: () => [],
   },
   games: {
     type: Array as () => Game[],
-    default: () => []
-  }
+    default: () => [],
+  },
 })
 </script>
 
 <template>
   <Layout class="bg-[#fafafa]">
-    <p class="text-4xl font-semibold">Nos Tournois Actuels</p>
+    <p class="text-4xl font-semibold">{{ t('i18n.currentTournament') }}</p>
 
     <div v-if="tournaments.length === 0" class="text-center py-8 text-gray-500">
-      Aucun tournoi n'est disponible pour le moment.
+      {{ t('i18n.unvaliableCurrentlyTournament') }}
     </div>
 
     <div v-else class="py-8">
@@ -38,11 +41,15 @@ defineProps({
           1280: { itemsToShow: 4 },
           1024: { itemsToShow: 3 },
           768: { itemsToShow: 2 },
-          0: { itemsToShow: 1 }
+          0: { itemsToShow: 1 },
         }"
         class="tournament-carousel"
       >
-        <Slide v-for="tournament in tournaments" :key="tournament.id" class="flex justify-center px-4">
+        <Slide
+          v-for="tournament in tournaments"
+          :key="tournament.id"
+          class="flex justify-center px-4"
+        >
           <TournamentCard :tournament="tournament" />
         </Slide>
 
@@ -51,7 +58,7 @@ defineProps({
             href="/tournaments"
             class="bg-[#D6B7B0] hover:bg-[#e6c5be] text-white font-semibold px-6 py-3 rounded-lg transition"
           >
-            Voir tous les tournois
+            {{ t('i18n.showAllTournaments') }}
           </a>
         </Slide>
 
@@ -61,7 +68,7 @@ defineProps({
       </Carousel>
     </div>
 
-    <p class="text-4xl pt-16 font-semibold">Nos Jeux</p>
+    <p class="text-4xl pt-16 font-semibold">{{ t('i18n.ourGames') }}</p>
 
     <div class="py-8">
       <Carousel
@@ -71,7 +78,7 @@ defineProps({
           1280: { itemsToShow: 6 },
           1024: { itemsToShow: 4 },
           768: { itemsToShow: 3 },
-          0: { itemsToShow: 2 }
+          0: { itemsToShow: 2 },
         }"
         class="game-carousel"
       >
@@ -84,7 +91,7 @@ defineProps({
             href="/games"
             class="bg-[#D6B7B0] hover:bg-[#e6c5be] text-white font-semibold px-6 py-3 rounded-lg transition"
           >
-            Voir tous les jeux
+            {{ t('i18n.showAllGames') }}
           </a>
         </Slide>
 

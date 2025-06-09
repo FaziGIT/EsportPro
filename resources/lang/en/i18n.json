@@ -1,0 +1,11 @@
+{
+  "gameNameUndefined": "Game name undefined",
+  "tournamentNameUndefined": "Name of the tournament undefined",
+  "stillUnknown": "Still unknown",
+  "undefinedFormat": "Format undefined",
+  "currentTournament": "Our Current Tournaments",
+  "unvaliableCurrentlyTournament" : "No tournaments are currently available.",
+  "showAllTournaments": "Show all tournaments",
+  "ourGames": "Our Games",
+  "showAllGames": "Show all games"
+}
