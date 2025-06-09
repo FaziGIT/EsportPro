@@ -4,6 +4,8 @@ import { defineProps, computed, ref } from 'vue'
 import HeartIconSVG from '~/components/icons/HeartIconSVG.vue'
 import { DateTime } from 'luxon'
 import { useI18n } from '../../resources/js/composables/useI18n'
+import { usePage } from '@inertiajs/vue3'
+import User from '#models/user'
 
 const { t } = useI18n()
 
@@ -66,6 +68,9 @@ const formattedDate = computed(() => {
 const isHovered = ref(false)
 const heartIconColor = computed(() => (isHovered.value ? '#5C4741' : '#D6B7B0'))
 
+const page = usePage()
+const user = computed(() => page.props.user as User)
+
 </script>
 
 <template>
@@ -87,7 +92,7 @@ const heartIconColor = computed(() => (isHovered.value ? '#5C4741' : '#D6B7B0'))
         <h3 class="text-lg font-bold text-black truncate max-w-[calc(100%-28px)]">
           {{ tournament.name || t('i18n.tournamentNameUndefined') }}
         </h3>
-        <HeartIconSVG :color="heartIconColor" class="flex-shrink-0 cursor-pointer" @mouseenter="isHovered = true" @mouseleave="isHovered = false"/>
+        <HeartIconSVG v-if="user" :color="heartIconColor" class="flex-shrink-0 cursor-pointer" @mouseenter="isHovered = true" @mouseleave="isHovered = false"/>
       </div>
 
       <p class="text-sm text-gray-600 line-clamp-2">

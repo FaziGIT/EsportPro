@@ -3,6 +3,8 @@ import imageNotFound from '../img/Image-not-found.png'
 import { defineProps, computed, ref } from 'vue'
 import HeartIconSVG from '~/components/icons/HeartIconSVG.vue'
 import { useI18n } from '../../resources/js/composables/useI18n'
+import User from '#models/user'
+import { usePage } from '@inertiajs/vue3'
 
 const { t } = useI18n()
 
@@ -15,6 +17,9 @@ defineProps({
 
 const isHovered = ref(false)
 const heartIconColor = computed(() => (isHovered.value ? '#5C4741' : '#D6B7B0'))
+
+const page = usePage()
+const user = computed(() => page.props.user as User)
 
 </script>
 
@@ -37,7 +42,8 @@ const heartIconColor = computed(() => (isHovered.value ? '#5C4741' : '#D6B7B0'))
         <h3 class="text-lg font-bold text-black truncate max-w-[calc(100%-28px)]">
           {{ game.name || t('i18n.gameNameUndefined') }}
         </h3>
-        <HeartIconSVG :color="heartIconColor" class="flex-shrink-0 cursor-pointer" @mouseenter="isHovered = true" @mouseleave="isHovered = false"/>
+
+        <HeartIconSVG v-if="user" :color="heartIconColor" class="flex-shrink-0 cursor-pointer" @mouseenter="isHovered = true" @mouseleave="isHovered = false"/>
       </div>
     </div>
   </div>
