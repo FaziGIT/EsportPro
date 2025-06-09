@@ -8,7 +8,7 @@ import { Carousel, Slide, Navigation } from 'vue3-carousel'
 import 'vue3-carousel/dist/carousel.css'
 import GameCard from '~/components/GameCard.vue'
 
-const props = defineProps({
+defineProps({
   title: String,
   description: String,
   tournaments: {
@@ -20,11 +20,10 @@ const props = defineProps({
     default: () => []
   }
 })
-
 </script>
 
 <template>
-  <Layout>
+  <Layout class="bg-[#fafafa]">
     <p class="text-4xl font-semibold">Nos Tournois Actuels</p>
 
     <div v-if="tournaments.length === 0" class="text-center py-8 text-gray-500">
@@ -34,7 +33,7 @@ const props = defineProps({
     <div v-else class="py-8">
       <Carousel
         :items-to-show="4"
-        :wrap-around="true"
+        :wrap-around="false"
         :breakpoints="{
           1280: { itemsToShow: 4 },
           1024: { itemsToShow: 3 },
@@ -47,6 +46,15 @@ const props = defineProps({
           <TournamentCard :tournament="tournament" />
         </Slide>
 
+        <Slide class="flex justify-center items-center px-4">
+          <a
+            href="/tournaments"
+            class="bg-[#D6B7B0] hover:bg-[#e6c5be] text-white font-semibold px-6 py-3 rounded-lg transition"
+          >
+            Voir tous les tournois
+          </a>
+        </Slide>
+
         <template #addons>
           <Navigation />
         </template>
@@ -57,8 +65,8 @@ const props = defineProps({
 
     <div class="py-8">
       <Carousel
-        :items-to-show="5"
-        :wrap-around="true"
+        :items-to-show="6"
+        :wrap-around="false"
         :breakpoints="{
           1280: { itemsToShow: 6 },
           1024: { itemsToShow: 4 },
@@ -69,6 +77,15 @@ const props = defineProps({
       >
         <Slide v-for="game in games" :key="game.id" class="flex justify-center px-4">
           <GameCard :game="game" />
+        </Slide>
+
+        <Slide class="flex justify-center items-center px-4">
+          <a
+            href="/games"
+            class="bg-[#D6B7B0] hover:bg-[#e6c5be] text-white font-semibold px-6 py-3 rounded-lg transition"
+          >
+            Voir tous les jeux
+          </a>
         </Slide>
 
         <template #addons>
