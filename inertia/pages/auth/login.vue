@@ -134,7 +134,7 @@ const { t } = useI18n()
                 :disabled="form.processing"
                 class="bg-[#5C4741] text-white px-4 py-2 rounded-lg font-altone text-sm md:text-base flex-1 cursor-pointer"
               >
-                {{ t('auth.connection') }}
+                {{ t('auth.login') }}
               </button>
             </div>
           </div>
