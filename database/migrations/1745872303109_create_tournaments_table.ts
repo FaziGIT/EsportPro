@@ -1,4 +1,5 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
+import { FormatType, FormatTypeValues } from '#enums/format_type'
 
 export default class extends BaseSchema {
   protected tableName = 'tournaments'
@@ -8,7 +9,6 @@ export default class extends BaseSchema {
       table.uuid('id').primary().defaultTo(this.db.rawQuery('gen_random_uuid()').knexQuery)
       table.string('name').notNullable()
       table.string('tier').notNullable()
-      table.string('format').notNullable()
       table.decimal('price').notNullable()
       table.string('rules').notNullable()
       table.integer('number_participants').notNullable()
@@ -21,6 +21,7 @@ export default class extends BaseSchema {
       table.binary('image').notNullable()
       table.dateTime('start_date').notNullable()
       table.dateTime('end_date').notNullable()
+      table.enu('format', FormatTypeValues).defaultTo(FormatType.BO3)
 
       table.uuid('winner_id').nullable().defaultTo(null)
       table.uuid('game_id').notNullable()

@@ -2,6 +2,7 @@ import factory from '@adonisjs/lucid/factories'
 import Tournament from '#models/tournament'
 import { DateTime } from 'luxon'
 import Game from '#models/game'
+import { FormatType } from '#enums/format_type'
 
 export const TournamentFactory = factory
   .define(Tournament, async ({ faker }) => {
@@ -11,7 +12,6 @@ export const TournamentFactory = factory
       randomBytes[i] = Math.floor(Math.random() * 256)
     }
 
-    const formats = ['1v1', '2v2', '5v5']
     const tiers = ['S', 'A', 'B', 'C']
 
     const numberParticipants = faker.number.int({ min: 8, max: 64 })
@@ -28,7 +28,7 @@ export const TournamentFactory = factory
     return {
       name: faker.company.name().substring(0, 200) + ' Tournament',
       tier: faker.helpers.arrayElement(tiers),
-      format: faker.helpers.arrayElement(formats),
+      format: faker.helpers.arrayElement(Object.values(FormatType)),
       price,
       rules: faker.lorem.paragraph(2).substring(0, 250), // Limiter à 250 caractères
       numberParticipants,

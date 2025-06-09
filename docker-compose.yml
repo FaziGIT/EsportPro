@@ -11,10 +11,12 @@ services:
       - .:/app
     environment:
       - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
     depends_on:
       - db
     networks:
       - esportpro-network
+    command: sh -c "npm install && npm run dev"
 
   db:
     image: postgres:16-alpine

@@ -4,6 +4,7 @@ import type { BelongsTo, HasMany, HasOne } from '@adonisjs/lucid/types/relations
 import Team from './team.js'
 import Game from './game.js'
 import Channel from './channel.js'
+import { FormatType } from '#enums/format_type'
 
 export default class Tournament extends BaseModel {
   @column({ isPrimary: true })
@@ -16,7 +17,7 @@ export default class Tournament extends BaseModel {
   declare tier: string
 
   @column()
-  declare format: string
+  declare format: FormatType
 
   @column()
   declare price: number
