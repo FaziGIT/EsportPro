@@ -90,7 +90,7 @@ const user = computed(() => page.props.user as User)
     <div class="p-4 flex flex-col justify-between flex-grow">
       <div class="flex items-start justify-between mb-2">
         <h3 class="text-lg font-bold text-black truncate max-w-[calc(100%-28px)]">
-          {{ tournament.name || t('i18n.tournamentNameUndefined') }}
+          {{ tournament.name || t('tournament.tournamentNameUndefined') }}
         </h3>
         <HeartIconSVG v-if="user" :color="heartIconColor" class="flex-shrink-0 cursor-pointer" @mouseenter="isHovered = true" @mouseleave="isHovered = false"/>
       </div>
@@ -102,7 +102,7 @@ const user = computed(() => page.props.user as User)
       <div class="mt-auto flex flex-row justify-between">
         <div>
           <p class="text-sm text-gray-600">
-            Equipe de {{ tournament.numberPlayersPerTeam || t('i18n.stillUnknown') }}
+            Equipe de {{ tournament.numberPlayersPerTeam || t('tournament.stillUnknown') }}
           </p>
           <p class="text-sm text-gray-600">
             {{ formattedDate }}
@@ -110,7 +110,7 @@ const user = computed(() => page.props.user as User)
         </div>
         <div class="">
           <p class="text-sm text-[#5C4741] font-semibold bg-[#CBD3CD] border-[#CBD3CD] border-2 rounded-md px-2 py-1 w-fit">
-            {{ tournament.format || t('i18n.undefinedFormat') }}
+            {{ tournament.format || t('tournament.undefinedFormat') }}
           </p>
         </div>
       </div>

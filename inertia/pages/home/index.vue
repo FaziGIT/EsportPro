@@ -27,7 +27,7 @@ defineProps({
 
 <template>
   <Layout class="bg-[#fafafa]">
-    <p class="text-4xl font-semibold">{{ t('i18n.currentTournament') }}</p>
+    <p class="text-4xl font-semibold">{{ t('home.currentTournament') }}</p>
 
     <div v-if="tournaments.length === 0" class="text-center py-8 text-gray-500">
       {{ t('i18n.unvaliableCurrentlyTournament') }}
@@ -58,7 +58,7 @@ defineProps({
             href="/tournaments"
             class="bg-[#D6B7B0] hover:bg-[#e6c5be] text-white font-semibold px-6 py-3 rounded-lg transition"
           >
-            {{ t('i18n.showAllTournaments') }}
+            {{ t('home.showAllTournaments') }}
           </a>
         </Slide>
 
@@ -68,7 +68,7 @@ defineProps({
       </Carousel>
     </div>
 
-    <p class="text-4xl pt-16 font-semibold">{{ t('i18n.ourGames') }}</p>
+    <p class="text-4xl pt-16 font-semibold">{{ t('home.ourGames') }}</p>
 
     <div class="py-8">
       <Carousel
@@ -91,7 +91,7 @@ defineProps({
             href="/games"
             class="bg-[#D6B7B0] hover:bg-[#e6c5be] text-white font-semibold px-6 py-3 rounded-lg transition"
           >
-            {{ t('i18n.showAllGames') }}
+            {{ t('home.showAllGames') }}
           </a>
         </Slide>
 

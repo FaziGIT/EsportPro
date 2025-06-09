@@ -1,12 +1,7 @@
 {
-  "gameNameUndefined": "Nom du jeu non défini",
-  "tournamentNameUndefined": "Nom du tournoi non défini",
-  "stillUnknown": "Encore inconnu",
-  "undefinedFormat": "Format non défini",
   "currentTournament": "Nos Tournois Actuels",
   "unvaliableCurrentlyTournament": "Aucun tournoi n'est disponible pour le moment.",
   "showAllTournaments": "Voir tous les tournois",
   "ourGames": "Nos Jeux",
   "showAllGames": "Voir tous les jeux"
-
 }

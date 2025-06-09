@@ -40,7 +40,7 @@ const user = computed(() => page.props.user as User)
     <div class="p-4 flex flex-col justify-between flex-grow">
       <div class="flex items-start justify-between mb-2">
         <h3 class="text-lg font-bold text-black truncate max-w-[calc(100%-28px)]">
-          {{ game.name || t('i18n.gameNameUndefined') }}
+          {{ game.name || t('game.gameNameUndefined') }}
         </h3>
 
         <HeartIconSVG v-if="user" :color="heartIconColor" class="flex-shrink-0 cursor-pointer" @mouseenter="isHovered = true" @mouseleave="isHovered = false"/>
