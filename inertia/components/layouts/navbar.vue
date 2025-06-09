@@ -1,12 +1,20 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { Link, usePage } from '@inertiajs/vue3'
 import blackLogo from '../../img/blackLogo.jpg'
+import { useI18n } from '../../../resources/js/composables/useI18n'
+import User from '#models/user'
 
 const isMenuOpen = ref(false)
 
 function toggleMenu() {
   isMenuOpen.value = !isMenuOpen.value
 }
+
+const page = usePage()
+const user = computed(() => page.props.user as User)
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -39,7 +47,9 @@ function toggleMenu() {
           ></path>
         </svg>
       </button>
-      <img :src="blackLogo" alt="logo de l'application" class="h-14 w-14" />
+      <Link href="/">
+        <img :src="blackLogo" alt="logo de l'application" class="h-14 w-14" />
+      </Link>
     </div>
 
     <!-- Desktop Navigation -->
@@ -47,13 +57,15 @@ function toggleMenu() {
       <!-- Navigation Links -->
       <div class="flex items-center gap-9 font-altone w-1/3 text-xl xl:text-2xl">
         <div class="font-bold">
-          <a href="#" class="text-gray-800 hover:text-gray-600">Jeux</a>
+          <Link href="#" class="text-gray-800 hover:text-gray-600">{{ t('layout.games') }}</Link>
         </div>
         <div class="font-bold">
-          <a href="#" class="text-gray-800 hover:text-gray-600">Tournois</a>
+          <Link href="#" class="text-gray-800 hover:text-gray-600"
+            >{{ t('layout.tournaments') }}
+          </Link>
         </div>
         <div class="font-bold">
-          <a href="#" class="text-gray-800 hover:text-gray-600">À propos</a>
+          <Link href="#" class="text-gray-800 hover:text-gray-600">{{ t('layout.about') }}</Link>
         </div>
       </div>
 
@@ -63,7 +75,7 @@ function toggleMenu() {
           <div class="relative">
             <input
               type="text"
-              class="w-full py-2 px-4 bg-[#D6B7B0] rounded-md focus:outline-none focus:ring-2 focus:ring-white h-12"
+              class="w-full py-2 px-4 bg-white border-[#D6B7B0] border-2 shadow-sm rounded-md focus:outline-none focus:ring-2 focus:ring-white h-12"
             />
             <div class="absolute inset-y-0 right-0 flex items-center !pr-3">
               <svg
@@ -78,7 +90,7 @@ function toggleMenu() {
                     fill-rule="evenodd"
                     clip-rule="evenodd"
                     d="M9.27025 16.0453C5.17296 16.0453 1.8515 12.7575 1.8515 8.69531C1.8515 4.63312 5.17296 1.33878 9.27025 1.33878C13.3675 1.33878 16.6897 4.63312 16.6897 8.69531C16.6897 12.7575 13.3675 16.0453 9.27025 16.0453ZM21.1439 19.8516L15.764 14.5162C17.1724 12.9741 18.0381 10.9397 18.0381 8.69531C18.0381 3.89156 14.1127 0 9.27025 0C4.42776 0 0.502441 3.89156 0.502441 8.69531C0.502441 13.4925 4.42776 17.3841 9.27025 17.3841C11.3625 17.3841 13.2816 16.6556 14.7889 15.4416L20.1903 20.7965C20.4541 21.059 20.8808 21.059 21.1439 20.7965C21.4077 20.5406 21.4077 20.1141 21.1439 19.8516Z"
-                    fill="white"
+                    fill="#D6B7B0"
                   />
                 </g>
                 <defs>
@@ -93,10 +105,27 @@ function toggleMenu() {
       </div>
 
       <!-- Login Desktop -->
-      <div class="flex items-center justify-end w-1/3">
-        <a href="#" class="px-9 py-2 text-white bg-[#D6B7B0] text-base font-bold rounded-md">
-          Log In
-        </a>
+      <div v-if="!user" class="flex items-center justify-end w-1/3">
+        <Link
+          href="/login"
+          class="px-9 py-2 text-white bg-[#D6B7B0] text-base font-bold rounded-md"
+        >
+          {{ t('auth.login') }}
+        </Link>
+      </div>
+
+      <!-- User Profile -->
+      <div v-else class="flex items-center justify-end w-1/3">
+        <Link href="/" class="px-9 py-2 text-white bg-[#D6B7B0] text-base font-bold rounded-md">
+          {{ user.pseudo }}
+        </Link>
+        <Link
+          href="/logout"
+          method="post"
+          class="px-9 py-2 text-white bg-[#D6B7B0] text-base font-bold rounded-md cursor-pointer"
+        >
+          {{ t('auth.logout') }}
+        </Link>
       </div>
     </div>
 
@@ -114,27 +143,27 @@ function toggleMenu() {
         class="lg:hidden absolute top-28 left-0 lg:left-[114px] right-0 bg-white shadow-md z-40 overflow-hidden"
       >
         <div class="flex flex-col p-4 space-y-4 font-altone text-xl">
-          <a
+          <Link
             href="#"
             class="text-gray-800 hover:text-gray-600 font-bold py-2 transition-transform duration-300 hover:translate-x-2"
-            >Jeux</a
-          >
-          <a
+            >{{ t('layout.games') }}
+          </Link>
+          <Link
             href="#"
             class="text-gray-800 hover:text-gray-600 font-bold py-2 transition-transform duration-300 hover:translate-x-2"
-            >Tournois</a
-          >
-          <a
+            >{{ t('layout.tournaments') }}
+          </Link>
+          <Link
             href="#"
             class="text-gray-800 hover:text-gray-600 font-bold py-2 transition-transform duration-300 hover:translate-x-2"
-            >À propos</a
-          >
+            >{{ t('layout.about') }}
+          </Link>
 
           <div class="py-2">
             <div class="relative">
               <input
                 type="text"
-                class="w-full py-2 px-4 bg-[#D6B7B0] rounded-md focus:outline-none focus:ring-2 focus:ring-white"
+                class="w-full py-2 px-4 border-[#D6B7B0] border-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white"
               />
               <div class="absolute inset-y-0 right-0 flex items-center !pr-3">
                 <svg
@@ -149,7 +178,7 @@ function toggleMenu() {
                       fill-rule="evenodd"
                       clip-rule="evenodd"
                       d="M9.27025 16.0453C5.17296 16.0453 1.8515 12.7575 1.8515 8.69531C1.8515 4.63312 5.17296 1.33878 9.27025 1.33878C13.3675 1.33878 16.6897 4.63312 16.6897 8.69531C16.6897 12.7575 13.3675 16.0453 9.27025 16.0453ZM21.1439 19.8516L15.764 14.5162C17.1724 12.9741 18.0381 10.9397 18.0381 8.69531C18.0381 3.89156 14.1127 0 9.27025 0C4.42776 0 0.502441 3.89156 0.502441 8.69531C0.502441 13.4925 4.42776 17.3841 9.27025 17.3841C11.3625 17.3841 13.2816 16.6556 14.7889 15.4416L20.1903 20.7965C20.4541 21.059 20.8808 21.059 21.1439 20.7965C21.4077 20.5406 21.4077 20.1141 21.1439 19.8516Z"
-                      fill="white"
+                      fill="#D6B7B0"
                     />
                   </g>
                 </svg>
@@ -158,13 +187,22 @@ function toggleMenu() {
           </div>
 
           <!-- Login Mobile -->
-          <div class="py-2">
-            <a
-              href="#"
+          <div v-if="!user" class="py-2">
+            <Link
+              href="/login"
               class="block px-4 py-2 text-center text-white bg-[#D6B7B0] text-base font-bold rounded-md transition-transform duration-300 hover:scale-105"
             >
-              Log In
-            </a>
+              {{ t('auth.login') }}
+            </Link>
+          </div>
+          <!-- User Profile -->
+          <div v-else class="py-2">
+            <Link
+              href="/"
+              class="block px-4 py-2 text-center text-white bg-[#D6B7B0] text-base font-bold rounded-md transition-transform duration-300 hover:scale-105"
+            >
+              {{ user.pseudo }}
+            </Link>
           </div>
         </div>
       </div>

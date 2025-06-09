@@ -2,25 +2,22 @@ import { defineConfig } from '@adonisjs/inertia'
 import type { InferSharedProps } from '@adonisjs/inertia/types'
 
 const inertiaConfig = defineConfig({
-  /**
-   * Path to the Edge view that will be used as the root view for Inertia responses
-   */
   rootView: 'inertia_layout',
 
-  /**
-   * Data that should be shared with all rendered pages
-   */
   sharedData: {
-    // user: (ctx) => ctx.inertia.always(() => ctx.auth.user),
-  },
+    user: (ctx) => ctx.inertia.always(() => ctx.auth.user),
+    i18n: (ctx) => {
+      return {
+        ...ctx.i18n,
+        locale: ctx.i18n.locale,
+      }
+    },
 
-  /**
-   * Options for the server-side rendering
-   */
-  ssr: {
-    enabled: true,
-    entrypoint: 'inertia/app/ssr.ts'
-  }
+    ssr: {
+      enabled: true,
+      entrypoint: 'inertia/app/ssr.ts',
+    },
+  },
 })
 
 export default inertiaConfig

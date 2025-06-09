@@ -11,7 +11,7 @@ import Footer from './footer.vue'
     <div class="lg:ml-[114px] flex flex-col min-h-screen">
       <Navbar />
 
-      <main class="flex-1 p-6">
+      <main class="flex-1 p-6 bg-[#F3F3F4]">
         <slot></slot>
       </main>
 
