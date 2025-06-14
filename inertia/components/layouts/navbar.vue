@@ -149,7 +149,7 @@ const { t } = useI18n()
             >{{ t('layout.games') }}
           </Link>
           <Link
-            href="#"
+            href="/tournaments"
             class="text-gray-800 hover:text-gray-600 font-bold py-2 transition-transform duration-300 hover:translate-x-2"
             >{{ t('layout.tournaments') }}
           </Link>

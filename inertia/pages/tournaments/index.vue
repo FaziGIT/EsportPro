@@ -32,12 +32,11 @@ defineProps({
         {{ t('home.showAllTournaments') }}
       </Link>
     </div>
-
-    <div v-if="tournaments.length === 0" class="text-center py-8 text-gray-500">
+   <div v-if="tournaments.length === 0" class="text-center py-8 text-gray-500">
       Aucun tournoi n'est disponible pour le moment.
     </div>
-    <div v-else class="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      <TournamentCard v-for="tournament in tournaments" :key="tournament.id" :tournament="tournament" />
+    <div v-else class="mt-6 ml-6 grid gap-6 grid-cols-[repeat(auto-fit,minmax(350px,1fr))]">
+    <TournamentCard class="my-6" v-for="tournament in tournaments" :key="tournament.id" :tournament="tournament" />
     </div>
   </Layout>
 
