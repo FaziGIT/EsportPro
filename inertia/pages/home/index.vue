@@ -8,6 +8,7 @@ import { Carousel, Slide, Navigation } from 'vue3-carousel'
 import 'vue3-carousel/dist/carousel.css'
 import GameCard from '~/components/GameCard.vue'
 import { useI18n } from '../../../resources/js/composables/useI18n'
+import { Link } from '@inertiajs/vue3'
 
 const { t } = useI18n()
 
@@ -54,12 +55,12 @@ defineProps({
         </Slide>
 
         <Slide class="flex justify-center items-center px-4">
-          <a
+          <Link
             href="/tournaments"
             class="bg-[#D6B7B0] hover:bg-[#e6c5be] text-white font-semibold px-6 py-3 rounded-lg transition"
           >
             {{ t('home.showAllTournaments') }}
-          </a>
+          </Link>
         </Slide>
 
         <template #addons>
