@@ -10,11 +10,26 @@ export default class TournamentsController {
     })
   }
 
-  public async api({ request, response }: HttpContext) {
+  public async api({ request }: HttpContext) {
     const page = request.input('page', 1)
     const limit = request.input('limit', 20)
-    const tournaments = await Tournament.query().orderBy('start_date', 'asc').paginate(page, limit)
+    const sort = request.input('sort', 'closest')
 
-    return response.json(tournaments.toJSON().data)
+    const baseQuery = Tournament.query().preload('game')
+
+    switch (sort) {
+      case 'furthest':
+        baseQuery.orderBy('start_date', 'desc')
+        break
+      case 'closest':
+        baseQuery.orderBy('start_date', 'asc')
+        break
+      case 'format':
+        baseQuery.orderBy('format', 'asc')
+        break
+    }
+
+    const tournaments = await baseQuery.paginate(page, limit)
+    return tournaments.toJSON().data
   }
 }

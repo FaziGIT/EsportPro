@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import Layout from '~/components/layouts/layout.vue'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import { useInfiniteScroll } from '@vueuse/core'
 import { useI18n } from '../../../resources/js/composables/useI18n'
 import Tournament from '#models/tournament'
 import { Link } from '@inertiajs/vue3'
 import TournamentCard from '~/components/TournamentCard.vue'
+import { ChevronDown } from '~/components/icons'
 
 const { t } = useI18n()
 
@@ -14,6 +16,20 @@ const page = ref(1)
 const loading = ref(false)
 const allLoaded = ref(false)
 
+const selectedFilter = ref('closest')
+const selectedLabel = ref('Date croissante')
+
+const options = [
+  { id: 'closest', name: 'Date croissante' },
+  { id: 'furthest', name: 'Date décroissante' },
+  { id: 'format', name: 'Format' },
+]
+
+const selectOption = (option: { id: string; name: string }) => {
+  selectedFilter.value = option.id
+  selectedLabel.value = option.name
+}
+
 const container = ref<HTMLElement | null>(null)
 
 const loadTournaments = async () => {
@@ -21,7 +37,7 @@ const loadTournaments = async () => {
   loading.value = true
 
   try {
-    const res = await fetch(`/api/tournaments?page=${page.value}&limit=20`)
+    const res = await fetch(`/api/tournaments?page=${page.value}&limit=20&sort=${selectedFilter.value}`)
     const data: Tournament[] = await res.json()
 
     if (data.length === 0) {
@@ -48,14 +64,63 @@ useInfiniteScroll(
   }
 )
 
+watch(selectedFilter, () => {
+  tournaments.value = []
+  page.value = 1
+  allLoaded.value = false
+  loadTournaments()
+})
+
 </script>
 
 <template>
   <Layout>
     <div class="text-4xl font-semibold text-center py-6">Les Tournois</div>
 
-    <div class="px-6 mb-4 flex justify-between">
-      <div>Ordre</div>
+    <div class="px-6 mb-4 flex justify-between items-center gap-4">
+      <Menu as="div" class="relative inline-block text-left">
+        <div>
+          <MenuButton
+            class="inline-flex w-48 justify-between rounded-md bg-white border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5C4741]"
+          >
+            {{ selectedLabel }}
+            <ChevronDown/>
+          </MenuButton>
+        </div>
+
+        <Transition
+          enter-active-class="transition duration-100 ease-out"
+          enter-from-class="transform scale-95 opacity-0"
+          enter-to-class="transform scale-100 opacity-100"
+          leave-active-class="transition duration-75 ease-in"
+          leave-from-class="transform scale-100 opacity-100"
+          leave-to-class="transform scale-95 opacity-0"
+        >
+          <MenuItems
+            class="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-50"
+          >
+            <div class="px-1 py-1">
+              <MenuItem
+                v-for="option in options"
+                :key="option.id"
+                v-slot="{ active }"
+              >
+                <button
+                  @click="selectOption(option)"
+                  :class="[
+              active ? 'bg-[#5C4741] text-white' : 'text-gray-900',
+              'group flex w-full items-center rounded-md px-4 py-2 text-sm',
+            ]"
+                >
+                  {{ option.name }}
+                </button>
+              </MenuItem>
+            </div>
+          </MenuItems>
+        </Transition>
+      </Menu>
+
+
       <Link
         href="/new_tournament"
         class="bg-[#5C4741] hover:bg-[#7b5f57] text-white font-semibold px-6 py-3 rounded-lg transition"
