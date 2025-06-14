@@ -28,3 +28,4 @@ router.post('/register', [RegisterController, 'store'])
 router.post('/logout', [LogoutController]).use(middleware.auth())
 
 router.get('/tournaments', [TournamentsController, 'index'])
+router.get('/api/tournaments', [TournamentsController, 'api'])

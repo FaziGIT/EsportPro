@@ -9,4 +9,12 @@ export default class TournamentsController {
       tournaments,
     })
   }
+
+  public async api({ request, response }: HttpContext) {
+    const page = request.input('page', 1)
+    const limit = request.input('limit', 20)
+    const tournaments = await Tournament.query().orderBy('start_date', 'asc').paginate(page, limit)
+
+    return response.json(tournaments.toJSON().data)
+  }
 }

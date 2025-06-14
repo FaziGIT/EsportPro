@@ -67,6 +67,7 @@
     "@tailwindcss/vite": "^4.1.6",
     "@vinejs/vine": "^3.0.0",
     "@vue/server-renderer": "^3.5.13",
+    "@vueuse/core": "^13.3.0",
     "edge.js": "^6.2.1",
     "luxon": "^3.6.1",
     "pg": "^8.14.1",
