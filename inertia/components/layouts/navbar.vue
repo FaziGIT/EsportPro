@@ -57,7 +57,7 @@ const { t } = useI18n()
       <!-- Navigation Links -->
       <div class="flex items-center gap-9 font-altone w-1/3 text-xl xl:text-2xl">
         <div class="font-bold">
-          <Link href="#" class="text-gray-800 hover:text-gray-600">{{ t('layout.games') }}</Link>
+          <Link href="/games" class="text-gray-800 hover:text-gray-600">{{ t('layout.games') }}</Link>
         </div>
         <div class="font-bold">
           <Link href="/tournaments" class="text-gray-800 hover:text-gray-600"
@@ -144,7 +144,7 @@ const { t } = useI18n()
       >
         <div class="flex flex-col p-4 space-y-4 font-altone text-xl">
           <Link
-            href="#"
+            href="/games"
             class="text-gray-800 hover:text-gray-600 font-bold py-2 transition-transform duration-300 hover:translate-x-2"
             >{{ t('layout.games') }}
           </Link>

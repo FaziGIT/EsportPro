@@ -9,7 +9,6 @@
 
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
-import GamesController from '#controllers/games_controller'
 
 const HomeController = () => import('#controllers/home_controller')
 const LoginController = () => import('#controllers/login_controller')
@@ -17,6 +16,7 @@ const RegisterController = () => import('#controllers/register_controller')
 const LogoutController = () => import('#controllers/logout_controller')
 // router.on('/').renderInertia('home')
 const TournamentsController = () => import('#controllers/tournaments_controller')
+const GamesController = () => import('#controllers/games_controller')
 
 router.get('/', [HomeController, 'index'])
 
