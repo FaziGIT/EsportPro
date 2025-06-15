@@ -1,3 +1,5 @@
 {
-  "gameNameUndefined": "Nom du jeu non défini"
+  "gameNameUndefined": "Nom du jeu non défini",
+  "ourGames": "Nos jeux",
+  "allGamesLoaded": "Tous les jeux sont chargés."
 }

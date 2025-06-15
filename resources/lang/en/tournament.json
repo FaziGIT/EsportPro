@@ -2,7 +2,7 @@
   "tournamentNameUndefined": "Name of the tournament undefined",
   "stillUnknown": "Still unknown",
   "undefinedFormat": "Format undefined",
-  "allTournamentsCharged": "All tournaments are charged.",
+  "allTournamentsLoaded": "All tournaments are loaded.",
   "tournaments": "The Tournaments",
   "newTournament": "New tournament"
 }
