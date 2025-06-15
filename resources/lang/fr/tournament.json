@@ -2,7 +2,7 @@
   "tournamentNameUndefined": "Nom du tournoi non défini",
   "stillUnknown": "Encore inconnu",
   "undefinedFormat": "Format non défini",
-  "allTournamentsCharged": "Tous les tournois sont chargés.",
+  "allTournamentsLoaded": "Tous les tournois sont chargés.",
   "tournaments": "Les Tournois",
   "newTournament": "Nouveau tournoi"
 }
