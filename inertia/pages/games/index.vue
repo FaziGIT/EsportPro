@@ -4,25 +4,24 @@ import { ref, onMounted, watch } from 'vue'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import { useInfiniteScroll } from '@vueuse/core'
 import { useI18n } from '../../../resources/js/composables/useI18n'
-import Tournament from '#models/tournament'
-import TournamentCard from '~/components/TournamentCard.vue'
 import { ChevronDown } from '~/components/icons'
-import Button from '~/components/Button.vue'
+import Game from '#models/game'
+import GameCard from '~/components/GameCard.vue'
 
 const { t } = useI18n()
 
-const tournaments = ref<Tournament[]>([])
+const games = ref<Game[]>([])
 const page = ref(1)
 const loading = ref(false)
 const allLoaded = ref(false)
 
 const selectedFilter = ref('closest')
-const selectedLabel = ref(t('menu.increasingDate'))
+const selectedLabel = ref(t('menu.ascendingName'))
 
 const options = [
-  { id: 'closest', name: t('menu.increasingDate') },
-  { id: 'furthest', name: t('menu.decreasingDate') },
-  { id: 'format', name: t('menu.format') },
+  { id: 'closest', name: t('menu.ascendingName') },
+  { id: 'furthest', name: t('menu.descendingName') },
+  { id: 'plateform', name: t('menu.platform') },
 ]
 
 const selectOption = (option: { id: string; name: string }) => {
@@ -32,20 +31,20 @@ const selectOption = (option: { id: string; name: string }) => {
 
 const container = ref<HTMLElement | null>(null)
 
-const loadTournaments = async () => {
+const loadGames = async () => {
   if (loading.value || allLoaded.value) return
   loading.value = true
 
   try {
     const res = await fetch(
-      `/api/tournaments?page=${page.value}&limit=20&sort=${selectedFilter.value}`
+      `/api/games?page=${page.value}&limit=20&sort=${selectedFilter.value}`
     )
-    const data: Tournament[] = await res.json()
+    const data: Game[] = await res.json()
 
     if (data.length === 0) {
       allLoaded.value = true
     } else {
-      tournaments.value.push(...data)
+      games.value.push(...data)
       page.value++
     }
   } catch (err) {
@@ -55,24 +54,24 @@ const loadTournaments = async () => {
   }
 }
 
-onMounted(loadTournaments)
+onMounted(loadGames)
 
-useInfiniteScroll(() => window, loadTournaments, {
+useInfiniteScroll(() => window, loadGames, {
   distance: 100,
   canLoadMore: () => !loading.value && !allLoaded.value,
 })
 
 watch(selectedFilter, () => {
-  tournaments.value = []
+  games.value = []
   page.value = 1
   allLoaded.value = false
-  loadTournaments()
+  loadGames()
 })
 </script>
 
 <template>
   <Layout>
-    <div class="text-4xl font-semibold text-center py-6">{{ t('tournament.tournaments') }}</div>
+    <div class="text-4xl font-semibold text-center py-6">{{ t('game.ourGames') }}</div>
 
     <div class="px-6 mb-4 flex justify-between items-center gap-4">
       <Menu as="div" class="relative inline-block text-left">
@@ -112,23 +111,24 @@ watch(selectedFilter, () => {
           </MenuItems>
         </Transition>
       </Menu>
-
-      <Button :value="t('tournament.newTournament')" color="#5C4741"></Button>
     </div>
 
     <!-- InfiniteScroll container -->
     <div ref="container" class="h-[calc(100vh-200px)] overflow-y-auto px-6">
-      <div class="grid gap-6 grid-cols-[repeat(auto-fit,minmax(350px,1fr))]">
-        <TournamentCard
-          class="my-6"
-          v-for="tournament in tournaments"
-          :key="tournament.id"
-          :tournament="tournament"
-        />
+      <div class="grid gap-12 grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
+        <div class="grid gap-12 grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
+
+          <GameCard
+            class="my-6"
+            v-for="game in games"
+            :key="game.id"
+            :game="game"
+          />
+        </div>
       </div>
 
       <div v-if="loading" class="text-center py-6 text-gray-500">{{ t('infiniteScroll.loading') }}</div>
-      <div v-if="allLoaded" class="text-center py-6 text-gray-400">{{ t('tournament.allTournamentsLoaded') }}</div>
+      <div v-if="allLoaded" class="text-center py-6 text-gray-400">{{ t('game.allGamesLoaded') }}</div>
     </div>
   </Layout>
 </template>
