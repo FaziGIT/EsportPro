@@ -9,6 +9,7 @@
 
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
+import GamesController from '#controllers/games_controller'
 
 const HomeController = () => import('#controllers/home_controller')
 const LoginController = () => import('#controllers/login_controller')
@@ -29,3 +30,6 @@ router.post('/logout', [LogoutController]).use(middleware.auth())
 
 router.get('/tournaments', [TournamentsController, 'index'])
 router.get('/api/tournaments', [TournamentsController, 'api'])
+
+router.get('/games', [GamesController, 'index'])
+router.get('/api/games', [GamesController, 'api'])
