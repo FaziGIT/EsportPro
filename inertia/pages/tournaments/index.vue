@@ -5,9 +5,9 @@ import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import { useInfiniteScroll } from '@vueuse/core'
 import { useI18n } from '../../../resources/js/composables/useI18n'
 import Tournament from '#models/tournament'
-import { Link } from '@inertiajs/vue3'
 import TournamentCard from '~/components/TournamentCard.vue'
 import { ChevronDown } from '~/components/icons'
+import Button from '~/components/Button.vue'
 
 const { t } = useI18n()
 
@@ -113,12 +113,7 @@ watch(selectedFilter, () => {
         </Transition>
       </Menu>
 
-      <Link
-        href="/#"
-        class="bg-[#5C4741] hover:bg-[#7b5f57] text-white font-semibold px-6 py-3 rounded-lg transition"
-      >
-        {{ t('tournament.newTournament') }}
-      </Link>
+      <Button :value="t('tournament.newTournament')" color="#5C4741"></Button>
     </div>
 
     <!-- InfiniteScroll container -->
