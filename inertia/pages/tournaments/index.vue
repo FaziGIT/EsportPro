@@ -17,12 +17,12 @@ const loading = ref(false)
 const allLoaded = ref(false)
 
 const selectedFilter = ref('closest')
-const selectedLabel = ref('Date croissante')
+const selectedLabel = ref(t('menu.increasingDate'))
 
 const options = [
-  { id: 'closest', name: 'Date croissante' },
-  { id: 'furthest', name: 'Date décroissante' },
-  { id: 'format', name: 'Format' },
+  { id: 'closest', name: t('menu.increasingDate') },
+  { id: 'furthest', name: t('menu.decreasingDate') },
+  { id: 'format', name: t('menu.format') },
 ]
 
 const selectOption = (option: { id: string; name: string }) => {
@@ -37,7 +37,9 @@ const loadTournaments = async () => {
   loading.value = true
 
   try {
-    const res = await fetch(`/api/tournaments?page=${page.value}&limit=20&sort=${selectedFilter.value}`)
+    const res = await fetch(
+      `/api/tournaments?page=${page.value}&limit=20&sort=${selectedFilter.value}`
+    )
     const data: Tournament[] = await res.json()
 
     if (data.length === 0) {
@@ -55,14 +57,10 @@ const loadTournaments = async () => {
 
 onMounted(loadTournaments)
 
-useInfiniteScroll(
-  () => window,
-  loadTournaments,
-  {
-    distance: 100,
-    canLoadMore: () => !loading.value && !allLoaded.value,
-  }
-)
+useInfiniteScroll(() => window, loadTournaments, {
+  distance: 100,
+  canLoadMore: () => !loading.value && !allLoaded.value,
+})
 
 watch(selectedFilter, () => {
   tournaments.value = []
@@ -70,12 +68,11 @@ watch(selectedFilter, () => {
   allLoaded.value = false
   loadTournaments()
 })
-
 </script>
 
 <template>
   <Layout>
-    <div class="text-4xl font-semibold text-center py-6">Les Tournois</div>
+    <div class="text-4xl font-semibold text-center py-6">{{ t('tournament.tournaments') }}</div>
 
     <div class="px-6 mb-4 flex justify-between items-center gap-4">
       <Menu as="div" class="relative inline-block text-left">
@@ -84,7 +81,7 @@ watch(selectedFilter, () => {
             class="inline-flex w-48 justify-between rounded-md bg-white border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5C4741]"
           >
             {{ selectedLabel }}
-            <ChevronDown/>
+            <ChevronDown />
           </MenuButton>
         </div>
 
@@ -100,17 +97,13 @@ watch(selectedFilter, () => {
             class="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-50"
           >
             <div class="px-1 py-1">
-              <MenuItem
-                v-for="option in options"
-                :key="option.id"
-                v-slot="{ active }"
-              >
+              <MenuItem v-for="option in options" :key="option.id" v-slot="{ active }">
                 <button
                   @click="selectOption(option)"
                   :class="[
-              active ? 'bg-[#5C4741] text-white' : 'text-gray-900',
-              'group flex w-full items-center rounded-md px-4 py-2 text-sm',
-            ]"
+                    active ? 'bg-[#5C4741] text-white' : 'text-gray-900',
+                    'group flex w-full items-center rounded-md px-4 py-2 text-sm',
+                  ]"
                 >
                   {{ option.name }}
                 </button>
@@ -120,19 +113,16 @@ watch(selectedFilter, () => {
         </Transition>
       </Menu>
 
-
       <Link
-        href="/new_tournament"
+        href="/#"
         class="bg-[#5C4741] hover:bg-[#7b5f57] text-white font-semibold px-6 py-3 rounded-lg transition"
       >
-        {{ t('home.showAllTournaments') }}
+        {{ t('tournament.newTournament') }}
       </Link>
     </div>
 
     <!-- InfiniteScroll container -->
-    <div
-      ref="container"
-      class="h-[calc(100vh-200px)] overflow-y-auto px-6">
+    <div ref="container" class="h-[calc(100vh-200px)] overflow-y-auto px-6">
       <div class="grid gap-6 grid-cols-[repeat(auto-fit,minmax(350px,1fr))]">
         <TournamentCard
           class="my-6"
@@ -142,12 +132,10 @@ watch(selectedFilter, () => {
         />
       </div>
 
-      <div v-if="loading" class="text-center py-6 text-gray-500">Chargement...</div>
-      <div v-if="allLoaded" class="text-center py-6 text-gray-400">Tous les tournois sont chargés.</div>
+      <div v-if="loading" class="text-center py-6 text-gray-500">{{ t('infiniteScroll.loading') }}</div>
+      <div v-if="allLoaded" class="text-center py-6 text-gray-400">{{ t('tournament.allTournamentsCharged') }}</div>
     </div>
   </Layout>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

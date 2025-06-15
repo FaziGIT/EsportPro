@@ -1,5 +1,8 @@
 {
   "tournamentNameUndefined": "Name of the tournament undefined",
   "stillUnknown": "Still unknown",
-  "undefinedFormat": "Format undefined"
+  "undefinedFormat": "Format undefined",
+  "allTournamentsCharged": "All tournaments are charged.",
+  "tournaments": "The Tournaments",
+  "newTournament": "New tournament"
 }
