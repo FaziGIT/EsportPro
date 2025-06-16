@@ -15,6 +15,7 @@ const LoginController = () => import('#controllers/login_controller')
 const RegisterController = () => import('#controllers/register_controller')
 const LogoutController = () => import('#controllers/logout_controller')
 // router.on('/').renderInertia('home')
+const TournamentsController = () => import('#controllers/tournaments_controller')
 
 router.get('/', [HomeController, 'index'])
 
@@ -25,3 +26,6 @@ router.get('/register', [RegisterController, 'index'])
 router.post('/register', [RegisterController, 'store'])
 
 router.post('/logout', [LogoutController]).use(middleware.auth())
+
+router.get('/tournaments', [TournamentsController, 'index'])
+router.get('/api/tournaments', [TournamentsController, 'api'])

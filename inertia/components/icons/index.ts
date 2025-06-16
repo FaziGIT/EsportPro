@@ -1,1 +1,2 @@
 export { default as HeartIconSvg } from './HeartIconSVG.vue'
+export { default as ChevronDown } from './ChevronDown.vue'
