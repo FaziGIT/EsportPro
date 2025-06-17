@@ -3,7 +3,7 @@ import Navbar from './navbar.vue'
 import Sidebar from './sidebar.vue'
 import Footer from './footer.vue'
 import Chat from '~/components/layouts/chat.vue'
-import { Link, usePage } from '@inertiajs/vue3'
+import { usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import User from '#models/user'
 
