@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Layout from '~/components/layouts/layout.vue'
 import background from '~/img/auth/bg.png'
-import { Link, useForm, usePage } from '@inertiajs/vue3'
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3'
 import { useI18n } from '../../../resources/js/composables/useI18n'
 
 const page = usePage()
@@ -16,6 +16,8 @@ const { t } = useI18n()
 </script>
 
 <template>
+  <Head :title="t('auth.register')" />
+
   <Layout>
     <div class="flex mt-16 flex-col items-center">
       <h1 class="text-4xl md:text-6xl font-altone">{{ t('auth.register') }}</h1>

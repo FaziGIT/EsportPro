@@ -7,6 +7,10 @@ import type { DefineComponent } from 'vue'
 import { createInertiaApp } from '@inertiajs/vue3'
 import { resolvePageComponent } from '@adonisjs/inertia/helpers'
 
+import { createPinia } from 'pinia'
+
+const pinia = createPinia()
+
 const appName = 'EsportPro'
 
 void createInertiaApp({
@@ -24,6 +28,7 @@ void createInertiaApp({
   setup({ el, App, props, plugin }) {
     createSSRApp({ render: () => h(App, props) })
       .use(plugin)
+      .use(pinia)
       .mount(el)
   },
 })
