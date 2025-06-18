@@ -55,7 +55,7 @@ defineProps({
         </Slide>
 
         <Slide class="flex justify-center items-center px-4">
-          <Button :value="t('home.showAllTournaments')" color="#D6B7B0" redirection-path="/tournaments"></Button>
+          <Button :value="t('home.showAllTournaments')" color="#D6B7B0" redirection-path="/tournaments"/>
         </Slide>
 
         <template #addons>
@@ -83,7 +83,7 @@ defineProps({
         </Slide>
 
         <Slide class="flex justify-center items-center px-4">
-          <Button :value="t('home.showAllGames')" color="#D6B7B0" redirection-path="/games"></Button>
+          <Button :value="t('home.showAllGames')" color="#D6B7B0" redirection-path="/games"/>
         </Slide>
 
         <template #addons>
