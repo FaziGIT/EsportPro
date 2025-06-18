@@ -8,6 +8,7 @@ import { Carousel, Slide, Navigation } from 'vue3-carousel'
 import 'vue3-carousel/dist/carousel.css'
 import GameCard from '~/components/GameCard.vue'
 import { useI18n } from '../../../resources/js/composables/useI18n'
+import Button from '~/components/Button.vue'
 
 const { t } = useI18n()
 
@@ -54,12 +55,7 @@ defineProps({
         </Slide>
 
         <Slide class="flex justify-center items-center px-4">
-          <a
-            href="/tournaments"
-            class="bg-[#D6B7B0] hover:bg-[#e6c5be] text-white font-semibold px-6 py-3 rounded-lg transition"
-          >
-            {{ t('home.showAllTournaments') }}
-          </a>
+          <Button :value="t('home.showAllTournaments')" color="#D6B7B0" redirection-path="/tournaments"></Button>
         </Slide>
 
         <template #addons>
@@ -87,12 +83,7 @@ defineProps({
         </Slide>
 
         <Slide class="flex justify-center items-center px-4">
-          <a
-            href="/games"
-            class="bg-[#D6B7B0] hover:bg-[#e6c5be] text-white font-semibold px-6 py-3 rounded-lg transition"
-          >
-            {{ t('home.showAllGames') }}
-          </a>
+          <Button :value="t('home.showAllGames')" color="#D6B7B0" redirection-path="/games"></Button>
         </Slide>
 
         <template #addons>
