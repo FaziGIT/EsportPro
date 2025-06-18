@@ -1,5 +1,8 @@
 {
   "increasingDate": "Increasing Date",
   "decreasingDate": "Decreasing Date",
-  "format": "Format"
+  "format": "Format",
+  "ascendingName": "Ascending Name",
+  "descendingName": "Descending Name",
+  "platform": "Platform"
 }

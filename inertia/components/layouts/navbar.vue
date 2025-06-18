@@ -4,6 +4,8 @@ import { Link, usePage } from '@inertiajs/vue3'
 import blackLogo from '../../img/blackLogo.jpg'
 import { useI18n } from '../../../resources/js/composables/useI18n'
 import User from '#models/user'
+import Button from '~/components/Button.vue'
+import { Profile } from '~/components/icons'
 
 const isMenuOpen = ref(false)
 
@@ -57,7 +59,7 @@ const { t } = useI18n()
       <!-- Navigation Links -->
       <div class="flex items-center gap-9 font-altone w-1/3 text-xl xl:text-2xl">
         <div class="font-bold">
-          <Link href="#" class="text-gray-800 hover:text-gray-600">{{ t('layout.games') }}</Link>
+          <Link href="/games" class="text-gray-800 hover:text-gray-600">{{ t('layout.games') }}</Link>
         </div>
         <div class="font-bold">
           <Link href="/tournaments" class="text-gray-800 hover:text-gray-600"
@@ -106,18 +108,14 @@ const { t } = useI18n()
 
       <!-- Login Desktop -->
       <div v-if="!user" class="flex items-center justify-end w-1/3">
-        <Link
-          href="/login"
-          class="px-9 py-2 text-white bg-[#D6B7B0] text-base font-bold rounded-md"
-        >
-          {{ t('auth.login') }}
-        </Link>
+        <Button redirection-path="/login" color="#D6B7B0" :value="t('auth.login')"/>
       </div>
 
       <!-- User Profile -->
       <div v-else class="flex items-center justify-end w-1/3">
-        <Link href="/" class="px-9 py-2 text-white bg-[#D6B7B0] text-base font-bold rounded-md">
-          {{ user.pseudo }}
+        <Link href="/profile" class="flex items-center cursor-pointer px-4">
+          <Profile/>
+          <span class="text-[#5C4741] font-semibold pl-1">{{ user.pseudo }}</span>
         </Link>
         <Link
           href="/logout"
@@ -144,7 +142,7 @@ const { t } = useI18n()
       >
         <div class="flex flex-col p-4 space-y-4 font-altone text-xl">
           <Link
-            href="#"
+            href="/games"
             class="text-gray-800 hover:text-gray-600 font-bold py-2 transition-transform duration-300 hover:translate-x-2"
             >{{ t('layout.games') }}
           </Link>
@@ -188,21 +186,11 @@ const { t } = useI18n()
 
           <!-- Login Mobile -->
           <div v-if="!user" class="py-2">
-            <Link
-              href="/login"
-              class="block px-4 py-2 text-center text-white bg-[#D6B7B0] text-base font-bold rounded-md transition-transform duration-300 hover:scale-105"
-            >
-              {{ t('auth.login') }}
-            </Link>
+            <Button redirection-path="/login" color="#D6B7B0" value="t('auth.login')" class="block px-4 py-2 text-center text-base font-bold rounded-md transition-transform duration-300"/>
           </div>
           <!-- User Profile -->
           <div v-else class="py-2">
-            <Link
-              href="/"
-              class="block px-4 py-2 text-center text-white bg-[#D6B7B0] text-base font-bold rounded-md transition-transform duration-300 hover:scale-105"
-            >
-              {{ user.pseudo }}
-            </Link>
+            <Button redirection-path="/profile" color="#D6B7B0" :value="user.pseudo ?? ''" class="block px-4 py-2 text-center text-base font-bold rounded-md transition-transform duration-300"/>
           </div>
         </div>
       </div>

@@ -18,6 +18,7 @@ const LogoutController = () => import('#controllers/logout_controller')
 const ChatController = () => import('#controllers/chat_controller')
 // router.on('/').renderInertia('home')
 const TournamentsController = () => import('#controllers/tournaments_controller')
+const GamesController = () => import('#controllers/games_controller')
 
 transmit.registerRoutes()
 
@@ -38,3 +39,5 @@ router.get('/chat/messages/old', [ChatController, 'getOldMessages']).use(middlew
 router.get('/tournaments', [TournamentsController, 'index'])
 router.get('/api/tournaments', [TournamentsController, 'api'])
 
+router.get('/games', [GamesController, 'index'])
+router.get('/api/games', [GamesController, 'api'])

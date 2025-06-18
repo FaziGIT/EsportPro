@@ -1,3 +1,11 @@
 {
-  "no_more_messages": "Premier message de la conversation"
+  "noMoreMessages": "Premier message de la conversation",
+  "onlineChat": "Chat en ligne",
+  "chats": "Conversations",
+  "noChatsAvailable": "Pas de discussions disponibles",
+  "joinTeamOrTournament": "Rejoins une équipe ou un tournoi pour commencer à discuter.",
+  "noChannelAvailable": "Aucun canal disponible",
+  "noMessages": "Aucun message",
+  "messageLoading": "Chargement des messages...",
+  "loadingOlderMessages": "Chargement des messages plus anciens..."
 }
