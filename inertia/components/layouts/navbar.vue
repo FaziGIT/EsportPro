@@ -108,7 +108,7 @@ const { t } = useI18n()
 
       <!-- Login Desktop -->
       <div v-if="!user" class="flex items-center justify-end w-1/3">
-        <Button redirection-path="/login" color="#D6B7B0" value="t('auth.login')"></Button>
+        <Button redirection-path="/login" color="#D6B7B0" :value="t('auth.login')"></Button>
       </div>
 
       <!-- User Profile -->
