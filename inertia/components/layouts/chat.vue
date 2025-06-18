@@ -419,7 +419,7 @@ const sendMessage = async (e: Event) => {
     >
       <div class="bg-[#B8938A] text-white p-3 rounded-t-lg flex justify-between items-center">
         <div class="flex items-center">
-          <span class="font-semibold">Chat en ligne</span>
+          <span class="font-semibold">{{ t('chat.onlineChat') }}</span>
           <span v-if="isConnecting" class="ml-2 animate-pulse">
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
               <circle
@@ -466,7 +466,7 @@ const sendMessage = async (e: Event) => {
         <!-- Conversations sidebar menu -->
         <div class="w-1/3 border-r border-r-gray-300 overflow-y-auto bg-gray-50">
           <div class="p-2">
-            <div class="text-sm font-medium text-gray-500 mb-2 px-2">Conversations</div>
+            <div class="text-sm font-medium text-gray-500 mb-2 px-2">{{ t('chat.chats') }}</div>
 
             <div v-if="chatList.length === 0" class="text-center text-gray-500 text-sm p-4">
               Aucun channel disponible
@@ -507,8 +507,8 @@ const sendMessage = async (e: Event) => {
             class="flex-1 flex items-center justify-center text-gray-500"
           >
             <div class="text-center">
-              <p class="mb-2">No channels available</p>
-              <p class="text-sm">Join a team or tournament to start chatting</p>
+              <p class="mb-2">{{ t('chat.noChannelsAvailable') }}</p>
+              <p class="text-sm">{{ t('chat.joinTeamOrTournament') }}</p>
             </div>
           </div>
 
@@ -579,7 +579,7 @@ const sendMessage = async (e: Event) => {
                   v-else-if="chatList.length > 0 && !hasMoreMessages.get(chatList[activeChat]?.id)"
                   class="text-center py-2"
                 >
-                  <div class="text-sm text-gray-400">📋 {{ t('chat.no_more_messages') }}</div>
+                  <div class="text-sm text-gray-400">📋 {{ t('chat.noMoreMessages') }}</div>
                 </div>
 
                 <!-- Messages -->
