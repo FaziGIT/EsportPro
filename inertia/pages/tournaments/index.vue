@@ -113,7 +113,7 @@ watch(selectedFilter, () => {
         </Transition>
       </Menu>
 
-      <Button :value="t('tournament.newTournament')" color="#5C4741"></Button>
+      <Button :value="t('tournament.newTournament')" color="#5C4741"/>
     </div>
 
     <!-- InfiniteScroll container -->
