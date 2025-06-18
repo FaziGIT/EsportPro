@@ -38,7 +38,7 @@
       <!-- Notification badge -->
       <div
         v-if="unreadCount > 0 && !chatStore.isChatOpen"
-        class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-6 min-w-6 flex items-center justify-center px-1"
+        class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 min-w-[1.5rem] flex items-center justify-center px-1"
       >
         {{ unreadCount > 9 ? '9+' : unreadCount }}
       </div>
@@ -46,14 +46,17 @@
   </div>
 
   <div
-    class="chat-container fixed bottom-24 right-5 z-10"
-    :class="{ 'chat-open': chatStore.isChatOpen, 'chat-closed': !chatStore.isChatOpen }"
+    class="fixed bottom-24 right-5 z-10 transform origin-bottom-right transition-all duration-300 ease-in-out"
+    :class="{
+      'scale-100 opacity-100 visible': chatStore.isChatOpen,
+      'scale-0 opacity-0 invisible': !chatStore.isChatOpen,
+    }"
   >
     <div
       v-if="chatStore.isChatOpen || isTransitioning"
       class="bg-white rounded-lg shadow-xl w-96 h-96 flex flex-col"
     >
-      <div class="bg-[#D6B7B0] text-white p-3 rounded-t-lg flex justify-between items-center">
+      <div class="bg-[#B8938A] text-white p-3 rounded-t-lg flex justify-between items-center">
         <div class="flex items-center">
           <span class="font-semibold">Chat en ligne</span>
           <span v-if="isConnecting" class="ml-2 animate-pulse">
@@ -100,7 +103,7 @@
 
       <div class="flex flex-1 overflow-hidden">
         <!-- Conversations sidebar menu -->
-        <div class="w-1/3 border-r overflow-y-auto bg-gray-50">
+        <div class="w-1/3 border-r border-r-gray-300 overflow-y-auto bg-gray-50">
           <div class="p-2">
             <div class="text-sm font-medium text-gray-500 mb-2 px-2">Conversations</div>
 
@@ -128,7 +131,7 @@
               </div>
               <div
                 v-if="chat.unread > 0"
-                class="absolute top-1 right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 min-w-5 flex items-center justify-center px-1"
+                class="absolute top-1 right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 min-w-[1.25rem] flex items-center justify-center px-1"
               >
                 {{ chat.unread }}
               </div>
@@ -213,25 +216,26 @@
                 </div>
               </div>
             </div>
-            <div class="p-3 border-t">
-              <div class="flex">
+            <div class="p-2 border-t border-t-gray-300">
+              <div class="flex px-2 mx-1">
+                <!-- Suppression de space-x-2 -->
                 <input
                   v-model="messageText"
                   @keyup.enter="sendMessage"
                   type="text"
                   placeholder="Écrivez votre message..."
-                  class="flex-1 border rounded-l-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#D6B7B0]"
+                  class="flex-1 rounded-l-lg px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#D6B7B0] border-[#D6B7B0] border"
                   :disabled="chatList.length === 0"
                 />
                 <button
                   @click="sendMessage"
-                  class="bg-[#D6B7B0] hover:bg-[#e6c5be] text-white px-4 py-2 rounded-r-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="bg-[#D6B7B0] hover:bg-[#e6c5be] text-white px-2 py-1 rounded-r-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                   :disabled="chatList.length === 0"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    width="18"
-                    height="18"
+                    width="14"
+                    height="14"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -322,10 +326,10 @@ const fetchUserChannels = async () => {
         hasMoreMessages.value.set(channel.id, true) // By default, assume there are more
       })
     } else {
-      console.error('❌ Error retrieving channels:', response.statusText)
+      console.error('Error retrieving channels:', response.statusText)
     }
   } catch (error) {
-    console.error('❌ Error retrieving channels:', error)
+    console.error('Error retrieving channels:', error)
   }
 }
 
@@ -378,11 +382,11 @@ const setupSubscriptions = async () => {
         // Store subscription reference
         subscriptions.set(channel.id, subscription)
       } catch (error) {
-        console.error(`❌ Error creating subscription for ${channel.displayName}:`, error)
+        console.error(`Error creating subscription for ${channel.displayName}:`, error)
       }
     }
   } catch (error) {
-    console.error('❌ Error setting up subscriptions:', error)
+    console.error('Error setting up subscriptions:', error)
   }
 }
 
@@ -393,7 +397,7 @@ const cleanupSubscriptions = async () => {
     if (subscription && typeof subscription.delete === 'function') {
       // Catch promise errors with catch
       await subscription.delete().catch((error: any) => {
-        console.error(`⚠️ Deletion error ignored for ${channelId}:`, error.message)
+        console.error(`Deletion error ignored for ${channelId}:`, error.message)
       })
     }
   }
@@ -560,31 +564,3 @@ const sendMessage = async (e: Event) => {
   }
 }
 </script>
-
-<style scoped>
-.chat-container {
-  transition: all 0.3s ease-in-out;
-  transform-origin: bottom right;
-}
-
-.chat-closed {
-  transform: scale(0);
-  opacity: 0;
-  visibility: hidden;
-}
-
-.chat-open {
-  transform: scale(1);
-  opacity: 1;
-  visibility: visible;
-}
-
-/* For notification badges */
-.min-w-5 {
-  min-width: 1.25rem;
-}
-
-.min-w-6 {
-  min-width: 1.5rem;
-}
-</style>
