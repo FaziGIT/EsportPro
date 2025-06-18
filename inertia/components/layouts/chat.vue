@@ -469,7 +469,7 @@ const sendMessage = async (e: Event) => {
             <div class="text-sm font-medium text-gray-500 mb-2 px-2">{{ t('chat.chats') }}</div>
 
             <div v-if="chatList.length === 0" class="text-center text-gray-500 text-sm p-4">
-              Aucun channel disponible
+              {{ t('chat.noChannelsAvailable') }}
             </div>
 
             <div
@@ -487,7 +487,7 @@ const sendMessage = async (e: Event) => {
               <div class="flex-1 min-w-0">
                 <div class="font-medium text-sm truncate">{{ chat.name }}</div>
                 <div class="text-xs text-gray-500 truncate">
-                  {{ chat.lastMessage || 'Aucun message' }}
+                  {{ chat.lastMessage || t('chat.noMessages') }}
                 </div>
               </div>
               <div
@@ -507,7 +507,7 @@ const sendMessage = async (e: Event) => {
             class="flex-1 flex items-center justify-center text-gray-500"
           >
             <div class="text-center">
-              <p class="mb-2">{{ t('chat.noChannelsAvailable') }}</p>
+              <p class="mb-2">{{ t('chat.noChatsAvailable') }}</p>
               <p class="text-sm">{{ t('chat.joinTeamOrTournament') }}</p>
             </div>
           </div>
@@ -541,7 +541,7 @@ const sendMessage = async (e: Event) => {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  <p class="text-sm text-gray-500">Chargement des messages...</p>
+                  <p class="text-sm text-gray-500"> {{ t('chat.loadingMessages') }}</p>
                 </div>
               </div>
 
@@ -570,7 +570,7 @@ const sendMessage = async (e: Event) => {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
-                    Loading older messages...
+                    {{ t('chat.loadingOlderMessages') }}
                   </div>
                 </div>
 
