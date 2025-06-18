@@ -363,7 +363,7 @@ const sendMessage = async (e: Event) => {
   <div class="fixed bottom-5 right-5 z-10">
     <button
       @click="toggleChat"
-      class="h-14 w-14 rounded-full bg-[#D6B7B0] hover:bg-[#e6c5be] flex items-center justify-center shadow-lg transition-all duration-300 relative"
+      class="h-14 w-14 rounded-full bg-[#D6B7B0] hover:bg-[#e6c5be] flex items-center justify-center shadow-lg transition-all duration-300 relative cursor-pointer"
     >
       <span v-if="!chatStore.isChatOpen" class="text-white text-xl">
         <svg
@@ -444,7 +444,7 @@ const sendMessage = async (e: Event) => {
             </svg>
           </span>
         </div>
-        <button @click="chatStore.toggleChat" class="text-white">
+        <button @click="chatStore.toggleChat" class="text-white cursor-pointer">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="18"
