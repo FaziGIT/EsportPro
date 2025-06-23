@@ -4,7 +4,25 @@
       "emailPseudo": "username/email",
       "pseudo": "pseudo",
       "email": "email",
-      "password": "password"
+      "password": "password",
+      "name": "tournament name",
+      "tier": "skill level",
+      "format": "tournament format",
+      "price": "prize amount",
+      "rules": "rules",
+      "numberParticipants": "number of participants",
+      "numberPlayersPerTeam": "players per team",
+      "teamMode": "team mode",
+      "region": "region",
+      "address": "address",
+      "city": "city",
+      "country": "country",
+      "postalCode": "postal code",
+      "startDate": "start date",
+      "endDate": "end date",
+      "gameId": "game selection",
+      "isOnline": "online mode",
+      "image": "tournament image"
     },
     "messages": {
       "required": "The {field} field cannot be empty. Please fill it out.",
@@ -12,7 +30,15 @@
       "email": "Please provide a valid email for the {field} field.",
       "password.required": "Please enter your password.",
       "database.unique": "The {field} is already taken.",
-      "minLength": "The {field} must be at least {min} characters long."
+      "minLength": "The {field} must be at least {min} characters long.",
+      "min": "The {field} must be at least {min}.",
+      "max": "The {field} cannot exceed {max}.",
+      "in": "Please select a valid {field}.",
+      "exists": "The selected {field} is invalid.",
+      "afterField": "The {field} must be after {otherField}.",
+      "requiredWhen": "The {field} is required when {otherField} is {value}.",
+      "file.size": "The {field} must be smaller than {size}.",
+      "file.extnames": "The {field} must be a valid image file (jpg, jpeg, png)."
     }
   }
 }

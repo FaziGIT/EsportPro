@@ -38,6 +38,7 @@ router.get('/chat/messages/old', [ChatController, 'getOldMessages']).use(middlew
 
 router.get('/tournaments', [TournamentsController, 'index'])
 router.get('/api/tournaments', [TournamentsController, 'api'])
+router.post('/tournaments/new', [TournamentsController, 'store']).use(middleware.auth()) // create middleware isAdmin ?
 
 router.get('/games', [GamesController, 'index'])
 router.get('/api/games', [GamesController, 'api'])
