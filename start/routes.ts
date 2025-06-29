@@ -72,4 +72,5 @@ router
   .post('/games/:id/toggle-favorite', [GamesController, 'toggleFavorite'])
   .use(middleware.auth())
 
-router.get('/profile', [ProfileController, 'index'])
+router.get('/profile', [ProfileController, 'index']).use(middleware.auth())
+router.post('/profile/privacy', [ProfileController, 'updatePrivacy']).use(middleware.auth())
