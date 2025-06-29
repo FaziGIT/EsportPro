@@ -5,7 +5,7 @@ import { Link } from '@inertiajs/vue3'
 const props = defineProps({
   redirectionPath: {
     type: String,
-    default: '/#',
+    default: '',
   },
   textColor: {
     type: String,
@@ -19,6 +19,10 @@ const props = defineProps({
     type: String,
     default: '#5C4741'
   },
+  useRedirection: {
+    type: Boolean,
+    default: true
+  }
 })
 
 const isHovered = ref(false)
@@ -30,7 +34,7 @@ const getHoverColor = computed(() => {
         return '#7b5f57'
       case '#7B5F57':
         return '#E6C5BE'
-      case '#D6B7B0' :
+      case '#D6B7B0':
         return '#E6C5BE'
       default:
         return props.color
@@ -43,16 +47,17 @@ const getHoverColor = computed(() => {
 </script>
 
 <template>
-  <Link
-    :href="props.redirectionPath"
+  <component
+    :is="props.useRedirection ? Link : 'button'"
+    :href="props.useRedirection ? props.redirectionPath : undefined"
     :style="{
       backgroundColor: isHovered ? getHoverColor : props.color,
       color: props.textColor
     }"
-    class="font-semibold px-6 py-3 rounded-lg transition"
+    class="font-semibold px-6 py-3 rounded-lg transition cursor-pointer"
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
   >
     {{ props.value }}
-  </Link>
+  </component>
 </template>
