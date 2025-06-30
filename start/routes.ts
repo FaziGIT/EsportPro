@@ -41,6 +41,10 @@ router.get('/chat/messages/old', [ChatController, 'getOldMessages']).use(middlew
 router.get('/tournaments', [TournamentsController, 'index'])
 router.get('/api/tournaments', [TournamentsController, 'api'])
 router.get('/tournaments/:id', [TournamentsController, 'show'])
+router.post('/tournaments/:id/join', [TournamentsController, 'join']).use(middleware.auth())
+
+// Team routes
+router.put('/teams/:id', [TournamentsController, 'updateTeam']).use(middleware.auth())
 
 // Game routes
 router.get('/games', [GamesController, 'index'])

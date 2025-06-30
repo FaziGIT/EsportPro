@@ -46,9 +46,13 @@ export const TournamentFactory = factory
     const tournamentName = faker.helpers.arrayElement(tournamentNames)
     const sponsorName = faker.company.name()
 
-    // Generate participant count that is a power of 2
-    const participantOptions = [8, 16, 32, 64]
-    const numberParticipants = faker.helpers.arrayElement(participantOptions)
+    // Generate number of players per team first
+    const numberPlayersPerTeam = faker.number.int({ min: 1, max: 5 })
+
+    // Generate participant count that is a multiple of players per team and a power of 2
+    const teamOptions = [2, 4, 8, 16] // Number of teams (power of 2)
+    const numberOfTeams = faker.helpers.arrayElement(teamOptions)
+    const numberParticipants = numberOfTeams * numberPlayersPerTeam
 
     const price = faker.helpers.arrayElement(prizePools)
 
@@ -68,7 +72,7 @@ export const TournamentFactory = factory
       price,
       rules: faker.lorem.paragraph(2).substring(0, 250),
       numberParticipants,
-      numberPlayersPerTeam: faker.number.int({ min: 1, max: 5 }),
+      numberPlayersPerTeam,
       region,
       address: faker.location.streetAddress().substring(0, 200),
       city: faker.location.city().substring(0, 100),
