@@ -1,6 +1,6 @@
 {
   "tournamentNameUndefined": "Name of the tournament undefined",
-  "stillUnknown": "Still unknown",
+  "stillUnknown": "Individual tournament",
   "undefinedFormat": "Format undefined",
   "allTournamentsLoaded": "All tournaments are loaded.",
   "tournaments": "The Tournaments",
@@ -39,5 +39,6 @@
   "postalCodePlaceholder": "Enter postal code",
   "country": "Country",
   "countryPlaceholder": "Enter country",
-  "save": "Save"
+  "save": "Save",
+  "teamsOf": "Teams of"
 }

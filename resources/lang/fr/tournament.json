@@ -1,6 +1,6 @@
 {
   "tournamentNameUndefined": "Nom du tournoi non défini",
-  "stillUnknown": "Encore inconnu",
+  "stillUnknown": "Tournoi individuel",
   "undefinedFormat": "Format non défini",
   "allTournamentsLoaded": "Tous les tournois sont chargés.",
   "tournaments": "Les Tournois",
@@ -39,5 +39,6 @@
   "postalCodePlaceholder": "Entrez le code postal",
   "country": "Pays",
   "countryPlaceholder": "Entrez le pays",
-  "save": "Enregistrer"
+  "save": "Enregistrer",
+  "teamsOf": "Équipes de"
 }

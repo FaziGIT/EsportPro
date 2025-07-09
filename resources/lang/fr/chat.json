@@ -7,5 +7,6 @@
   "noChannelAvailable": "Aucun canal disponible",
   "noMessages": "Aucun message",
   "messageLoading": "Chargement des messages...",
-  "loadingOlderMessages": "Chargement des messages plus anciens..."
+  "loadingOlderMessages": "Chargement des messages plus anciens...",
+  "noChannelsAvailable": "Aucun canal disponible"
 }
