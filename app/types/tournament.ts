@@ -1,5 +1,6 @@
 import { TierType } from '#enums/tier_type'
 import { FormatType } from '#enums/format_type'
+import { DateTime } from 'luxon'
 
 export interface TournamentFormData {
   name: string
@@ -14,8 +15,8 @@ export interface TournamentFormData {
   city: string | null
   country: string | null
   postalCode: string | null
-  startDate: string
-  endDate: string
+  startDate: DateTime | null
+  endDate: DateTime | null
   gameId: string
   isOnline: boolean
   teamMode: boolean

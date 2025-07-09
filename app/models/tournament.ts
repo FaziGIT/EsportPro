@@ -30,22 +30,22 @@ export default class Tournament extends BaseModel {
   declare numberParticipants: number
 
   @column()
-  declare numberPlayersPerTeam: number
+  declare numberPlayersPerTeam: number | null
 
   @column()
-  declare region: string
+  declare region: string | null
 
   @column()
-  declare address: string
+  declare address: string | null
 
   @column()
-  declare city: string
+  declare city: string | null
 
   @column()
-  declare country: string
+  declare country: string | null
 
   @column()
-  declare postalCode: string
+  declare postalCode: string | null
 
   @column()
   declare image: Uint8Array

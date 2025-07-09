@@ -1,3 +1,152 @@
+<script setup lang="ts">
+import { defineEmits, defineProps, ref, watch } from 'vue'
+import { useForm } from '@inertiajs/vue3'
+import { useI18n } from '../../../resources/js/composables/useI18n'
+import { TierType } from '#enums/tier_type'
+import { FormatType } from '#enums/format_type'
+import { TournamentFormData } from '#types/tournament'
+
+const { t } = useI18n()
+
+// Props
+const props = defineProps<{
+  isOpen: boolean
+  games: Array<{
+    id: string
+    name: string
+  }>
+}>()
+
+// Emits
+const emit = defineEmits(['close', 'submit'])
+
+// State
+const activeTab = ref('general')
+const imageInput = ref<HTMLInputElement>()
+
+const form = useForm<TournamentFormData>({
+  name: '',
+  tier: TierType.Beginner,
+  format: FormatType.BO1,
+  price: 0,
+  rules: '',
+  numberParticipants: 0,
+  numberPlayersPerTeam: null,
+  region: null,
+  address: null,
+  city: null,
+  country: null,
+  postalCode: null,
+  startDate: null,
+  endDate: null,
+  gameId: '',
+  isOnline: true,
+  teamMode: false,
+  image: null,
+  imagePreview: '',
+})
+
+const closeModal = () => {
+  emit('close')
+}
+
+const submitForm = () => {
+  form.clearErrors()
+
+  console.log('Submitting form:', form.data())
+
+  const imagePreview = form.imagePreview
+  form.imagePreview = ''
+
+  form.post('/tournaments/new', {
+    forceFormData: true,
+    onSuccess: () => {
+      emit('close')
+    },
+    onError: () => {
+      form.imagePreview = imagePreview
+    },
+    onFinish: () => {
+      if (!form.imagePreview) {
+        form.imagePreview = imagePreview
+      }
+    },
+  })
+}
+
+const triggerImageUpload = () => {
+  imageInput.value?.click()
+}
+
+const handleImageUpload = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (!target.files || target.files.length === 0) return
+  const file = target.files[0]
+
+  form.image = file
+
+  // Create preview
+  const reader = new FileReader()
+  reader.onload = (e: ProgressEvent<FileReader>) => {
+    const result = e.target?.result
+    form.imagePreview = typeof result === 'string' ? result : ''
+  }
+  reader.readAsDataURL(file)
+}
+
+const removeImage = () => {
+  form.image = null
+  form.imagePreview = ''
+  if (imageInput.value) {
+    imageInput.value.value = ''
+  }
+}
+
+const getTabOffset = () => {
+  switch (activeTab.value) {
+    case 'general':
+      return 0
+    case 'players':
+      return 100
+    case 'image':
+      return 200
+    default:
+      return 0
+  }
+}
+
+const getError = (fieldName: string) => {
+  return (form.errors as any)[fieldName]
+}
+
+const hasError = (fieldName: string) => {
+  return !!(form.errors as any)[fieldName]
+}
+
+watch(
+  () => form.isOnline,
+  (newValue) => {
+    if (newValue) {
+      form.region = null
+      form.address = null
+      form.city = null
+      form.country = null
+      form.postalCode = null
+    }
+  }
+)
+
+watch(
+  () => form.teamMode,
+  (newValue) => {
+    if (!newValue) {
+      form.numberPlayersPerTeam = null
+    } else if (form.numberPlayersPerTeam === null) {
+      form.numberPlayersPerTeam = 5
+    }
+  }
+)
+</script>
 <template>
   <!-- Modal only renders when isOpen is true -->
   <div v-if="isOpen">
@@ -643,154 +792,6 @@
     </Transition>
   </div>
 </template>
-
-<script setup lang="ts">
-import { defineEmits, defineProps, ref, watch } from 'vue'
-import { useForm } from '@inertiajs/vue3'
-import { useI18n } from '../../../resources/js/composables/useI18n'
-import { TierType } from '#enums/tier_type'
-import { FormatType } from '#enums/format_type'
-import { TournamentFormData } from '#types/tournament'
-
-const { t } = useI18n()
-
-// Props
-const props = defineProps<{
-  isOpen: boolean
-  games: Array<{
-    id: string
-    name: string
-  }>
-}>()
-
-// Emits
-const emit = defineEmits(['close', 'submit'])
-
-// State
-const activeTab = ref('general')
-const imageInput = ref<HTMLInputElement>()
-
-const form = useForm<TournamentFormData>({
-  name: '',
-  tier: TierType.Beginner,
-  format: FormatType.BO1,
-  price: 0,
-  rules: '',
-  numberParticipants: 0,
-  numberPlayersPerTeam: null,
-  region: null,
-  address: null,
-  city: null,
-  country: null,
-  postalCode: null,
-  startDate: '',
-  endDate: '',
-  gameId: '',
-  isOnline: false,
-  teamMode: false,
-  image: null,
-  imagePreview: '',
-})
-
-const closeModal = () => {
-  emit('close')
-}
-
-const submitForm = () => {
-  form.clearErrors()
-
-  const imagePreview = form.imagePreview
-  form.imagePreview = ''
-
-  form.post('/tournaments/new', {
-    forceFormData: true,
-    onSuccess: () => {
-      emit('close')
-    },
-    onError: () => {
-      form.imagePreview = imagePreview
-    },
-    onFinish: () => {
-      if (!form.imagePreview) {
-        form.imagePreview = imagePreview
-      }
-    },
-  })
-}
-
-const triggerImageUpload = () => {
-  imageInput.value?.click()
-}
-
-const handleImageUpload = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  if (!target.files || target.files.length === 0) return
-  const file = target.files[0]
-
-  form.image = file
-
-  // Create preview
-  const reader = new FileReader()
-  reader.onload = (e: ProgressEvent<FileReader>) => {
-    const result = e.target?.result
-    form.imagePreview = typeof result === 'string' ? result : ''
-  }
-  reader.readAsDataURL(file)
-}
-
-const removeImage = () => {
-  form.image = null
-  form.imagePreview = ''
-  if (imageInput.value) {
-    imageInput.value.value = ''
-  }
-}
-
-const getTabOffset = () => {
-  switch (activeTab.value) {
-    case 'general':
-      return 0
-    case 'players':
-      return 100
-    case 'image':
-      return 200
-    default:
-      return 0
-  }
-}
-
-const getError = (fieldName: string) => {
-  return (form.errors as any)[fieldName]
-}
-
-const hasError = (fieldName: string) => {
-  return !!(form.errors as any)[fieldName]
-}
-
-watch(
-  () => form.isOnline,
-  (newValue) => {
-    if (newValue) {
-      form.region = null
-      form.address = null
-      form.city = null
-      form.country = null
-      form.postalCode = null
-    }
-  }
-)
-
-watch(
-  () => form.teamMode,
-  (newValue) => {
-    if (!newValue) {
-      form.numberPlayersPerTeam = null
-    } else if (form.numberPlayersPerTeam === null) {
-      form.numberPlayersPerTeam = 5
-    }
-  }
-)
-</script>
 
 <style scoped>
 /* Modal overlay transitions - smooth backdrop fade */

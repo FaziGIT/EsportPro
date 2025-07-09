@@ -1,12 +1,12 @@
 import vine from '@vinejs/vine'
-import { FormatTypeValues } from '#enums/format_type'
-import { TierTypeValues } from '#enums/tier_type'
+import { FormatType } from '#enums/format_type'
+import { TierType } from '#enums/tier_type'
 
 export const tournamentValidator = vine.compile(
   vine.object({
     name: vine.string().minLength(3).maxLength(100),
-    tier: vine.enum(TierTypeValues),
-    format: vine.enum(FormatTypeValues),
+    tier: vine.enum(TierType),
+    format: vine.enum(FormatType),
     price: vine.number().min(0),
     rules: vine.string().minLength(10),
     numberParticipants: vine.number().min(2).max(128),
@@ -23,10 +23,8 @@ export const tournamentValidator = vine.compile(
     city: vine.string().minLength(1).optional().requiredWhen('isOnline', '=', '0'),
     country: vine.string().minLength(1).optional().requiredWhen('isOnline', '=', '0'),
     postalCode: vine.string().minLength(1).optional().requiredWhen('isOnline', '=', '0'),
-    startDate: vine.date({ formats: ['YYYY-MM-DD HH:mm', 'YYYY-MM-DDTHH:mm'] }).afterField('today'),
-    endDate: vine
-      .date({ formats: ['YYYY-MM-DD HH:mm', 'YYYY-MM-DDTHH:mm'] })
-      .afterField('startDate'),
+    startDate: vine.date({ formats: { utc: true } }).after('today'),
+    endDate: vine.date({ formats: { utc: true } }).afterField('startDate'),
     gameId: vine.string().exists({ table: 'games', column: 'id' }),
     image: vine
       .file({
