@@ -1,5 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Game from '#models/game'
+import { Uint8ArrayToBuffer } from '#services/transform_image.ts'
+import { getAllGamesWithoutImages } from '../repository/game.js'
 
 export default class GamesController {
   public async index({ inertia }: HttpContext) {
@@ -15,7 +17,7 @@ export default class GamesController {
     const limit = request.input('limit', 20)
     const sort = request.input('sort', 'closest')
 
-    const baseQuery = Game.query()
+    const baseQuery = getAllGamesWithoutImages()
 
     switch (sort) {
       case 'furthest':
@@ -31,5 +33,21 @@ export default class GamesController {
 
     const games = await baseQuery.paginate(page, limit)
     return games.toJSON().data
+  }
+
+  /**
+   * Endpoint to retrieve the image of a game
+   */
+  async getImageFromGame({ params, response }: HttpContext) {
+    try {
+      const tournament = await Game.query().select('image').where('id', params.id).first()
+
+      return Uint8ArrayToBuffer({
+        model: tournament,
+        response,
+      })
+    } catch (error) {
+      return response.status(500).json({ error: 'Internal server error' })
+    }
   }
 }
