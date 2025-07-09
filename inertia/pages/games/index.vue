@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Layout from '~/components/layouts/layout.vue'
-import { ref, onMounted, watch } from 'vue'
-import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
+import { onMounted, ref, watch } from 'vue'
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { useInfiniteScroll } from '@vueuse/core'
 import { useI18n } from '../../../resources/js/composables/useI18n'
 import { ChevronDown } from '~/components/icons'
@@ -36,10 +36,8 @@ const loadGames = async () => {
   loading.value = true
 
   try {
-    const res = await fetch(
-      `/api/games?page=${page.value}&limit=20&sort=${selectedFilter.value}`
-    )
-    const data: Game[] = await res.json()
+    const res = await fetch(`/api/games?page=${page.value}&limit=20&sort=${selectedFilter.value}`)
+    const data: Partial<Game[]> = await res.json()
 
     if (data.length === 0) {
       allLoaded.value = true
@@ -117,18 +115,16 @@ watch(selectedFilter, () => {
     <div ref="container" class="h-[calc(100vh-200px)] overflow-y-auto px-6">
       <div class="grid gap-12 grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
         <div class="grid gap-12 grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
-
-          <GameCard
-            class="my-6"
-            v-for="game in games"
-            :key="game.id"
-            :game="game"
-          />
+          <GameCard class="my-6" v-for="game in games" :key="game.id" :game="game" />
         </div>
       </div>
 
-      <div v-if="loading" class="text-center py-6 text-gray-500">{{ t('infiniteScroll.loading') }}</div>
-      <div v-if="allLoaded" class="text-center py-6 text-gray-400">{{ t('game.allGamesLoaded') }}</div>
+      <div v-if="loading" class="text-center py-6 text-gray-500">
+        {{ t('infiniteScroll.loading') }}
+      </div>
+      <div v-if="allLoaded" class="text-center py-6 text-gray-400">
+        {{ t('game.allGamesLoaded') }}
+      </div>
     </div>
   </Layout>
 </template>
