@@ -74,3 +74,4 @@ router
 
 router.get('/profile', [ProfileController, 'index']).use(middleware.auth())
 router.post('/profile/privacy', [ProfileController, 'updatePrivacy']).use(middleware.auth())
+router.post('/profile/update-data', [ProfileController, 'updateName']).use(middleware.auth())

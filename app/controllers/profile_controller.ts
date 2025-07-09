@@ -19,4 +19,18 @@ export default class ProfileController {
 
     return response.redirect().back()
   }
+
+  public async updateName({ request, auth, response }: HttpContext) {
+    const user = auth.user
+    const firstName = request.input('firstName')
+    const lastName = request.input('lastName')
+
+    if (user) {
+      user.firstName = firstName
+      user.lastName = lastName
+      await user.save()
+    }
+
+    return response.redirect().back()
+  }
 }
