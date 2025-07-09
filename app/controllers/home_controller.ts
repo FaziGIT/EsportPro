@@ -1,15 +1,16 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import Tournament from '#models/tournament'
-import Game from '#models/game'
+import { getAllTournamentsWithoutImages } from '../repository/tournament.js'
+import { getAllGamesWithoutImages } from '../repository/game.js'
 
 export default class HomeController {
   public async index({ inertia }: HttpContext) {
-    const tournaments = await Tournament.query().orderBy('created_at', 'desc').limit(10)
-    const games = await Game.query().limit(15)
+    const tournaments = await getAllTournamentsWithoutImages()
+      .orderBy('start_date', 'asc')
+      .limit(10)
+
+    const games = await getAllGamesWithoutImages().limit(15)
 
     return inertia.render('home/index', {
-      title: 'Home',
-      description: 'Welcome to the home page!',
       tournaments,
       games,
     })
