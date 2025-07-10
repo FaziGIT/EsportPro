@@ -57,6 +57,9 @@ export default class Tournament extends BaseModel {
   declare endDate: DateTime
 
   @column()
+  declare isValidated: boolean
+
+  @column()
   declare winnerId: string | null
 
   @belongsTo(() => Team)

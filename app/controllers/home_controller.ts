@@ -5,6 +5,7 @@ import { getAllGamesWithoutImages } from '../repository/game.js'
 export default class HomeController {
   public async index({ inertia }: HttpContext) {
     const tournaments = await getAllTournamentsWithoutImages()
+      .where('is_validated', true)
       .orderBy('start_date', 'asc')
       .limit(10)
 

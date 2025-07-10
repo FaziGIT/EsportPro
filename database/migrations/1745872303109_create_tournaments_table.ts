@@ -23,6 +23,7 @@ export default class extends BaseSchema {
       table.dateTime('start_date').notNullable()
       table.dateTime('end_date').notNullable()
       table.enu('format', FormatTypeValues).defaultTo(FormatType.BO3).notNullable()
+      table.boolean('is_validated').defaultTo(false).notNullable()
 
       table.uuid('winner_id').nullable().defaultTo(null)
       table.uuid('game_id').notNullable()

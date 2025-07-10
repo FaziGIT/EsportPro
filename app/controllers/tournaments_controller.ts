@@ -2,19 +2,12 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Tournament from '#models/tournament'
 import Game from '#models/game'
 import { tournamentValidator } from '#validators/tournament'
-import { UserRole } from '#enums/user_role'
 import { BufferToUint8Array, Uint8ArrayToBuffer } from '#services/transform_image.ts'
 import { DateTime } from 'luxon'
 import { getAllTournamentsWithoutImages } from '../repository/tournament.js'
 
 export default class TournamentsController {
-  public async index({ inertia, auth }: HttpContext) {
-    const isAdmin = auth.user?.role === UserRole.Admin
-
-    if (!isAdmin) {
-      return inertia.render('tournaments/index')
-    }
-
+  public async index({ inertia }: HttpContext) {
     // Fetch all games to display in the dropdown when creating new tournament
     const games = await Game.query().select('id', 'name').orderBy('name', 'asc')
 
@@ -28,7 +21,7 @@ export default class TournamentsController {
     const limit = request.input('limit', 20)
     const sort = request.input('sort', 'closest')
 
-    const baseQuery = getAllTournamentsWithoutImages().preload('game')
+    const baseQuery = getAllTournamentsWithoutImages().where('is_validated', true).preload('game')
 
     switch (sort) {
       case 'furthest':

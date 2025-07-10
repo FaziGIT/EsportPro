@@ -47,6 +47,7 @@ export const TournamentFactory = factory
       image: imageBytes,
       startDate: startDate,
       endDate: endDate,
+      isValidated: faker.helpers.arrayElement([true, false]),
       gameId: randomGameId,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),

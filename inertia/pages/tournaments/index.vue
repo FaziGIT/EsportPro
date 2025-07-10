@@ -139,7 +139,6 @@ const closeModal = () => {
 
       <button
         @click="openModal"
-        v-if="isAdmin"
         class="font-semibold px-6 py-3 rounded-lg transition bg-[#5C4741] hover:bg-[#7b5f57] text-white cursor-pointer"
       >
         {{ t('tournament.newTournament') }}
@@ -167,7 +166,6 @@ const closeModal = () => {
 
     <!-- Tournament Modal -->
     <TournamentModal
-      v-if="isAdmin"
       :isOpen="isModalOpen"
       :games="props.games!"
       @close="closeModal"
