@@ -3,7 +3,7 @@ import imageNotFound from '../img/Image-not-found.png'
 import { computed, defineProps, ref } from 'vue'
 import HeartIconSVG from '~/components/icons/HeartIconSVG.vue'
 import { useI18n } from '../../resources/js/composables/useI18n'
-import { usePage } from '@inertiajs/vue3'
+import { usePage, router } from '@inertiajs/vue3'
 import User from '#models/user'
 import Tournament from '#models/tournament'
 import { DateTime } from 'luxon'
@@ -16,6 +16,17 @@ const props = defineProps({
     required: true,
   },
 })
+const formattedDate = computed(() => {
+  if (!props.tournament.startDate) return 'Date non spécifiée'
+
+  try {
+    if (props.tournament.startDate instanceof DateTime) {
+      return props.tournament.startDate.toFormat('dd/MM/yyyy')
+    }
+
+    if (typeof props.tournament.startDate === 'string') {
+      return DateTime.fromISO(props.tournament.startDate).toFormat('dd/MM/yyyy')
+    }
 
 const imageSource = computed(() => {
   if (props.tournament?.id) {
@@ -37,19 +48,29 @@ const handleImageError = (event: Event) => {
     target.src = <string>imageNotFound
   }
 }
+
+const navigateToTournament = () => {
+  if (!props.tournament?.id) {
+    console.error('Tournament ID is missing:', props.tournament)
+    return
+  }
+  
+  router.visit(`/tournaments/${props.tournament.id}`)
+}
+
 </script>
 
 <template>
-  <div
-    class="flex flex-col justify-between w-96 h-96 min-w-80 rounded-xl shadow-md bg-white overflow-hidden border border-gray-200"
+  <div 
+    class="flex flex-col justify-between w-96 h-96 min-w-80 rounded-xl shadow-md bg-white overflow-hidden border border-gray-200 cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02]"
+    @click="navigateToTournament"
+    @mouseenter="isHovered = true" 
+    @mouseleave="isHovered = false"
   >
     <div class="bg-gray-100 h-48 flex items-center justify-center">
-      <img
-        :src="imageSource"
-        alt="Tournoi Image"
-        class="w-full h-full object-cover"
-        @error="handleImageError"
-      />
+      <div class="flex flex-col items-center justify-center text-gray-500">
+        <img :src="imageNotFound" alt="Placeholder" class="w-12 h-12 mb-2" />
+      </div>
     </div>
 
     <div class="p-4 flex flex-col justify-between flex-grow">

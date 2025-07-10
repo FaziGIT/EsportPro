@@ -11,13 +11,17 @@ export default class Match extends BaseModel {
   @column({ columnName: 'team1_id' })
   declare team1Id: string
 
-  @belongsTo(() => Team)
+  @belongsTo(() => Team, {
+    foreignKey: 'team1Id',
+  })
   declare team1: BelongsTo<typeof Team>
 
   @column({ columnName: 'team2_id' })
   declare team2Id: string
 
-  @belongsTo(() => Team)
+  @belongsTo(() => Team, {
+    foreignKey: 'team2Id',
+  })
   declare team2: BelongsTo<typeof Team>
 
   @column({ columnName: 'score_team_1' })
@@ -29,7 +33,9 @@ export default class Match extends BaseModel {
   @column()
   declare winnerId: string | null
 
-  @belongsTo(() => Team)
+  @belongsTo(() => Team, {
+    foreignKey: 'winnerId',
+  })
   declare winner: BelongsTo<typeof Team>
 
   @column()
