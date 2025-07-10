@@ -12,7 +12,7 @@ export const tournamentValidator = vine.compile(
     numberParticipants: vine.number().min(2).max(128),
     numberPlayersPerTeam: vine
       .number()
-      .min(1)
+      .min(2)
       .max(10)
       .optional()
       .requiredWhen('teamMode', '=', '1'),
@@ -24,7 +24,7 @@ export const tournamentValidator = vine.compile(
     country: vine.string().minLength(1).optional().requiredWhen('isOnline', '=', '0'),
     postalCode: vine.string().minLength(1).optional().requiredWhen('isOnline', '=', '0'),
     startDate: vine.date({ formats: { utc: true } }).after('today'),
-    endDate: vine.date({ formats: { utc: true } }).afterField('startDate'),
+    endDate: vine.date({ formats: { utc: true } }).afterOrSameAs('startDate'),
     gameId: vine.string().exists({ table: 'games', column: 'id' }),
     image: vine
       .file({
