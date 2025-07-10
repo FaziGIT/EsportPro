@@ -1,5 +1,7 @@
 {
   "games": "Games",
   "tournaments": "Tournaments",
-  "about": "About"
+  "about": "About",
+  "no_results": "No results found",
+  "search_placeholder": "Search..."
 }

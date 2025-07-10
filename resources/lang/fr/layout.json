@@ -1,5 +1,7 @@
 {
   "games": "Jeux",
   "tournaments": "Tournois",
-  "about": "À propos"
+  "about": "À propos",
+  "no_results": "Aucun résultat trouvé",
+  "search_placeholder": "Rechercher..."
 }
