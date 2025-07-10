@@ -13,7 +13,7 @@ export default class extends BaseSchema {
       table.decimal('price').notNullable()
       table.string('rules').notNullable()
       table.integer('number_participants').notNullable()
-      table.integer('number_players_per_team')
+      table.integer('number_players_per_team').defaultTo(1)
       table.string('region')
       table.string('address')
       table.string('city')

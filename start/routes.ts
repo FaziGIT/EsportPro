@@ -24,6 +24,7 @@ transmit.registerRoutes()
 
 // Public routes
 router.get('/', [HomeController, 'index'])
+router.get('/search', [HomeController, 'search'])
 
 // Authentication routes
 router.get('/login', [LoginController, 'index'])

@@ -30,7 +30,7 @@ export default class Tournament extends BaseModel {
   declare numberParticipants: number
 
   @column()
-  declare numberPlayersPerTeam: number | null
+  declare numberPlayersPerTeam: number
 
   @column()
   declare region: string | null

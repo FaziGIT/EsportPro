@@ -2,11 +2,16 @@
   <Layout>
     <div class="px-6 py-6">
       <!-- Success notification -->
-      <div v-if="showSuccessMessage" class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+      <div
+        v-if="showSuccessMessage"
+        class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded"
+      >
         <div class="flex items-center">
-          <span class="mr-2">✅</span>
-          <span>Successfully joined the tournament!</span>
-          <button @click="showSuccessMessage = false" class="ml-auto text-green-500 hover:text-green-700">
+          <span>{{ t('tournament.joinSuccess') }}</span>
+          <button
+            @click="showSuccessMessage = false"
+            class="ml-auto text-green-500 hover:text-green-700"
+          >
             ✕
           </button>
         </div>
@@ -15,74 +20,94 @@
       <!-- Header with title and join button -->
       <div class="flex justify-between items-start mb-6">
         <h1 class="text-4xl font-semibold text-gray-900">{{ tournament.name }}</h1>
-        <button 
-          v-if="!userHasJoined && !tournamentStarted && user" 
-          @click="joinTournament" 
+        <button
+          v-if="!userHasJoined && !tournamentStarted && user"
+          @click="joinTournament"
           :disabled="isJoining"
           class="font-semibold px-6 py-3 rounded-lg transition bg-[#5C4741] text-white hover:bg-[#7b5f57] disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {{ isJoining ? 'Joining...' : 'Join Tournament' }}
+          {{ isJoining ? t('tournament.joining') : t('tournament.join') }}
         </button>
-        <button 
-          v-else-if="!user" 
-          @click="redirectToLogin" 
+        <button
+          v-else-if="!user"
+          @click="redirectToLogin"
           class="font-semibold px-6 py-3 rounded-lg transition bg-[#5C4741] text-white hover:bg-[#7b5f57]"
         >
-          Login to Join
+          {{ t('tournament.loginToJoin') }}
         </button>
-        <div v-else-if="userHasJoined" class="font-semibold px-6 py-3 rounded-lg bg-green-100 text-green-700">
-          ✓ Already Joined
+        <div
+          v-else-if="userHasJoined"
+          class="font-semibold px-6 py-3 rounded-lg bg-green-100 text-green-700"
+        >
+          {{ t('tournament.alreadyJoined') }}
         </div>
       </div>
 
       <!-- Tournament image placeholder -->
-      <div class="bg-gray-100 h-64 flex items-center justify-center rounded-lg mb-6">
+      <div
+        class="bg-gray-100 h-64 flex items-center justify-center rounded-lg mb-6 overflow-hidden"
+      >
         <div class="flex flex-col items-center justify-center text-gray-500">
-          <img src="../img/Image-not-found.png" alt="Placeholder" class="w-16 h-16 mb-2" />
-          <p class="text-sm">Tournament Image</p>
+          <img :src="imageSource" alt="Placeholder" class="w-full mb-2" @error="handleImageError" />
         </div>
       </div>
-      
+
       <!-- Tournament details grid -->
       <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
         <!-- Main content -->
         <div class="xl:col-span-3">
           <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 class="text-2xl font-semibold text-gray-900 mb-4">Tournament Rules</h2>
+            <h2 class="text-2xl font-semibold text-gray-900 mb-4">{{ t('tournament.rules') }}</h2>
             <p class="text-gray-700 leading-relaxed">{{ tournament.rules }}</p>
           </div>
 
           <!-- Teams section -->
           <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 class="text-2xl font-semibold text-gray-900 mb-4">Registered Teams</h2>
-            
+            <h2 class="text-2xl font-semibold text-gray-900 mb-4">
+              {{ t('tournament.registeredTeams') }}
+            </h2>
+
             <!-- Show message when no teams have joined yet -->
             <div v-if="allTeams.length === 0" class="text-center py-8">
               <div class="text-gray-500 mb-4">
-                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                <svg
+                  class="mx-auto h-12 w-12 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
                 </svg>
               </div>
-              <h3 class="text-lg font-medium text-gray-900 mb-2">No teams have joined yet</h3>
-              <p class="text-gray-600">Be the first to join this tournament!</p>
+              <h3 class="text-lg font-medium text-gray-900 mb-2">
+                {{ t('tournament.noTeamsYet') }}
+              </h3>
+              <p class="text-gray-600">{{ t('tournament.beFirstToJoin') }}</p>
             </div>
-            
+
             <!-- Show teams grid when teams exist -->
             <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div 
-                v-for="team in allTeams" 
+              <div
+                v-for="team in allTeams"
                 :key="team.id"
                 :data-team-id="team.id"
                 :class="[
                   'border-2 rounded-lg p-4 transition-all duration-200',
-                  isUserTeam(team) ? 'bg-green-50 border-green-300 shadow-md' : 'bg-gray-50 border-gray-200',
-                  isUserTeam(team) && isEditingTeam(team) ? 'ring-2 ring-green-400' : ''
+                  isUserTeam(team)
+                    ? 'bg-green-50 border-green-300 shadow-md'
+                    : 'bg-gray-50 border-gray-200',
+                  isUserTeam(team) && isEditingTeam(team) ? 'ring-2 ring-green-400' : '',
                 ]"
               >
                 <div class="flex items-center justify-between mb-3">
                   <div v-if="isUserTeam(team) && isEditingTeam(team)" class="flex-1 mr-2">
-                    <input 
-                      v-model="editingTeamName" 
+                    <input
+                      v-model="editingTeamName"
                       @keyup.enter="saveTeamName(team)"
                       @blur="saveTeamName(team)"
                       class="w-full px-2 py-1 border border-green-400 rounded text-sm font-semibold"
@@ -92,30 +117,42 @@
                   </div>
                   <h3 v-else class="font-semibold text-gray-900 flex-1 team-name">
                     {{ team.name }}
-                    <button 
-                      v-if="isUserTeam(team)" 
+                    <button
+                      v-if="isUserTeam(team)"
                       @click="startEditingTeam(team)"
                       class="ml-2 text-green-600 hover:text-green-800 text-sm"
                     >
                       ✏️
                     </button>
                   </h3>
-                  <div v-if="isUserTeam(team)" class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                    Your Team
+                  <div
+                    v-if="isUserTeam(team)"
+                    class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded"
+                  >
+                    {{ t('tournament.yourTeam') }}
                   </div>
                 </div>
-                
+
                 <div class="flex flex-wrap gap-2">
-                  <div 
-                    v-for="player in team.players" 
+                  <div
+                    v-for="player in team.players"
                     :key="player.id"
                     class="flex flex-col items-center"
                   >
                     <div
                       class="w-12 h-12 rounded-full flex items-center justify-center mb-1"
-                      :class="player.id === user?.id ? 'border-2 border-green-500 bg-white' : 'bg-gray-300'"
+                      :class="
+                        player.id === user?.id
+                          ? 'border-2 border-green-500 bg-white'
+                          : 'bg-gray-300'
+                      "
                     >
-                      <span :class="player.id === user?.id ? 'text-green-600 font-bold' : 'text-gray-700'" class="text-sm font-medium">
+                      <span
+                        :class="
+                          player.id === user?.id ? 'text-green-600 font-bold' : 'text-gray-700'
+                        "
+                        class="text-sm font-medium"
+                      >
                         {{ player.pseudo?.charAt(0) || player.email?.charAt(0) || '?' }}
                       </span>
                     </div>
@@ -127,15 +164,17 @@
                     </span>
                   </div>
                   <!-- Empty slots -->
-                  <div 
-                    v-for="i in (tournament.numberPlayersPerTeam - (team.players?.length || 0))" 
+                  <div
+                    v-for="i in tournament.numberPlayersPerTeam - (team.players?.length || 0)"
                     :key="`empty-${i}`"
                     class="flex flex-col items-center"
                   >
-                    <div class="w-12 h-12 bg-gray-200 border-2 border-dashed border-gray-300 rounded-full flex items-center justify-center mb-1">
+                    <div
+                      class="w-12 h-12 bg-gray-200 border-2 border-dashed border-gray-300 rounded-full flex items-center justify-center mb-1"
+                    >
                       <span class="text-sm text-gray-400">?</span>
                     </div>
-                    <span class="text-xs text-gray-400">Empty</span>
+                    <span class="text-xs text-gray-400">{{ t('tournament.emptySlot') }}</span>
                   </div>
                 </div>
               </div>
@@ -151,48 +190,56 @@
         <!-- Sidebar with tournament info -->
         <div class="xl:col-span-1">
           <div class="bg-white rounded-lg shadow-md p-6 sticky top-6">
-            <h2 class="text-xl font-semibold text-gray-900 mb-4">Tournament Details</h2>
-            
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ t('tournament.details') }}</h2>
+
             <div class="space-y-4">
               <div class="flex justify-between items-center">
-                <span class="text-gray-600">Format:</span>
+                <span class="text-gray-600">{{ t('tournament.format') }}:</span>
                 <span class="font-medium text-gray-900">{{ tournament.format }}</span>
               </div>
-              
+
               <div class="flex justify-between items-center">
-                <span class="text-gray-600">Players per team:</span>
+                <span class="text-gray-600">{{ t('tournament.playersPerTeam') }}:</span>
                 <span class="font-medium text-gray-900">{{ tournament.numberPlayersPerTeam }}</span>
               </div>
-              
+
               <div class="flex justify-between items-center">
-                <span class="text-gray-600">Entry fee:</span>
+                <span class="text-gray-600">{{ t('tournament.numberOfParticipants') }}:</span>
+                <span class="font-medium text-gray-900">{{ tournament.numberParticipants }}</span>
+              </div>
+
+              <div class="flex justify-between items-center">
+                <span class="text-gray-600">{{ t('tournament.price') }}:</span>
                 <span class="font-medium text-gray-900">{{ tournament.price }}€</span>
               </div>
-              
+
               <div class="flex justify-between items-center">
-                <span class="text-gray-600">Tier:</span>
+                <span class="text-gray-600">{{ t('tournament.tier') }}:</span>
                 <span class="font-medium text-gray-900">{{ tournament.tier }}</span>
               </div>
-              
-              <div class="flex justify-between items-center">
-                <span class="text-gray-600">Region:</span>
-                <span class="font-medium text-gray-900">{{ tournament.region }}</span>
-              </div>
-              
-              <div class="pt-4 border-t border-gray-200">
-                <h3 class="font-semibold text-gray-900 mb-2">Location</h3>
+
+              <div v-if="tournament.region" class="pt-4 border-t border-gray-200">
+                <h3 class="font-semibold text-gray-900 mb-2">{{ t('tournament.location') }}</h3>
                 <p class="text-gray-700 text-sm">
-                  {{ tournament.address }}<br>
-                  {{ tournament.postalCode }} {{ tournament.city }}<br>
+                  {{ tournament.address }}<br />
+                  {{ tournament.postalCode }} {{ tournament.city }}<br />
                   {{ tournament.country }}
                 </p>
               </div>
+              <div v-else class="pt-4 border-t border-gray-200">
+                <h3 class="font-semibold text-gray-900 mb-2">{{ t('tournament.online') }}</h3>
+              </div>
 
               <div class="pt-4 border-t border-gray-200">
-                <h3 class="font-semibold text-gray-900 mb-2">Dates</h3>
+                <h3 class="font-semibold text-gray-900 mb-2">{{ t('tournament.dates') }}</h3>
                 <p class="text-gray-700 text-sm">
-                  <span class="font-medium">Start:</span> {{ formatDate(tournament.startDate) }}<br>
-                  <span class="font-medium">End:</span> {{ formatDate(tournament.endDate) }}
+                  <span class="font-medium">{{ t('tournament.startDate') }}:</span>
+                  {{
+                    DateTime.fromISO(tournament.startDate.toString()).toFormat('dd/MM/yyyy HH:mm')
+                  }}
+                  <br />
+                  <span class="font-medium">{{ t('tournament.endDate') }}:</span>
+                  {{ DateTime.fromISO(tournament.endDate.toString()).toFormat('dd/MM/yyyy HH:mm') }}
                 </p>
               </div>
             </div>
@@ -204,12 +251,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, nextTick } from 'vue'
-import { usePage, router } from '@inertiajs/vue3'
+import { computed, nextTick, ref } from 'vue'
+import { router, usePage } from '@inertiajs/vue3'
 import Layout from '~/components/layouts/layout.vue'
 import { DateTime } from 'luxon'
 import TournamentBracket from '../../components/TournamentBracket.vue'
 import { getCsrfToken } from '~/utils'
+import imageNotFound from '~/img/Image-not-found.png'
+import { useI18n } from '../../../resources/js/composables/useI18n'
+
+const { t } = useI18n()
 
 interface User {
   id: string
@@ -287,21 +338,17 @@ const allTeams = computed(() => {
 
 const userHasJoined = computed(() => {
   if (!user.value) return false
-  return teams.value.some(team => 
-    team.players?.some(player => player.id === user.value?.id)
-  )
+  return teams.value.some((team) => team.players?.some((player) => player.id === user.value?.id))
 })
 
 const userTeam = computed(() => {
   if (!user.value) return null
-  return teams.value.find(team => 
-    team.players?.some(player => player.id === user.value?.id)
-  )
+  return teams.value.find((team) => team.players?.some((player) => player.id === user.value?.id))
 })
 
 const isUserTeam = (team: Team): boolean => {
   if (!user.value) return false
-  return team.players?.some(player => player.id === user.value?.id) || false
+  return team.players?.some((player) => player.id === user.value?.id) || false
 }
 
 const isEditingTeam = (team: Team): boolean => {
@@ -357,7 +404,7 @@ const saveTeamName = async (team: Team) => {
 
 const tournamentStarted = computed(() => {
   if (!tournament.startDate) return false
-  
+
   try {
     let startDate: DateTime
     if (tournament.startDate instanceof DateTime) {
@@ -369,7 +416,7 @@ const tournamentStarted = computed(() => {
     } else {
       return false
     }
-    
+
     return DateTime.now() >= startDate
   } catch (error) {
     console.error('Error checking tournament start date:', error)
@@ -382,13 +429,13 @@ const joinTournament = async () => {
     redirectToLogin()
     return
   }
-  
+
   isJoining.value = true
-  
+
   try {
     // Get CSRF token from Inertia props
     const token = getCsrfToken()
-    
+
     const response = await fetch(`/tournaments/${tournament.id}/join`, {
       method: 'POST',
       headers: {
@@ -400,11 +447,11 @@ const joinTournament = async () => {
 
     if (response.ok) {
       const data = await response.json()
-      
+
       // Update local data dynamically
       teams.value = data.teams
       matches.value = data.matches
-      
+
       // Show success message
       showSuccessMessage.value = true
       setTimeout(() => {
@@ -413,11 +460,11 @@ const joinTournament = async () => {
     } else {
       const errorData = await response.json()
       console.error('Error joining tournament:', errorData.error)
-      alert(errorData.error || 'Failed to join tournament')
+      alert(errorData.error || t('tournament.joinError'))
     }
   } catch (error) {
     console.error('Error joining tournament:', error)
-    alert('Failed to join tournament')
+    alert(t('tournament.joinError'))
   } finally {
     isJoining.value = false
   }
@@ -427,26 +474,18 @@ const redirectToLogin = () => {
   router.visit('/login')
 }
 
-const formatDate = (date: DateTime | string | Date | undefined): string => {
-  if (!date) return 'Date not specified'
-  
-  try {
-    if (date instanceof DateTime) {
-      return date.toFormat('dd/MM/yyyy')
-    }
-    
-    if (typeof date === 'string') {
-      return DateTime.fromISO(date).toFormat('dd/MM/yyyy')
-    }
-    
-    if (date instanceof Date) {
-      return DateTime.fromJSDate(date).toFormat('dd/MM/yyyy')
-    }
-    
-    return String(date)
-  } catch (error) {
-    console.error('Date formatting error:', error)
-    return 'Date not specified'
+const imageSource = computed(() => {
+  if (tournament.id) {
+    return `/tournaments/${tournament.id}/image`
+  }
+
+  return imageNotFound
+})
+
+const handleImageError = (event: Event) => {
+  const target = event.target as HTMLImageElement
+  if (target) {
+    target.src = <string>imageNotFound
   }
 }
 </script>
@@ -479,7 +518,8 @@ const formatDate = (date: DateTime | string | Date | undefined): string => {
 
 /* Enhanced pulse animation */
 @keyframes enhancedPulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }

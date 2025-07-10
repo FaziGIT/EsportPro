@@ -57,6 +57,7 @@ export default class TournamentsController {
       endDate: DateTime.fromJSDate(data.endDate),
       winnerId: null,
       gameId: data.gameId,
+      numberPlayersPerTeam: data.numberPlayersPerTeam,
     }
 
     if (data.isOnline) {
@@ -72,13 +73,6 @@ export default class TournamentsController {
       tournamentModel.city = data.city!
       tournamentModel.country = data.country!
       tournamentModel.postalCode = data.postalCode!
-    }
-
-    // If the tournament is team mode, we set the numberPlayersPerTeam, otherwise we set it to null
-    if (data.teamMode) {
-      tournamentModel.numberPlayersPerTeam = data.numberPlayersPerTeam!
-    } else {
-      tournamentModel.numberPlayersPerTeam = null
     }
 
     // If the image is provided, we read the temporary file and convert it to a Uint8Array
@@ -111,13 +105,14 @@ export default class TournamentsController {
     } catch (error) {
       return response.status(500).json({ error: 'Internal server error' })
     }
+  }
 
   public async show({ params, inertia }: HttpContext) {
     if (!params.id) {
       throw new Error('Tournament ID is required')
     }
 
-    const tournament = await Tournament.query().where('id', params.id).firstOrFail()
+    const tournament = await getAllTournamentsWithoutImages().where('id', params.id).firstOrFail()
     const teams = await Team.query().where('tournament_id', params.id).preload('players')
     const matches = await Match.query()
       .where('tournament_id', params.id)
@@ -204,7 +199,7 @@ export default class TournamentsController {
     })
   }
 
-  public async updateTeam({ params, auth, request, response, inertia }: HttpContext) {
+  public async updateTeam({ params, auth, request, response }: HttpContext) {
     if (!params.id) {
       throw new Error('Team ID is required')
     }

@@ -38,9 +38,6 @@ export default class extends BaseSeeder {
 
     await TournamentFactory.createMany(20)
 
-    // Create tournaments
-    await TournamentFactory.createMany(20)
-
     // Create teams and brackets for each tournament
     const tournaments = await Tournament.all()
 
