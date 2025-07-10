@@ -227,9 +227,6 @@ const { t } = useI18n()
             >{{ t('layout.tournaments') }}
           </Link>
         </div>
-        <div class="font-bold">
-          <Link href="#" class="text-gray-800 hover:text-gray-600">{{ t('layout.about') }}</Link>
-        </div>
       </div>
 
       <!-- Search Bar Desktop -->
@@ -381,11 +378,6 @@ const { t } = useI18n()
             href="/tournaments"
             class="text-gray-800 hover:text-gray-600 font-bold py-2 transition-transform duration-300 hover:translate-x-2"
             >{{ t('layout.tournaments') }}
-          </Link>
-          <Link
-            href="#"
-            class="text-gray-800 hover:text-gray-600 font-bold py-2 transition-transform duration-300 hover:translate-x-2"
-            >{{ t('layout.about') }}
           </Link>
 
           <!-- Search Bar Mobile -->
