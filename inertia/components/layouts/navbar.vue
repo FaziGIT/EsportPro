@@ -7,9 +7,20 @@ import User from '#models/user'
 import Button from '~/components/Button.vue'
 import { Profile } from '~/components/icons'
 
+interface SearchResult {
+  id: number
+  name: string
+  type: string
+  url: string
+  game?: {
+    name: string
+  }
+  pseudo?: string
+}
+
 const isMenuOpen = ref(false)
 const searchQuery = ref('')
-const searchResults = ref<any[]>([])
+const searchResults = ref<SearchResult[]>([])
 const isSearchOpen = ref(false)
 const isLoading = ref(false)
 const selectedIndex = ref(-1)
@@ -40,10 +51,10 @@ async function performSearch(query: string) {
     const response = await fetch(`/search?query=${encodeURIComponent(query)}`)
     const data = await response.json()
 
-    const results: any[] = []
+    const results: SearchResult[] = []
 
     if (data.tournaments) {
-      data.tournaments.forEach((tournament: any) => {
+      data.tournaments.forEach((tournament: SearchResult) => {
         results.push({
           ...tournament,
           type: 'tournament',
@@ -53,7 +64,7 @@ async function performSearch(query: string) {
     }
 
     if (data.games) {
-      data.games.forEach((game: any) => {
+      data.games.forEach((game: SearchResult) => {
         results.push({
           ...game,
           type: 'game',
@@ -63,7 +74,7 @@ async function performSearch(query: string) {
     }
 
     if (data.users) {
-      data.users.forEach((user: any) => {
+      data.users.forEach((user: SearchResult) => {
         results.push({
           ...user,
           type: 'user',
@@ -147,7 +158,7 @@ function closeSearchResults() {
   }, 200)
 }
 
-function selectResult(result: any) {
+function selectResult(result: SearchResult) {
   router.visit(result.url)
   isSearchOpen.value = false
   searchQuery.value = ''
@@ -311,7 +322,7 @@ const { t } = useI18n()
                     v-if="result.game && result.type === 'tournament'"
                     class="text-xs text-gray-500"
                   >
-                    {{ result.game.name || result.game }}
+                    {{ result.game?.name || result.game }}
                   </p>
                 </div>
               </div>
@@ -461,7 +472,7 @@ const { t } = useI18n()
                       v-if="result.game && result.type === 'tournament'"
                       class="text-xs text-gray-500"
                     >
-                      {{ result.game.name || result.game }}
+                      {{ result.game?.name || result.game }}
                     </p>
                   </div>
                 </div>
