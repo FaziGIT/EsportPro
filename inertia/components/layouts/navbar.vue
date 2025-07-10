@@ -299,19 +299,19 @@ const { t } = useI18n()
                     v-if="result.type === 'tournament'"
                     class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
                   >
-                    Tournoi
+                    {{ t('layout.tournament') }}
                   </span>
                   <span
                     v-else-if="result.type === 'game'"
                     class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
                   >
-                    Jeu
+                    {{ t('layout.game') }}
                   </span>
                   <span
                     v-else
                     class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
                   >
-                    Joueur
+                    {{ t('layout.user') }}
                   </span>
                 </div>
                 <div class="flex-1">
@@ -449,19 +449,19 @@ const { t } = useI18n()
                       v-if="result.type === 'tournament'"
                       class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
                     >
-                      Tournoi
+                      {{ t('layout.tournament') }}
                     </span>
                     <span
                       v-else-if="result.type === 'game'"
                       class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
                     >
-                      Jeu
+                      {{ t('layout.game') }}
                     </span>
                     <span
                       v-else
                       class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
                     >
-                      Joueur
+                      {{ t('layout.user') }}
                     </span>
                   </div>
                   <div class="flex-1">

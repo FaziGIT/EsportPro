@@ -3,5 +3,8 @@
   "tournaments": "Tournaments",
   "about": "About",
   "no_results": "No results found",
-  "search_placeholder": "Search..."
+  "search_placeholder": "Search...",
+  "tournament": "Tournament",
+  "game": "Game",
+  "user": "User"
 }

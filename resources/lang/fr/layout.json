@@ -3,5 +3,8 @@
   "tournaments": "Tournois",
   "about": "À propos",
   "no_results": "Aucun résultat trouvé",
-  "search_placeholder": "Rechercher..."
+  "search_placeholder": "Rechercher...",
+  "tournament": "Tournoi",
+  "game": "Jeu",
+  "user": "Utilisateur"
 }
