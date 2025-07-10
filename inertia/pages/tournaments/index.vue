@@ -1,15 +1,25 @@
 <script setup lang="ts">
 import Layout from '~/components/layouts/layout.vue'
-import { ref, onMounted, watch } from 'vue'
-import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { useInfiniteScroll } from '@vueuse/core'
 import { useI18n } from '../../../resources/js/composables/useI18n'
 import Tournament from '#models/tournament'
 import TournamentCard from '~/components/TournamentCard.vue'
 import { ChevronDown } from '~/components/icons'
-import Button from '~/components/Button.vue'
+import TournamentModal from '~/components/tournaments/new.vue'
+import Game from '#models/game'
+import { usePage } from '@inertiajs/vue3'
 
 const { t } = useI18n()
+
+// Props from controller
+const props = defineProps<{
+  games?: Game[]
+}>()
+
+const usePageInertia = usePage()
+const isAdmin = computed(() => usePageInertia.props.isAdmin as boolean)
 
 const tournaments = ref<Tournament[]>([])
 const page = ref(1)
@@ -18,6 +28,9 @@ const allLoaded = ref(false)
 
 const selectedFilter = ref('closest')
 const selectedLabel = ref(t('menu.increasingDate'))
+
+// Modal state
+const isModalOpen = ref(false)
 
 const options = [
   { id: 'closest', name: t('menu.increasingDate') },
@@ -68,6 +81,17 @@ watch(selectedFilter, () => {
   allLoaded.value = false
   loadTournaments()
 })
+
+// Modal methods
+const openModal = () => {
+  isModalOpen.value = true
+  document.body.style.overflow = 'hidden'
+}
+
+const closeModal = () => {
+  isModalOpen.value = false
+  document.body.style.overflow = ''
+}
 </script>
 
 <template>
@@ -113,7 +137,12 @@ watch(selectedFilter, () => {
         </Transition>
       </Menu>
 
-      <Button :value="t('tournament.newTournament')" color="#5C4741"/>
+      <button
+        @click="openModal"
+        class="font-semibold px-6 py-3 rounded-lg transition bg-[#5C4741] hover:bg-[#7b5f57] text-white cursor-pointer"
+      >
+        {{ t('tournament.newTournament') }}
+      </button>
     </div>
 
     <!-- InfiniteScroll container -->
@@ -127,9 +156,21 @@ watch(selectedFilter, () => {
         />
       </div>
 
-      <div v-if="loading" class="text-center py-6 text-gray-500">{{ t('infiniteScroll.loading') }}</div>
-      <div v-if="allLoaded" class="text-center py-6 text-gray-400">{{ t('tournament.allTournamentsLoaded') }}</div>
+      <div v-if="loading" class="text-center py-6 text-gray-500">
+        {{ t('infiniteScroll.loading') }}
+      </div>
+      <div v-if="allLoaded" class="text-center py-6 text-gray-400">
+        {{ t('tournament.allTournamentsLoaded') }}
+      </div>
     </div>
+
+    <!-- Tournament Modal -->
+    <TournamentModal
+      :isOpen="isModalOpen"
+      :games="props.games!"
+      @close="closeModal"
+      @submit="handleSubmit"
+    />
   </Layout>
 </template>
 

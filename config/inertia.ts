@@ -1,3 +1,4 @@
+import { UserRole } from '#enums/user_role'
 import { defineConfig } from '@adonisjs/inertia'
 import type { InferSharedProps } from '@adonisjs/inertia/types'
 
@@ -12,6 +13,7 @@ const inertiaConfig = defineConfig({
         locale: ctx.i18n.locale,
       }
     },
+    isAdmin: (ctx) => ctx.auth.user?.role === UserRole.Admin,
 
     ssr: {
       enabled: true,
