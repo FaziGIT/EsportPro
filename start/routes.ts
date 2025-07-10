@@ -40,6 +40,9 @@ router.get('/chat/messages/old', [ChatController, 'getOldMessages']).use(middlew
 // Tournament routes
 router.get('/tournaments', [TournamentsController, 'index'])
 router.get('/api/tournaments', [TournamentsController, 'api'])
+router.get('/tournaments/:id/image', [TournamentsController, 'getImageFromTournament'])
+router.post('/tournaments/new', [TournamentsController, 'store']).use(middleware.auth()) // create middleware isAdmin ?
+
 router.get('/tournaments/:id', [TournamentsController, 'show'])
 router.post('/tournaments/:id/join', [TournamentsController, 'join']).use(middleware.auth())
 
@@ -49,3 +52,4 @@ router.put('/teams/:id', [TournamentsController, 'updateTeam']).use(middleware.a
 // Game routes
 router.get('/games', [GamesController, 'index'])
 router.get('/api/games', [GamesController, 'api'])
+router.get('/games/:id/image', [GamesController, 'getImageFromGame'])

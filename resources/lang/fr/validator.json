@@ -4,7 +4,25 @@
       "emailPseudo": "identifiant/e-mail",
       "pseudo": "pseudo",
       "email": "e-mail",
-      "password": "mot de passe"
+      "password": "mot de passe",
+      "name": "nom du tournoi",
+      "tier": "niveau de compétence",
+      "format": "format du tournoi",
+      "price": "montant du prix",
+      "rules": "règles",
+      "numberParticipants": "nombre de participants",
+      "numberPlayersPerTeam": "joueurs par équipe",
+      "teamMode": "mode équipe",
+      "region": "région",
+      "address": "adresse",
+      "city": "ville",
+      "country": "pays",
+      "postalCode": "code postal",
+      "startDate": "date de début",
+      "endDate": "date de fin",
+      "gameId": "sélection du jeu",
+      "isOnline": "mode en ligne",
+      "image": "image du tournoi"
     },
     "messages": {
       "required": "Le champ {field} est requis.",
@@ -12,7 +30,15 @@
       "email": "Le champ {field} doit être une adresse e-mail valide.",
       "password.required": "Veuillez saisir votre mot de passe.",
       "database.unique": "Le {field} est déjà utilisé.",
-      "minLength": "Le {field} doit comporter au moins {min} caractères."
+      "minLength": "Le champ {field} doit comporter au moins {min} caractères.",
+      "min": "Le champ {field} doit être d'au moins {min}.",
+      "max": "Le champ {field} ne peut pas dépasser {max}.",
+      "in": "Veuillez sélectionner un {field} valide.",
+      "exists": "Le {field} sélectionné est invalide.",
+      "afterField": "Le champ {field} doit être postérieur à {otherField}.",
+      "requiredWhen": "Le champ {field} est requis quand {otherField} est {value}.",
+      "file.size": "Le {field} doit faire moins de {size}.",
+      "file.extnames": "Le {field} doit être un fichier image valide (jpg, jpeg, png)."
     }
   }
 }

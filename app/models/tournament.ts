@@ -5,6 +5,7 @@ import Team from './team.js'
 import Game from './game.js'
 import Channel from './channel.js'
 import { FormatType } from '#enums/format_type'
+import { TierType } from '#enums/tier_type'
 
 export default class Tournament extends BaseModel {
   @column({ isPrimary: true })
@@ -14,7 +15,7 @@ export default class Tournament extends BaseModel {
   declare name: string
 
   @column()
-  declare tier: string
+  declare tier: TierType
 
   @column()
   declare format: FormatType
@@ -29,22 +30,22 @@ export default class Tournament extends BaseModel {
   declare numberParticipants: number
 
   @column()
-  declare numberPlayersPerTeam: number
+  declare numberPlayersPerTeam: number | null
 
   @column()
-  declare region: string
+  declare region: string | null
 
   @column()
-  declare address: string
+  declare address: string | null
 
   @column()
-  declare city: string
+  declare city: string | null
 
   @column()
-  declare country: string
+  declare country: string | null
 
   @column()
-  declare postalCode: string
+  declare postalCode: string | null
 
   @column()
   declare image: Uint8Array
@@ -54,6 +55,9 @@ export default class Tournament extends BaseModel {
 
   @column()
   declare endDate: DateTime
+
+  @column()
+  declare isValidated: boolean
 
   @column()
   declare winnerId: string | null

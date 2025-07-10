@@ -33,7 +33,10 @@ export default class extends BaseSeeder {
       ])
     )
       .with('favoriteGames', 3)
-      .createMany(10)
+      .createMany(5)
+    await UserFactory.with('favoriteGames', 3).createMany(5)
+
+    await TournamentFactory.createMany(20)
 
     // Create tournaments
     await TournamentFactory.createMany(20)

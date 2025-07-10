@@ -1,21 +1,21 @@
 <script setup lang="ts">
 import imageNotFound from '../img/Image-not-found.png'
-import { defineProps, computed, ref } from 'vue'
+import { computed, defineProps, ref } from 'vue'
 import HeartIconSVG from '~/components/icons/HeartIconSVG.vue'
-import { DateTime } from 'luxon'
 import { useI18n } from '../../resources/js/composables/useI18n'
 import { usePage, router } from '@inertiajs/vue3'
 import User from '#models/user'
+import Tournament from '#models/tournament'
+import { DateTime } from 'luxon'
 
 const { t } = useI18n()
 
 const props = defineProps({
   tournament: {
-    type: Object,
+    type: Object as () => Tournament,
     required: true,
   },
 })
-
 const formattedDate = computed(() => {
   if (!props.tournament.startDate) return 'Date non spécifiée'
 
@@ -28,15 +28,12 @@ const formattedDate = computed(() => {
       return DateTime.fromISO(props.tournament.startDate).toFormat('dd/MM/yyyy')
     }
 
-    if (props.tournament.startDate instanceof Date) {
-      return DateTime.fromJSDate(props.tournament.startDate).toFormat('dd/MM/yyyy')
-    }
-
-    return String(props.tournament.startDate)
-  } catch (error) {
-    console.error("Erreur de formatage de date:", error)
-    return 'Date non spécifiée'
+const imageSource = computed(() => {
+  if (props.tournament?.id) {
+    return `/tournaments/${props.tournament.id}/image`
   }
+
+  return imageNotFound
 })
 
 const isHovered = ref(false)
@@ -45,6 +42,13 @@ const heartIconColor = computed(() => (isHovered.value ? '#5C4741' : '#D6B7B0'))
 const page = usePage()
 const user = computed(() => page.props.user as User)
 
+const handleImageError = (event: Event) => {
+  const target = event.target as HTMLImageElement
+  if (target) {
+    target.src = <string>imageNotFound
+  }
+}
+
 const navigateToTournament = () => {
   if (!props.tournament?.id) {
     console.error('Tournament ID is missing:', props.tournament)
@@ -52,12 +56,6 @@ const navigateToTournament = () => {
   }
   
   router.visit(`/tournaments/${props.tournament.id}`)
-}
-
-const handleHeartClick = (event: Event) => {
-  event.stopPropagation()
-  // TODO: Implement bookmark functionality
-  console.log('Heart clicked for tournament:', props.tournament.id)
 }
 
 </script>
@@ -80,29 +78,37 @@ const handleHeartClick = (event: Event) => {
         <h3 class="text-lg font-bold text-black truncate max-w-[calc(100%-28px)]">
           {{ tournament.name || t('tournament.tournamentNameUndefined') }}
         </h3>
-        <HeartIconSVG 
-          v-if="user" 
-          :color="heartIconColor" 
-          class="flex-shrink-0 cursor-pointer" 
-          @click="handleHeartClick"
+        <HeartIconSVG
+          v-if="user"
+          :color="heartIconColor"
+          class="flex-shrink-0 cursor-pointer"
+          @mouseenter="isHovered = true"
+          @mouseleave="isHovered = false"
         />
       </div>
 
       <p class="text-sm text-gray-600 line-clamp-2">
-        {{ tournament.address || '' }} {{ tournament.city || '' }} {{ tournament.postalCode || '' }}{{ tournament.country ? ', ' + tournament.country : '' }}
+        {{ tournament.address || '' }} {{ tournament.city || '' }} {{ tournament.postalCode || ''
+        }}{{ tournament.country ? ', ' + tournament.country : '' }}
       </p>
 
       <div class="mt-auto flex flex-row justify-between">
         <div>
           <p class="text-sm text-gray-600">
-            Equipe de {{ tournament.numberPlayersPerTeam || t('tournament.stillUnknown') }}
+            {{
+              tournament.numberPlayersPerTeam
+                ? t('tournament.teamsOf') + ' ' + tournament.numberPlayersPerTeam
+                : t('tournament.stillUnknown')
+            }}
           </p>
           <p class="text-sm text-gray-600">
-            {{ formattedDate }}
+            {{ DateTime.fromISO(tournament.startDate.toString()).toFormat('dd/MM/yyyy HH:mm') }}
           </p>
         </div>
         <div class="">
-          <p class="text-sm text-[#5C4741] font-semibold bg-[#CBD3CD] border-[#CBD3CD] border-2 rounded-md px-2 py-1 w-fit">
+          <p
+            class="text-sm text-[#5C4741] font-semibold bg-[#CBD3CD] border-[#CBD3CD] border-2 rounded-md px-2 py-1 w-fit"
+          >
             {{ tournament.format || t('tournament.undefinedFormat') }}
           </p>
         </div>

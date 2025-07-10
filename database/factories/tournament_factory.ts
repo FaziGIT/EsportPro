@@ -2,73 +2,39 @@ import factory from '@adonisjs/lucid/factories'
 import Tournament from '#models/tournament'
 import { DateTime } from 'luxon'
 import Game from '#models/game'
-import { FormatType, FormatTypeValues } from '#enums/format_type'
-
-// Realistic tournament names
-const tournamentNames = [
-  'Championship',
-  'Masters',
-  'Grand Prix',
-  'World Cup',
-  'International',
-  'Premier League',
-  'Pro League',
-  'Elite Series',
-  'Champions League',
-  'Super Cup',
-  'All-Star',
-  'Invitational',
-  'Showdown',
-  'Clash',
-  'Battle Royale',
-  'War Games',
-  'Ultimate Challenge',
-  'Epic Tournament',
-  'Legendary Cup',
-  'Elite Championship',
-]
-
-// Realistic prize pools
-const prizePools = [1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000, 500000]
-
-// Regions
-const regions = ['Europe', 'North America', 'South America', 'Asia', 'Oceania', 'Africa', 'Global']
+import { FormatType } from '#enums/format_type'
+import { TierType } from '#enums/tier_type'
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import path from 'node:path'
 
 export const TournamentFactory = factory
   .define(Tournament, async ({ faker }) => {
-    // Generate random image bytes
-    const randomBytes = new Uint8Array(16)
-    for (let i = 0; i < randomBytes.length; i++) {
-      randomBytes[i] = Math.floor(Math.random() * 256)
+    let imageBytes: Uint8Array
+    try {
+      const dirname = path.dirname(fileURLToPath(import.meta.url))
+      const imagePath = path.resolve(dirname, '../../inertia/img/blackLogo.jpg')
+      const imageBuffer = readFileSync(imagePath)
+      imageBytes = new Uint8Array(imageBuffer)
+    } catch (error) {
+      console.warn("Impossible de charger l'image BlackLogo, utilisation de bytes aléatoires")
+      imageBytes = new Uint8Array(16)
+      for (let i = 0; i < imageBytes.length; i++) {
+        imageBytes[i] = Math.floor(Math.random() * 256)
+      }
     }
 
-    const tiers = ['S', 'A', 'B', 'C']
-    const tournamentName = faker.helpers.arrayElement(tournamentNames)
-    const sponsorName = faker.company.name()
-
-    // Generate number of players per team first
-    const numberPlayersPerTeam = faker.number.int({ min: 1, max: 5 })
-
-    // Generate participant count that is a multiple of players per team and a power of 2
-    const teamOptions = [2, 4, 8, 16] // Number of teams (power of 2)
-    const numberOfTeams = faker.helpers.arrayElement(teamOptions)
-    const numberParticipants = numberOfTeams * numberPlayersPerTeam
-
-    const price = faker.helpers.arrayElement(prizePools)
-
-    // Generate consistent dates
+    const numberParticipants = faker.number.int({ min: 8, max: 64 })
+    const price = faker.number.int({ min: 100, max: 10000 })
     const startDate = DateTime.fromJSDate(faker.date.future())
-    const duration = faker.number.int({ min: 1, max: 7 })
-    const endDate = startDate.plus({ days: duration })
-
-    const allGames = await Game.all()
-    const randomGameId = faker.helpers.arrayElement(allGames).id
-    const region = faker.helpers.arrayElement(regions)
+    const endDate = startDate.plus({ days: faker.number.int({ min: 1, max: 7 }) })
+    const allGame = await Game.all()
+    const randomGameId = faker.helpers.arrayElement(allGame).id
 
     return {
-      name: `${sponsorName} ${tournamentName}`,
-      tier: faker.helpers.arrayElement(tiers),
-      format: faker.helpers.arrayElement(FormatTypeValues) as FormatType,
+      name: faker.company.name().substring(0, 200) + ' Tournament',
+      tier: faker.helpers.arrayElement(Object.values(TierType)),
+      format: faker.helpers.arrayElement(Object.values(FormatType)),
       price,
       rules: faker.lorem.paragraph(2).substring(0, 250),
       numberParticipants,
@@ -78,9 +44,10 @@ export const TournamentFactory = factory
       city: faker.location.city().substring(0, 100),
       country: faker.location.country().substring(0, 100),
       postalCode: faker.location.zipCode().substring(0, 20),
-      image: randomBytes,
-      startDate,
-      endDate,
+      image: imageBytes,
+      startDate: startDate,
+      endDate: endDate,
+      isValidated: faker.helpers.arrayElement([true, false]),
       gameId: randomGameId,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
