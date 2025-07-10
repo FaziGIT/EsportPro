@@ -58,7 +58,7 @@ async function performSearch(query: string) {
         results.push({
           ...tournament,
           type: 'tournament',
-          url: `/tournaments#${tournament.id}`,
+          url: `/tournaments/${tournament.id}`,
         })
       })
     }
@@ -68,7 +68,7 @@ async function performSearch(query: string) {
         results.push({
           ...game,
           type: 'game',
-          url: `/games#${game.id}`,
+          url: `/games/${game.id}`,
         })
       })
     }

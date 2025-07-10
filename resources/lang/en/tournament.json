@@ -40,5 +40,22 @@
   "country": "Country",
   "countryPlaceholder": "Enter country",
   "save": "Save",
-  "teamsOf": "Teams of"
+  "teamsOf": "Teams of",
+  "joinSuccess": "Successfully joined the tournament!",
+  "joining": "Joining...",
+  "join": "Join Tournament",
+  "loginToJoin": "Login to Join",
+  "alreadyJoined": "✓ Already Joined",
+  "registeredTeams": "Registered Teams",
+  "noTeamsYet": "No teams have joined yet",
+  "beFirstToJoin": "Be the first to join this tournament!",
+  "yourTeam": "Your Team",
+  "emptySlot": "Empty",
+  "details": "Tournament Details",
+  "format": "Format",
+  "price": "Price",
+  "tier": "Tier",
+  "location": "Location",
+  "dates": "Dates",
+  "joinError": "Failed to join tournament"
 }
