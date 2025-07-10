@@ -371,7 +371,7 @@ const { t } = useI18n()
         v-if="isMenuOpen"
         class="lg:hidden absolute top-28 left-0 lg:left-[114px] right-0 bg-white shadow-md z-40 overflow-visible"
       >
-        <div class="flex flex-col p-4 space-y-4 font-altone text-xl">
+        <div class="flex flex-col p-4 space-y-4 text-xl">
           <Link
             href="/games"
             class="text-gray-800 hover:text-gray-600 font-bold py-2 transition-transform duration-300 hover:translate-x-2"
