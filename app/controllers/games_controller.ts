@@ -5,7 +5,7 @@ import { getAllGamesWithoutImages } from '../repository/game.js'
 
 export default class GamesController {
   public async index({ inertia }: HttpContext) {
-    const games = await Game.query().orderBy('name', 'asc')
+    const games = await getAllGamesWithoutImages().orderBy('name', 'asc')
 
     return inertia.render('games/index', {
       games,
