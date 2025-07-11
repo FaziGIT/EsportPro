@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useChatStore } from '~/store/chat_store'
 import { transmit } from '#services/transmit'
 import { usePage } from '@inertiajs/vue3'
@@ -246,6 +246,17 @@ const toggleChat = () => {
 const updateTotalUnreadCount = () => {
   unreadCount.value = chatList.value.reduce((total, chat) => total + chat.unread, 0)
 }
+
+// Watch for channel refresh trigger
+watch(() => chatStore.refreshChannels, async (newValue, oldValue) => {
+  if (newValue > oldValue) {
+    // Clean up existing subscriptions before refreshing
+    await cleanupSubscriptions()
+    // Refresh channels and setup new subscriptions
+    await fetchUserChannels()
+    await setupSubscriptions()
+  }
+})
 
 onMounted(async () => {
   await fetchUserChannels()
