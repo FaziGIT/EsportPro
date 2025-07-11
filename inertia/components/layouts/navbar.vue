@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref, watch } from 'vue'
-import { Link, router, usePage } from '@inertiajs/vue3'
+import { onUnmounted, ref, watch } from 'vue'
+import { Link, router } from '@inertiajs/vue3'
 import blackLogo from '../../img/blackLogo.jpg'
 import { useI18n } from '../../../resources/js/composables/useI18n'
-import User from '#models/user'
+import { useAuth } from '../../../resources/js/composables/useAuth'
 import Button from '~/components/Button.vue'
 import { Profile } from '~/components/icons'
 
@@ -172,10 +172,8 @@ onUnmounted(() => {
   document.body.style.overflow = ''
 })
 
-const page = usePage()
-const user = computed(() => page.props.user as User)
-
 const { t } = useI18n()
+const { user } = useAuth()
 </script>
 
 <template>

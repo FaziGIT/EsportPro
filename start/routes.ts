@@ -34,15 +34,19 @@ router.post('/register', [RegisterController, 'store'])
 router.post('/logout', [LogoutController]).use(middleware.auth())
 
 // Chat routes (authenticated)
-router.get('/chat/channels', [ChatController, 'getUserChannelsWithMessages']).use(middleware.auth())
-router.post('/chat/all/message', [ChatController, 'message']).use(middleware.auth())
-router.get('/chat/messages/old', [ChatController, 'getOldMessages']).use(middleware.auth())
+router
+  .group(() => {
+    router.get('/chat/channels', [ChatController, 'getUserChannelsWithMessages'])
+    router.post('/chat/all/message', [ChatController, 'message'])
+    router.get('/chat/messages/old', [ChatController, 'getOldMessages'])
+  })
+  .use(middleware.auth())
 
 // Tournament routes
 router.get('/tournaments', [TournamentsController, 'index'])
 router.get('/api/tournaments', [TournamentsController, 'api'])
 router.get('/tournaments/:id/image', [TournamentsController, 'getImageFromTournament'])
-router.post('/tournaments/new', [TournamentsController, 'store']).use(middleware.auth()) // create middleware isAdmin ?
+router.post('/tournaments/new', [TournamentsController, 'store']).use(middleware.auth())
 
 router.get('/tournaments/:id', [TournamentsController, 'show'])
 router.post('/tournaments/:id/join', [TournamentsController, 'join']).use(middleware.auth())
@@ -54,3 +58,8 @@ router.put('/teams/:id', [TournamentsController, 'updateTeam']).use(middleware.a
 router.get('/games', [GamesController, 'index'])
 router.get('/api/games', [GamesController, 'api'])
 router.get('/games/:id/image', [GamesController, 'getImageFromGame'])
+router.get('/games/:id', [GamesController, 'show'])
+router.post('/games/new', [GamesController, 'store']).use(middleware.auth())
+router
+  .post('/games/:id/toggle-favorite', [GamesController, 'toggleFavorite'])
+  .use(middleware.auth())

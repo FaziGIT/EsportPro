@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import imageNotFound from '../img/Image-not-found.png'
 import { computed, defineProps, ref } from 'vue'
-import HeartIconSVG from '~/components/icons/HeartIconSVG.vue'
 import { useI18n } from '../../resources/js/composables/useI18n'
-import { router, usePage } from '@inertiajs/vue3'
-import User from '#models/user'
+import { router } from '@inertiajs/vue3'
 import Tournament from '#models/tournament'
 import { DateTime } from 'luxon'
 
@@ -26,10 +24,6 @@ const imageSource = computed(() => {
 })
 
 const isHovered = ref(false)
-const heartIconColor = computed(() => (isHovered.value ? '#5C4741' : '#D6B7B0'))
-
-const page = usePage()
-const user = computed(() => page.props.user as User)
 
 const handleImageError = (event: Event) => {
   const target = event.target as HTMLImageElement
@@ -71,13 +65,6 @@ const navigateToTournament = () => {
         <h3 class="text-lg font-bold text-black truncate max-w-[calc(100%-28px)]">
           {{ tournament.name || t('tournament.tournamentNameUndefined') }}
         </h3>
-        <HeartIconSVG
-          v-if="user"
-          :color="heartIconColor"
-          class="flex-shrink-0 cursor-pointer"
-          @mouseenter="isHovered = true"
-          @mouseleave="isHovered = false"
-        />
       </div>
 
       <p class="text-sm text-gray-600 line-clamp-2">

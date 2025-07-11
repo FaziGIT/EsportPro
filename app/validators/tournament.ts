@@ -23,7 +23,7 @@ export const tournamentValidator = vine.compile(
     city: vine.string().minLength(1).optional().requiredWhen('isOnline', '=', '0'),
     country: vine.string().minLength(1).optional().requiredWhen('isOnline', '=', '0'),
     postalCode: vine.string().minLength(1).optional().requiredWhen('isOnline', '=', '0'),
-    startDate: vine.date({ formats: { utc: true } }).after('today'),
+    startDate: vine.date({ formats: { utc: true } }).afterOrSameAs('today'),
     endDate: vine.date({ formats: { utc: true } }).afterOrSameAs('startDate'),
     gameId: vine.string().exists({ table: 'games', column: 'id' }),
     image: vine

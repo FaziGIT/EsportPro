@@ -4,11 +4,14 @@ import { onMounted, ref, watch } from 'vue'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { useInfiniteScroll } from '@vueuse/core'
 import { useI18n } from '../../../resources/js/composables/useI18n'
+import { useAuth } from '../../../resources/js/composables/useAuth'
 import { ChevronDown } from '~/components/icons'
 import Game from '#models/game'
 import GameCard from '~/components/GameCard.vue'
+import GameModal from '~/components/games/new.vue'
 
 const { t } = useI18n()
+const { user } = useAuth()
 
 const games = ref<Game[]>([])
 const page = ref(1)
@@ -17,6 +20,9 @@ const allLoaded = ref(false)
 
 const selectedFilter = ref('closest')
 const selectedLabel = ref(t('menu.ascendingName'))
+
+// Modal state
+const isModalOpen = ref(false)
 
 const options = [
   { id: 'closest', name: t('menu.ascendingName') },
@@ -65,6 +71,17 @@ watch(selectedFilter, () => {
   allLoaded.value = false
   loadGames()
 })
+
+// Modal methods
+const openModal = () => {
+  isModalOpen.value = true
+  document.body.style.overflow = 'hidden'
+}
+
+const closeModal = () => {
+  isModalOpen.value = false
+  document.body.style.overflow = ''
+}
 </script>
 
 <template>
@@ -109,6 +126,14 @@ watch(selectedFilter, () => {
           </MenuItems>
         </Transition>
       </Menu>
+
+      <button
+        v-if="user"
+        @click="openModal"
+        class="font-semibold px-6 py-3 rounded-lg transition bg-[#5C4741] hover:bg-[#7b5f57] text-white cursor-pointer"
+      >
+        {{ t('game.newGame') }}
+      </button>
     </div>
 
     <!-- InfiniteScroll container -->
@@ -126,6 +151,9 @@ watch(selectedFilter, () => {
         {{ t('game.allGamesLoaded') }}
       </div>
     </div>
+
+    <!-- Game Modal -->
+    <GameModal v-if="user" :isOpen="isModalOpen" @close="closeModal" />
   </Layout>
 </template>
 

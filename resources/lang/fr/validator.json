@@ -5,9 +5,9 @@
       "pseudo": "pseudo",
       "email": "e-mail",
       "password": "mot de passe",
-      "name": "nom du tournoi",
+      "name": "nom",
       "tier": "niveau de compétence",
-      "format": "format du tournoi",
+      "format": "format",
       "price": "montant du prix",
       "rules": "règles",
       "numberParticipants": "nombre de participants",
@@ -22,7 +22,8 @@
       "endDate": "date de fin",
       "gameId": "sélection du jeu",
       "isOnline": "mode en ligne",
-      "image": "image du tournoi"
+      "image": "image",
+      "platform": "plateforme"
     },
     "messages": {
       "required": "Le champ {field} est requis.",

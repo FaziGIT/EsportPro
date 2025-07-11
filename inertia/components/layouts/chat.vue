@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useChatStore } from '~/store/chat_store'
 import { transmit } from '#services/transmit'
-import { usePage } from '@inertiajs/vue3'
-import User from '#models/user'
+import { useAuth } from '../../../resources/js/composables/useAuth'
 import { getCsrfToken } from '~/utils'
 import { Subscription } from '@adonisjs/transmit-client'
 import { Chat, ChatMessage, FromWho, UserChannel } from '#types/chat'
 import { useI18n } from '../../../resources/js/composables/useI18n'
 
 const { t } = useI18n()
+const { user } = useAuth()
 
 const chatStore = useChatStore()
 const messageText = ref('')
@@ -18,8 +18,6 @@ const isConnecting = ref(false)
 const unreadCount = ref(0)
 const isTransitioning = ref(false)
 const seenChats = ref<Set<string>>(new Set())
-const page = usePage()
-const user = computed(() => page.props.user as User)
 const subscriptions = new Map<string, Subscription>()
 const userChannels = ref<UserChannel[]>([])
 const isLoadingInitialMessages = ref(true)
@@ -117,7 +115,7 @@ const setupSubscriptions = async () => {
         subscription.onMessage((data: ChatMessage) => {
           // Identify if the message comes from current user or another user
           const fromWho: FromWho.user | FromWho.other =
-            user.value.pseudo === data.pseudo ? FromWho.user : FromWho.other
+            user.value?.pseudo === data.pseudo ? FromWho.user : FromWho.other
 
           // Format message differently based on sender
           const formattedMessage: ChatMessage = {
@@ -246,6 +244,20 @@ const toggleChat = () => {
 const updateTotalUnreadCount = () => {
   unreadCount.value = chatList.value.reduce((total, chat) => total + chat.unread, 0)
 }
+
+// Watch for channel refresh trigger
+watch(
+  () => chatStore.refreshChannels,
+  async (newValue, oldValue) => {
+    if (newValue > oldValue) {
+      // Clean up existing subscriptions before refreshing
+      await cleanupSubscriptions()
+      // Refresh channels and setup new subscriptions
+      await fetchUserChannels()
+      await setupSubscriptions()
+    }
+  }
+)
 
 onMounted(async () => {
   await fetchUserChannels()
@@ -541,7 +553,7 @@ const sendMessage = async (e: Event) => {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  <p class="text-sm text-gray-500"> {{ t('chat.loadingMessages') }}</p>
+                  <p class="text-sm text-gray-500">{{ t('chat.loadingMessages') }}</p>
                 </div>
               </div>
 

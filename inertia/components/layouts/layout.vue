@@ -3,12 +3,9 @@ import Navbar from './navbar.vue'
 import Sidebar from './sidebar.vue'
 import Footer from './footer.vue'
 import Chat from '~/components/layouts/chat.vue'
-import { usePage } from '@inertiajs/vue3'
-import { computed } from 'vue'
-import User from '#models/user'
+import { useAuth } from '../../../resources/js/composables/useAuth'
 
-const page = usePage()
-const user = computed(() => page.props.user as User)
+const { user } = useAuth()
 </script>
 
 <template>
