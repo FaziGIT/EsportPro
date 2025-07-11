@@ -13,5 +13,18 @@
   "import": "Importer",
   "noImageSelected": "Aucune image sélectionnée",
   "cancel": "Annuler",
-  "save": "Sauvegarder"
+  "save": "Sauvegarder",
+  "tournaments": "Tournois",
+  "tournamentsFound": "tournois trouvés",
+  "noTournamentsYet": "Aucun tournoi pour ce jeu",
+  "noTournamentsDescription": "Il n'y a pas encore de tournois organisés pour ce jeu.",
+  "tournamentFinished": "Tournoi terminé",
+  "tournamentInProgress": "En cours",
+  "tournamentUpcoming": "À venir",
+  "gameDetails": "Détails du jeu",
+  "statistics": "Statistiques",
+  "totalTournaments": "Total des tournois",
+  "activeTournaments": "Tournois actifs",
+  "upcomingTournaments": "Tournois à venir",
+  "finishedTournaments": "Tournois terminés"
 }

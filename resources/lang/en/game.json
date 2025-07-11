@@ -13,5 +13,18 @@
   "import": "Import",
   "noImageSelected": "No image selected",
   "cancel": "Cancel",
-  "save": "Save"
+  "save": "Save",
+  "tournaments": "Tournaments",
+  "tournamentsFound": "tournaments found",
+  "noTournamentsYet": "No tournaments for this game",
+  "noTournamentsDescription": "There are no tournaments organized for this game yet.",
+  "tournamentFinished": "Tournament finished",
+  "tournamentInProgress": "In progress",
+  "tournamentUpcoming": "Upcoming",
+  "gameDetails": "Game Details",
+  "statistics": "Statistics",
+  "totalTournaments": "Total tournaments",
+  "activeTournaments": "Active tournaments",
+  "upcomingTournaments": "Upcoming tournaments",
+  "finishedTournaments": "Finished tournaments"
 }
