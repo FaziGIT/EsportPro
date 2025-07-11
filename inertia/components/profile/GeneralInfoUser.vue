@@ -4,10 +4,7 @@ import Button from '~/components/Button.vue'
 import User from '#models/user'
 import { defineProps, ref } from 'vue'
 import { router } from '@inertiajs/vue3'
-import { useI18n } from '../../../resources/js/composables/useI18n'
-
-
-// const { t } = useI18n()
+import UserInfoField from '~/components/UserInfoField.vue'
 
 const props = defineProps({
   user: {
@@ -24,6 +21,8 @@ const editing = ref(false)
 const firstName = ref(props.user.firstName)
 const lastName = ref(props.user.lastName)
 
+const originalFirstName = ref(props.user.firstName)
+const originalLastName = ref(props.user.lastName)
 
 const onSwitchClick = () => {
   pendingValue.value = !isPublic.value
@@ -52,56 +51,58 @@ const updateData = () => {
   }, {
     preserveScroll: true
   })
+
+  originalFirstName.value = firstName.value
+  originalLastName.value = lastName.value
+
+  editing.value = false
+}
+
+const switchEditMode = () => {
+  if (editing.value) {
+    cancelEdit()
+  } else {
+    editing.value = true
+  }
+}
+
+const cancelEdit = () => {
+  firstName.value = originalFirstName.value
+  lastName.value = originalLastName.value
   editing.value = false
 }
 </script>
 
 <template>
-  <div class="flex justify-between items-center">
-    <p class="text-2xl pt-12 pb-4">Mes informations générales</p>
-    <button @click="editing = !editing" class="hover:opacity-70 cursor-pointer">
+  <div class="flex justify-between items-center pt-12 pb-4">
+    <p class="text-2xl">Mes informations générales</p>
+    <button @click="switchEditMode" class="hover:opacity-70 cursor-pointer">
       <EditSVG class="w-6 h-6"/>
     </button>
   </div>
 
-  <div class="bg-[#CBD3CD] rounded-md flex flex-wrap justify-between">
-    <div class="p-8 flex flex-col gap-4">
-      <div>
-        <label class="block mb-1">Nom :</label>
-        <template v-if="editing">
-          <input
-            v-model="firstName"
-            class="border rounded p-2 w-64"
-            type="text"
-          />
-        </template>
-        <template v-else>
-          <div class="border border-[#5C4741] rounded p-2 bg-[#fafafa]" style="min-width: 8rem; min-height: 1.75rem;">{{ firstName }}</div>
-        </template>
-      </div>
-      <div>
-        <label class="block mb-1">Prénom :</label>
-        <template v-if="editing">
-          <input
-            v-model="lastName"
-            class="border rounded p-2 w-64"
-            type="text"
-          />
-        </template>
-        <template v-else>
-          <div class="border border-[#5C4741] rounded p-2 bg-[#fafafa] h-6" style="min-width: 8rem;">{{ lastName }}</div>
-        </template>
-      </div>
 
-      <div v-if="editing" class="mt-2">
-        <Button @click="updateData" :use-redirection="false" value="Sauvegarder" />
-      </div>
+  <div class="bg-[#CBD3CD] rounded-md flex flex-wrap justify-start">
+    <div class="p-8 flex flex-col gap-3 w-full md:w-1/3">
+      <UserInfoField
+        class="pb-2"
+        label="Nom"
+        :value="firstName"
+        :isEditable="editing"
+        @update:value="firstName = $event"
+      />
+      <UserInfoField
+        label="Prénom"
+        :value="lastName"
+        :isEditable="editing"
+        @update:value="lastName = $event"
+      />
     </div>
-    <div class="p-8">
-      <p class="pb-4">Mon pseudo : {{ user?.pseudo }}</p>
-      <p>Mon Email : {{ user?.email }}</p>
+    <div class="p-8 flex flex-col gap-3 w-full md:w-1/3">
+      <UserInfoField class="pb-2" label="Mon pseudo" :value="user?.pseudo" />
+      <UserInfoField label="Mon Email" :value="user?.email" />
     </div>
-    <div class="p-8">
+    <div class="p-8 w-full md:w-1/3">
       <div class="flex flex-wrap">
         <p class="pr-4">Mon compte est public ? </p>
         <button
@@ -122,6 +123,11 @@ const updateData = () => {
     </div>
   </div>
 
+  <div v-if="editing" class="mt-2 flex gap-3">
+    <Button @click="updateData" :use-redirection="false" value="Sauvegarder" />
+    <Button @click="cancelEdit" :use-redirection="false" color="#D6B7B0" text-color="#000000" value="Annuler" />
+  </div>
+
   <!-- Popup de confirmation -->
   <div v-if="showConfirm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
     <div class="bg-white rounded-lg p-6 shadow-lg max-w-sm w-full">
@@ -138,7 +144,3 @@ const updateData = () => {
     </div>
   </div>
 </template>
-
-<style scoped>
-
-</style>
