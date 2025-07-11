@@ -75,7 +75,7 @@ const cancelEdit = () => {
 
 <template>
   <div class="flex justify-between items-center pt-12 pb-4">
-    <p class="text-2xl">Mes informations générales</p>
+    <p class="text-2xl font-semibold mt-8">Mes informations générales</p>
     <button @click="switchEditMode" class="hover:opacity-70 cursor-pointer">
       <EditSVG class="w-6 h-6"/>
     </button>
