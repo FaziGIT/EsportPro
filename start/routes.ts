@@ -75,3 +75,9 @@ router
 router.get('/profile', [ProfileController, 'index']).use(middleware.auth())
 router.post('/profile/privacy', [ProfileController, 'updatePrivacy']).use(middleware.auth())
 router.post('/profile/update-data', [ProfileController, 'updateName']).use(middleware.auth())
+router
+  .post('/profile/tournaments/:id/validate', [ProfileController, 'validateTournament'])
+  .use(middleware.auth())
+router
+  .post('/profile/tournaments/:id/refuse', [ProfileController, 'refuseTournament'])
+  .use(middleware.auth())
