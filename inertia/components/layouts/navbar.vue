@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onUnmounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
 import blackLogo from '../../img/blackLogo.jpg'
 import { useI18n } from '../../../resources/js/composables/useI18n'
@@ -25,6 +25,16 @@ const isSearchOpen = ref(false)
 const isLoading = ref(false)
 const selectedIndex = ref(-1)
 const searchTimeout = ref<ReturnType<typeof setTimeout> | null>(null)
+const searchInputDesktop = ref<HTMLInputElement>()
+const searchInputMobile = ref<HTMLInputElement>()
+
+const isMac = ref(false)
+
+function detectOS() {
+  if (typeof window !== 'undefined') {
+    isMac.value = navigator.platform.toUpperCase().indexOf('MAC') >= 0
+  }
+}
 
 function toggleMenu() {
   isMenuOpen.value = !isMenuOpen.value
@@ -165,11 +175,43 @@ function selectResult(result: SearchResult) {
   selectedIndex.value = -1
 }
 
+function handleGlobalKeyDown(event: KeyboardEvent) {
+  // Détection du raccourci Ctrl+K (Windows/Linux) ou Cmd+K (Mac)
+  const isShortcut = isMac.value
+    ? event.metaKey && event.key === 'k'
+    : event.ctrlKey && event.key === 'k'
+
+  if (isShortcut) {
+    event.preventDefault()
+
+    const isMobile = window.innerWidth < 1024 // lg breakpoint
+
+    if (isMobile) {
+      if (!isMenuOpen.value) {
+        isMenuOpen.value = true
+      }
+      setTimeout(() => {
+        searchInputMobile.value?.focus()
+      }, 100)
+    } else {
+      searchInputDesktop.value?.focus()
+    }
+  }
+}
+
+onMounted(() => {
+  detectOS()
+
+  document.addEventListener('keydown', handleGlobalKeyDown)
+})
+
 onUnmounted(() => {
   if (searchTimeout.value) {
     clearTimeout(searchTimeout.value)
   }
   document.body.style.overflow = ''
+
+  document.removeEventListener('keydown', handleGlobalKeyDown)
 })
 
 const { t } = useI18n()
@@ -232,6 +274,7 @@ const { user } = useAuth()
         <div class="w-full max-w-md">
           <div class="relative">
             <input
+              ref="searchInputDesktop"
               type="text"
               :value="searchQuery"
               @input="handleSearchInput"
@@ -241,7 +284,20 @@ const { user } = useAuth()
               :placeholder="t('layout.search_placeholder')"
               class="w-full py-2 px-4 bg-white border-[#D6B7B0] border-2 shadow-sm rounded-md focus:outline-none focus:ring-2 focus:ring-white h-12"
             />
-            <div class="absolute inset-y-0 right-0 flex items-center !pr-3">
+            <div class="absolute inset-y-0 right-0 flex items-center !pr-3 gap-2">
+              <div v-if="!isLoading && !searchQuery" class="flex items-center gap-1">
+                <kbd
+                  class="px-1.5 py-0.5 text-xs font-medium text-gray-500 bg-gray-100 border border-gray-300 rounded"
+                >
+                  {{ isMac ? '⌘' : 'Ctrl' }}
+                </kbd>
+                <kbd
+                  class="px-1.5 py-0.5 text-xs font-medium text-gray-500 bg-gray-100 border border-gray-300 rounded"
+                >
+                  K
+                </kbd>
+              </div>
+
               <!-- Loader -->
               <div
                 v-if="isLoading"
@@ -382,6 +438,7 @@ const { user } = useAuth()
           <div class="py-2 relative">
             <div class="relative">
               <input
+                ref="searchInputMobile"
                 type="text"
                 :value="searchQuery"
                 @input="handleSearchInput"
@@ -391,12 +448,13 @@ const { user } = useAuth()
                 :placeholder="t('layout.search_placeholder')"
                 class="w-full py-2 px-4 border-[#D6B7B0] border-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white"
               />
-              <div class="absolute inset-y-0 right-0 flex items-center !pr-3">
+                            <div class="absolute inset-y-0 right-0 flex items-center !pr-3">
                 <!-- Loader -->
                 <div
                   v-if="isLoading"
                   class="animate-spin rounded-full h-5 w-5 border-b-2 border-[#D6B7B0]"
                 ></div>
+                
                 <!-- Search Icon -->
                 <svg
                   v-else
