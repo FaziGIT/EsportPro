@@ -46,6 +46,7 @@ router.post('/tournaments/new', [TournamentsController, 'store']).use(middleware
 
 router.get('/tournaments/:id', [TournamentsController, 'show'])
 router.post('/tournaments/:id/join', [TournamentsController, 'join']).use(middleware.auth())
+router.post('/tournaments/:id/leave', [TournamentsController, 'leave']).use(middleware.auth())
 router.post('/tournaments/:id/launch', [TournamentsController, 'launch']).use(middleware.auth())
 router
   .put('/tournaments/:id/matches/:matchId/score', [TournamentsController, 'updateMatchScore'])

@@ -40,6 +40,16 @@
           >
             {{ isJoining ? t('tournament.joining') : t('tournament.join') }}
           </button>
+
+          <!-- Leave Tournament Button -->
+          <button
+            v-if="userHasJoined && !tournament.isStarted"
+            @click="leaveTournament"
+            :disabled="isLeaving"
+            class="font-semibold px-6 py-3 rounded-lg transition bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {{ isLeaving ? t('tournament.leaving') : t('tournament.leave') }}
+          </button>
           <button
             v-else-if="!userHasJoined && !tournamentStarted && user && !tournament.isStarted && isTournamentFull"
             disabled
@@ -371,6 +381,7 @@ const teamNameInput = ref<HTMLInputElement | null>(null)
 // UI state
 const showSuccessMessage = ref(false)
 const isJoining = ref(false)
+const isLeaving = ref(false)
 const isStarting = ref(false)
 
 // Generate all possible teams based on tournament participants
@@ -546,6 +557,56 @@ const joinTournament = async () => {
     alert(t('tournament.joinError'))
   } finally {
     isJoining.value = false
+  }
+}
+
+const leaveTournament = async () => {
+  if (!user.value) {
+    redirectToLogin()
+    return
+  }
+
+  // Confirm before leaving
+  if (!confirm(t('tournament.confirmLeave'))) {
+    return
+  }
+
+  isLeaving.value = true
+
+  try {
+    const token = getCsrfToken()
+
+    const response = await fetch(`/tournaments/${tournament.id}/leave`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': token || '',
+        'Accept': 'application/json',
+      },
+    })
+
+    if (response.ok) {
+      const data = await response.json()
+
+      // Update local data dynamically
+      teams.value = data.teams
+      matches.value = data.matches
+
+      // Show success message
+      showSuccessMessage.value = true
+      setTimeout(() => {
+        showSuccessMessage.value = false
+      }, 5000)
+    } else {
+      const errorData = await response.json()
+      console.error('Error leaving tournament:', errorData.error)
+      alert(errorData.error || t('tournament.leaveError'))
+    }
+  } catch (error) {
+    console.error('Error leaving tournament:', error)
+    alert(t('tournament.leaveError'))
+  } finally {
+    isLeaving.value = false
   }
 }
 

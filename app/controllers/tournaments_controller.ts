@@ -443,6 +443,71 @@ export default class TournamentsController {
     })
   }
 
+  public async leave({ params, auth, response }: HttpContext) {
+    if (!params.id) {
+      throw new Error('Tournament ID is required')
+    }
+
+    const user = auth.user!
+    const tournament = await Tournament.query().where('id', params.id).firstOrFail()
+
+    // Check if tournament has started
+    if (tournament.isStarted) {
+      return response.badRequest({ error: 'Cannot leave tournament after it has started' })
+    }
+
+    // Find the team the user is in for this tournament
+    const userTeam = await Team.query()
+      .where('tournament_id', params.id)
+      .whereHas('players', (query) => {
+        query.where('user_id', user.id)
+      })
+      .preload('players')
+      .first()
+
+    if (!userTeam) {
+      return response.badRequest({ error: 'You are not registered for this tournament' })
+    }
+
+    // Remove user from the team
+    await userTeam.related('players').detach([user.id])
+
+    // Reload players to get updated count
+    await userTeam.load('players')
+
+    // If team becomes empty, reset the team name to default
+    if (userTeam.players.length === 0) {
+      // Get all teams for this tournament to determine the team number
+      const allTeams = await Team.query()
+        .where('tournament_id', params.id)
+        .orderBy('created_at', 'asc')
+
+      // Find the position of this team to generate the default name
+      const teamIndex = allTeams.findIndex((team) => team.id === userTeam.id)
+      const defaultName = `Team ${teamIndex + 1}`
+
+      await userTeam.merge({ name: defaultName }).save()
+    }
+
+    // Return updated data for dynamic refresh
+    const updatedTeams = await Team.query().where('tournament_id', params.id).preload('players')
+
+    const matches = await Match.query()
+      .where('tournament_id', params.id)
+      .preload('team1')
+      .preload('team2')
+      .preload('winner')
+      .orderBy('created_at', 'asc')
+
+    // Return JSON response with updated data
+    return response.json({
+      success: true,
+      teams: updatedTeams,
+      matches: matches,
+      message: 'Successfully left the tournament',
+    })
+  }
+
   public async updateTeam({ params, auth, request, response }: HttpContext) {
     if (!params.id) {
       throw new Error('Team ID is required')
