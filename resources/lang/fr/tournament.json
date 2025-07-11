@@ -57,5 +57,16 @@
   "tier": "Niveau",
   "location": "Lieu",
   "dates": "Dates",
-  "joinError": "Échec de l'inscription au tournoi"
+  "joinError": "Échec de l'inscription au tournoi",
+  "startTournament": "Démarrer le tournoi",
+  "starting": "Démarrage...",
+  "started": "✓ Tournoi démarré",
+  "startError": "Échec du démarrage du tournoi",
+  "full": "Tournoi Complet",
+  "updateMatchScore": "Mettre à jour le score du match",
+  "score": "Score",
+  "firstTo": "Premier à",
+  "wins": "victoires",
+  "updateScore": "Mettre à jour le score",
+  "updating": "Mise à jour..."
 }

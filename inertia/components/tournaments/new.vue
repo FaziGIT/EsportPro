@@ -53,8 +53,6 @@ const closeModal = () => {
 const submitForm = () => {
   form.clearErrors()
 
-  console.log('Submitting form:', form.data())
-
   const imagePreview = form.imagePreview
   form.imagePreview = ''
 

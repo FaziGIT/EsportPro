@@ -9,7 +9,7 @@ export default class Match extends BaseModel {
   declare id: string
 
   @column({ columnName: 'team1_id' })
-  declare team1Id: string
+  declare team1Id: string | null
 
   @belongsTo(() => Team, {
     foreignKey: 'team1Id',
@@ -17,7 +17,7 @@ export default class Match extends BaseModel {
   declare team1: BelongsTo<typeof Team>
 
   @column({ columnName: 'team2_id' })
-  declare team2Id: string
+  declare team2Id: string | null
 
   @belongsTo(() => Team, {
     foreignKey: 'team2Id',

@@ -57,5 +57,16 @@
   "tier": "Tier",
   "location": "Location",
   "dates": "Dates",
-  "joinError": "Failed to join tournament"
+  "joinError": "Failed to join tournament",
+  "startTournament": "Start Tournament",
+  "starting": "Starting...",
+  "started": "✓ Tournament Started",
+  "startError": "Failed to start tournament",
+  "full": "Tournament Full",
+  "updateMatchScore": "Update Match Score",
+  "score": "Score",
+  "firstTo": "First to",
+  "wins": "wins",
+  "updateScore": "Update Score",
+  "updating": "Updating..."
 }

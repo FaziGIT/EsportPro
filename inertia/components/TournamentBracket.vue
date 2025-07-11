@@ -24,8 +24,10 @@
             :class="[
               'bg-gray-50 border-2 border-gray-200 rounded-lg overflow-hidden min-h-[70px] transition-all duration-200',
               roundIndex === bracketRounds.length - 1 ? 'border-yellow-400 min-h-[90px]' : '',
-              isTeamHighlighted(match.team1) || isTeamHighlighted(match.team2) ? 'ring-1 ring-blue-300 ring-opacity-30' : ''
+              isTeamHighlighted(match.team1) || isTeamHighlighted(match.team2) ? 'ring-1 ring-blue-300 ring-opacity-30' : '',
+              canEditMatch(match) ? 'cursor-pointer hover:ring-2 hover:ring-blue-500 hover:ring-opacity-50' : ''
             ]"
+            @click="openScoreModal(match)"
           >
             <div 
               :class="[
@@ -40,7 +42,7 @@
               @mouseleave="hoveredTeam = null"
             >
               <span class="font-medium text-gray-700 flex-1">
-                {{ match.team1?.name || 'TBD' }}
+                {{ getTeamDisplayName(match.team1, 'team1', match) }}
               </span>
               <span v-if="roundIndex === bracketRounds.length - 1 && isWinner(match.team1, match)" class="text-xl mr-2">🏆</span>
               <span v-if="match.scoreTeam1 !== null" class="bg-gray-600 text-white px-2 py-1 rounded text-sm font-bold min-w-[30px] text-center">{{ match.scoreTeam1 }}</span>
@@ -51,13 +53,14 @@
                 isTeamHighlighted(match.team2) ? 'border-l-4 border-l-blue-500' : '',
                 isLosingTeam(match.team2) ? 'opacity-30' : '',
                 isWinner(match.team2, match) ? 'font-bold text-green-700 bg-green-50' : '',
-                isLoser(match.team2, match) ? 'text-gray-500 line-through opacity-75' : ''
+                isLoser(match.team2, match) ? 'text-gray-500 line-through opacity-75' : '',
+                !match.team2 ? 'bg-gray-100 opacity-60' : '' // Style for BYE
               ]"
               @mouseenter="hoveredTeam = match.team2 || null"
               @mouseleave="hoveredTeam = null"
             >
               <span class="font-medium text-gray-700 flex-1">
-                {{ match.team2?.name || 'TBD' }}
+                {{ getTeamDisplayName(match.team2, 'team2', match) }}
               </span>
               <span v-if="roundIndex === bracketRounds.length - 1 && isWinner(match.team2, match)" class="text-xl mr-2">🏆</span>
               <span v-if="match.scoreTeam2 !== null" class="bg-gray-600 text-white px-2 py-1 rounded text-sm font-bold min-w-[30px] text-center">{{ match.scoreTeam2 }}</span>
@@ -66,16 +69,31 @@
         </div>
       </div>
     </div>
+
+    <!-- Match Score Update Modal -->
+    <MatchScoreModal
+      :isOpen="showScoreModal"
+      :match="selectedMatch"
+      :tournament="tournament"
+      @close="closeScoreModal"
+      @updated="handleScoreUpdated"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import MatchScoreModal from './MatchScoreModal.vue'
 
 interface Team {
   id: string
   name: string
   isWinner?: boolean
+  players?: {
+    id: string
+    email: string
+    pseudo?: string
+  }[]
 }
 
 interface Match {
@@ -86,65 +104,92 @@ interface Match {
   scoreTeam1: number | null
   scoreTeam2: number | null
   tournamentId: string
+  nextMatchId?: string | null // For linking matches in a round
 }
 
 interface Tournament {
   id: string
   numberParticipants: number
   startDate: string | Date | any // Accept DateTime from Luxon
+  isStarted: boolean
+    format: string
+  creator?: {
+    id: string
+    email: string
+    pseudo?: string
+  }
+}
+
+interface User {
+  id: string
+  email: string
+  pseudo?: string
+  role: string
 }
 
 interface Props {
   teams: Team[]
   matches: Match[]
   tournament: Tournament
+  user?: User | null
+  isAdmin?: boolean
 }
 
 const props = defineProps<Props>()
 
 const hoveredTeam = ref<Team | null>(null)
+const showScoreModal = ref(false)
+const selectedMatch = ref<Match | null>(null)
+
+// Check if user can edit match scores
+const canEditScores = computed(() => {
+  if (!props.user || !props.tournament.isStarted) return false
+  
+  // Admin can always edit
+  if (props.isAdmin) return true
+  
+  // Tournament creator can edit
+  if (props.tournament.creator?.id === props.user.id) return true
+  
+  return false
+})
 
 // Check if tournament has started
 const tournamentStarted = computed(() => {
-  if (!props.tournament.startDate) return false
-  
-  try {
-    const startDate = new Date(props.tournament.startDate)
-    return new Date() >= startDate
-  } catch (error) {
-    return false
-  }
+  // Tournament is only considered started when explicitly marked as started
+  return props.tournament.isStarted || false
 })
 
-// Generate bracket structure based on tournament participants or real matches
+// Generate bracket structure based on tournament state
 const bracketRounds = computed(() => {
-  // If tournament hasn't started, generate empty bracket based on participants
+  // If tournament hasn't been started yet, show TBD placeholder bracket
   if (!tournamentStarted.value) {
-    return generateEmptyBracket(props.tournament.numberParticipants)
+    return generateTBDBracket(props.tournament.numberParticipants)
   }
   
-  // If tournament has started but no matches, generate empty bracket
-  if (props.matches.length === 0) {
-    return generateEmptyBracket(props.tournament.numberParticipants)
+  // If tournament has been started, organize real matches by rounds
+  if (tournamentStarted.value && props.matches.length > 0) {
+    return generateBracketFromRealMatches(props.matches)
   }
   
-  // Use real matches if tournament has started and has matches
-  return generateBracketFromMatches(props.matches)
+  // If tournament started but no matches yet, show TBD
+  return generateTBDBracket(props.tournament.numberParticipants)
 })
 
-// Generate empty bracket structure based on number of participants
-const generateEmptyBracket = (participants: number): Match[][] => {
+// Generate TBD bracket structure (before tournament starts)
+const generateTBDBracket = (participants: number): Match[][] => {
   const rounds: Match[][] = []
   let currentRoundSize = participants
   
   while (currentRoundSize > 1) {
     const roundMatches: Match[] = []
+    const matchesInRound = Math.ceil(currentRoundSize / 2)
     
-    for (let i = 0; i < currentRoundSize; i += 2) {
+    for (let i = 0; i < matchesInRound; i++) {
       const match: Match = {
-        id: `empty-${rounds.length}-${i}`,
-        team1: undefined,
-        team2: undefined,
+        id: `tbd-${rounds.length}-${i}`,
+        team1: undefined, // Will show as "TBD"
+        team2: undefined, // Will show as "TBD"
         winner: undefined,
         scoreTeam1: null,
         scoreTeam2: null,
@@ -160,15 +205,40 @@ const generateEmptyBracket = (participants: number): Match[][] => {
   return rounds
 }
 
-// Generate bracket from real matches
-const generateBracketFromMatches = (matches: Match[]): Match[][] => {
-  const rounds: Match[][] = []
-  let currentMatches = [...matches]
+// Generate bracket from real matches using nextMatchId relationships
+const generateBracketFromRealMatches = (matches: Match[]): Match[][] => {
+  if (matches.length === 0) return []
+
+  // Create a map for quick match lookup
+  const matchMap = new Map(matches.map(match => [match.id, match]))
   
-  while (currentMatches.length > 0) {
-    const roundMatches = currentMatches.slice(0, Math.ceil(currentMatches.length / 2))
-    rounds.push(roundMatches)
-    currentMatches = currentMatches.slice(Math.ceil(currentMatches.length / 2))
+  // Find matches that don't have any match pointing to them (first round)
+  const firstRoundMatches = matches.filter(match => 
+    !matches.some(otherMatch => otherMatch.nextMatchId === match.id)
+  )
+  
+  if (firstRoundMatches.length === 0) return []
+
+  const rounds: Match[][] = []
+  let currentRound = firstRoundMatches
+  
+  // Build rounds by following nextMatchId relationships
+  while (currentRound.length > 0) {
+    rounds.push([...currentRound])
+    
+    // Get unique next matches for this round
+    const nextMatchIds = new Set(
+      currentRound
+        .map(match => match.nextMatchId)
+        .filter(id => id !== null && id !== undefined)
+    )
+    
+    if (nextMatchIds.size === 0) break
+    
+    // Get the actual next matches
+    currentRound = Array.from(nextMatchIds)
+      .map(id => matchMap.get(id!))
+      .filter(match => match !== undefined) as Match[]
   }
   
   return rounds
@@ -211,4 +281,66 @@ const getRoundName = (roundIndex: number, totalRounds: number): string => {
   
   return `Round ${roundIndex + 1}`
 }
+
+const getTeamDisplayName = (team: Team | undefined, type: 'team1' | 'team2', match: Match): string => {
+  // If tournament hasn't started, everything is TBD
+  if (!tournamentStarted.value) {
+    return 'TBD'
+  }
+  
+  // If tournament has started
+  if (team) {
+    return team.name
+  }
+  
+  // If team is null/undefined after tournament started
+  // For finals (no nextMatchId), always show TBD for missing teams
+  if (!match.nextMatchId) {
+    return 'TBD'
+  }
+  
+  // For non-final matches: team1 should be TBD if missing, team2 can be BYE for bye matches
+  return type === 'team2' ? 'BYE' : 'TBD'
+}
+
+const openScoreModal = (match: Match) => {
+  // Only allow editing for real matches with actual teams and if authorized
+  if (!canEditScores.value || !match.id || match.id.startsWith('tbd-') || match.id.startsWith('future-')) {
+    return
+  }
+  
+  // Only allow editing matches that have teams and are not already completed
+  if (!match.team1 || (!match.team2 && match.team2 !== null)) {
+    return
+  }
+  
+  selectedMatch.value = match
+  showScoreModal.value = true
+}
+
+const closeScoreModal = () => {
+  showScoreModal.value = false
+  selectedMatch.value = null
+}
+
+const canEditMatch = (match: Match): boolean => {
+  if (!canEditScores.value) return false
+  if (!match.id || match.id.startsWith('tbd-') || match.id.startsWith('future-')) return false
+  
+  // Must have team1, and either team2 or be a bye match (team2 = null)
+  if (!match.team1) return false
+  if (match.team2 === undefined) return false // undefined means TBD, null means BYE
+  
+  return true
+}
+
+const handleScoreUpdated = (data: any) => {
+  // Emit event to parent to refresh data
+  emit('matchUpdated', data)
+}
+
+const emit = defineEmits<{
+  matchUpdated: [data: any]
+}>()
+
 </script> 
