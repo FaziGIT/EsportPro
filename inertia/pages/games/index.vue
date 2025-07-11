@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Layout from '~/components/layouts/layout.vue'
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, computed } from 'vue'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { useInfiniteScroll } from '@vueuse/core'
 import { useI18n } from '../../../resources/js/composables/useI18n'
@@ -8,8 +8,12 @@ import { ChevronDown } from '~/components/icons'
 import Game from '#models/game'
 import GameCard from '~/components/GameCard.vue'
 import GameModal from '~/components/games/new.vue'
+import { usePage } from '@inertiajs/vue3'
 
 const { t } = useI18n()
+
+const usePageInertia = usePage()
+const user = computed(() => usePageInertia.props.user)
 
 const games = ref<Game[]>([])
 const page = ref(1)
@@ -126,6 +130,7 @@ const closeModal = () => {
       </Menu>
 
       <button
+        v-if="user"
         @click="openModal"
         class="font-semibold px-6 py-3 rounded-lg transition bg-[#5C4741] hover:bg-[#7b5f57] text-white cursor-pointer"
       >
@@ -151,6 +156,7 @@ const closeModal = () => {
 
     <!-- Game Modal -->
     <GameModal
+      v-if="user"
       :isOpen="isModalOpen"
       @close="closeModal"
     />

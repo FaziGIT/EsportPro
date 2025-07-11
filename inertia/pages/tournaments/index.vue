@@ -19,7 +19,7 @@ const props = defineProps<{
 }>()
 
 const usePageInertia = usePage()
-const isAdmin = computed(() => usePageInertia.props.isAdmin as boolean)
+const user = computed(() => usePageInertia.props.user)
 
 const tournaments = ref<Tournament[]>([])
 const page = ref(1)
@@ -138,6 +138,7 @@ const closeModal = () => {
       </Menu>
 
       <button
+        v-if="user"
         @click="openModal"
         class="font-semibold px-6 py-3 rounded-lg transition bg-[#5C4741] hover:bg-[#7b5f57] text-white cursor-pointer"
       >
@@ -152,7 +153,7 @@ const closeModal = () => {
           class="my-6"
           v-for="tournament in tournaments"
           :key="tournament.id"
-          :tournament="tournament"
+          :tournament="tournament as Tournament"
         />
       </div>
 
@@ -166,10 +167,10 @@ const closeModal = () => {
 
     <!-- Tournament Modal -->
     <TournamentModal
+      v-if="user"
       :isOpen="isModalOpen"
       :games="props.games!"
       @close="closeModal"
-      @submit="handleSubmit"
     />
   </Layout>
 </template>
