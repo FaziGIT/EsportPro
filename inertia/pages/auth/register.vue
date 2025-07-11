@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import Layout from '~/components/layouts/layout.vue'
 import background from '~/img/auth/bg.png'
-import { Head, Link, useForm, usePage } from '@inertiajs/vue3'
+import { Head, Link, useForm } from '@inertiajs/vue3'
 import { useI18n } from '../../../resources/js/composables/useI18n'
-
-const page = usePage()
 
 const form = useForm({
   pseudo: null,

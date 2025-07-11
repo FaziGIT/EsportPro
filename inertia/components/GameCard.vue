@@ -3,13 +3,15 @@ import imageNotFound from '../img/Image-not-found.png'
 import { computed, defineProps, ref } from 'vue'
 import HeartIconSVG from '~/components/icons/HeartIconSVG.vue'
 import { useI18n } from '../../resources/js/composables/useI18n'
+import { useAuth } from '../../resources/js/composables/useAuth'
 import User from '#models/user'
-import { router, usePage } from '@inertiajs/vue3'
+import { router } from '@inertiajs/vue3'
 import Game from '#models/game'
 import { GamePlatform } from '#enums/game_platform'
 import { getCsrfToken } from '~/utils'
 
 const { t } = useI18n()
+const { user: userProps } = useAuth()
 
 const props = defineProps({
   game: {
@@ -27,11 +29,8 @@ const imageSource = computed(() => {
 })
 
 const isHovered = ref(false)
-
-const page = usePage()
-const userProps = computed(() => page.props.user as User)
 const isFavorite = ref(
-  props.game?.favoriteOfUsers?.some((user: User) => user.id === userProps.value?.id)
+  props.game?.favoriteOfUsers?.some((user: User) => user.id === String(userProps.value?.id))
 )
 
 const handleImageError = (event: Event) => {

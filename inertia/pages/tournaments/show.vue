@@ -252,23 +252,21 @@
 
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue'
-import { router, usePage } from '@inertiajs/vue3'
+import { router } from '@inertiajs/vue3'
 import Layout from '~/components/layouts/layout.vue'
 import { DateTime } from 'luxon'
 import TournamentBracket from '../../components/TournamentBracket.vue'
 import { getCsrfToken } from '~/utils'
 import imageNotFound from '~/img/Image-not-found.png'
 import { useI18n } from '../../../resources/js/composables/useI18n'
+import { useAuth } from '../../../resources/js/composables/useAuth'
+import { useTournamentData } from '../../../resources/js/composables/usePageProps'
 import { useChatStore } from '~/store/chat_store'
 
 const { t } = useI18n()
+const { user } = useAuth()
+const { tournament, teams: initialTeams, matches: initialMatches } = useTournamentData()
 const chatStore = useChatStore()
-
-interface User {
-  id: string
-  email: string
-  pseudo?: string
-}
 
 interface Player {
   id: string
@@ -294,29 +292,8 @@ interface Match {
   tournamentId: string
 }
 
-interface Tournament {
-  id: string
-  name: string
-  format: string
-  price: number
-  rules: string
-  numberPlayersPerTeam: number
-  numberParticipants: number
-  tier: string
-  region: string
-  address: string
-  city: string
-  country: string
-  postalCode: string
-  startDate: DateTime | string | Date
-  endDate: DateTime | string | Date
-}
-
-const { props } = usePage()
-const tournament = props.tournament as Tournament
-const teams = ref(props.teams as Team[])
-const matches = ref(props.matches as Match[])
-const user = computed(() => props.user as User | null)
+const teams = ref(initialTeams.value as Team[])
+const matches = ref(initialMatches.value as Match[])
 
 // Team editing state
 const editingTeamId = ref<string | null>(null)
@@ -343,14 +320,9 @@ const userHasJoined = computed(() => {
   return teams.value.some((team) => team.players?.some((player) => player.id === user.value?.id))
 })
 
-const userTeam = computed(() => {
-  if (!user.value) return null
-  return teams.value.find((team) => team.players?.some((player) => player.id === user.value?.id))
-})
-
 const isUserTeam = (team: Team): boolean => {
   if (!user.value) return false
-  return team.players?.some((player) => player.id === user.value?.id) || false
+  return team.players?.some((player) => player.id === String(user.value?.id)) || false
 }
 
 const isEditingTeam = (team: Team): boolean => {
