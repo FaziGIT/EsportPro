@@ -43,7 +43,7 @@ const loadGames = async () => {
 
   try {
     const res = await fetch(`/api/games?page=${page.value}&limit=20&sort=${selectedFilter.value}`)
-    const data: Partial<Game[]> = await res.json()
+    const data: Game[] = await res.json()
 
     if (data.length === 0) {
       allLoaded.value = true

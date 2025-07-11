@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Layout from '~/components/layouts/layout.vue'
-import { computed, onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { useInfiniteScroll } from '@vueuse/core'
 import { useI18n } from '../../../resources/js/composables/useI18n'
@@ -8,8 +8,9 @@ import { useAuth } from '../../../resources/js/composables/useAuth'
 import Tournament from '#models/tournament'
 import TournamentCard from '~/components/TournamentCard.vue'
 import { ChevronDown } from '~/components/icons'
-import TournamentModal from '~/components/tournaments/new.vue'
+import TournamentForm from '~/components/TournamentForm.vue'
 import Game from '#models/game'
+import { TournamentStatus } from '#types/tournament'
 
 const { t } = useI18n()
 const { user } = useAuth()
@@ -152,6 +153,8 @@ const closeModal = () => {
           v-for="tournament in tournaments"
           :key="tournament.id"
           :tournament="tournament as Tournament"
+          :user="user"
+          :games="props.games || []"
         />
       </div>
 
@@ -164,9 +167,10 @@ const closeModal = () => {
     </div>
 
     <!-- Tournament Modal -->
-    <TournamentModal
+    <TournamentForm
       v-if="user"
       :isOpen="isModalOpen"
+      :mode="TournamentStatus.NEW"
       :games="props.games!"
       @close="closeModal"
     />

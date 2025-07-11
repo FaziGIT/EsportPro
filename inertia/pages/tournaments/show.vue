@@ -21,6 +21,29 @@
       <div class="flex justify-between items-start mb-6">
         <h1 class="text-4xl font-semibold text-gray-900">{{ tournament.name }}</h1>
         <div class="flex gap-3">
+          <!-- Edit button (visible only when user is logged in) -->
+          <button
+            v-if="user"
+            @click="navigateToEdit"
+            class="font-semibold px-6 py-3 rounded-lg transition bg-gray-600 text-white hover:bg-gray-700 flex items-center gap-2"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+              ></path>
+            </svg>
+            {{ t('tournament.editTournament') }}
+          </button>
+
           <!-- Start Tournament Button (Admin or Creator only, after start date) -->
           <button
             v-if="canStartTournament"
@@ -225,9 +248,9 @@
 
           <!-- Bracket section -->
           <div class="w-full overflow-hidden">
-            <TournamentBracket 
-              :teams="teams" 
-              :matches="matches" 
+            <TournamentBracket
+              :teams="teams"
+              :matches="matches"
               :tournament="tournament"
               :user="user as User | null"
               :isAdmin="isAdmin"
@@ -296,6 +319,15 @@
         </div>
       </div>
     </div>
+
+    <TournamentForm
+      v-if="user"
+      :isOpen="isEditModalOpen"
+      mode="edit"
+      :tournament="tournament"
+      :games="props.games"
+      @close="closeEditModal"
+    />
   </Layout>
 </template>
 
@@ -303,6 +335,7 @@
 import { computed, nextTick, ref } from 'vue'
 import { router } from '@inertiajs/vue3'
 import Layout from '~/components/layouts/layout.vue'
+import TournamentForm from '~/components/TournamentForm.vue'
 import { DateTime } from 'luxon'
 import TournamentBracket from '../../components/TournamentBracket.vue'
 import { getCsrfToken } from '~/utils'
@@ -317,12 +350,12 @@ const { user, isAdmin } = useAuth()
 const { tournament, teams: initialTeams, matches: initialMatches } = useTournamentData()
 const chatStore = useChatStore()
 
-interface User {
-  id: string
-  email: string
-  pseudo?: string
-  role: string
-}
+const props = defineProps<{
+  games: Array<{
+    id: string
+    name: string
+  }>
+}>()
 
 interface Player {
   id: string
@@ -350,6 +383,8 @@ interface Match {
 
 const teams = ref(initialTeams.value as Team[])
 const matches = ref(initialMatches.value as Match[])
+
+const isEditModalOpen = ref(false)
 
 // Team editing state
 const editingTeamId = ref<string | null>(null)
@@ -458,18 +493,18 @@ const isTournamentFull = computed(() => {
   const totalPlayers = teams.value.reduce((total, team) => {
     return total + (team.players?.length || 0)
   }, 0)
-  
+
   return totalPlayers >= tournament.value.numberParticipants
 })
 
 const canStartTournament = computed(() => {
   if (!user.value || tournament.value.isStarted) return false
-  
+
   // Check if user is admin or creator
   const userIsAdmin = isAdmin.value
   const userIsCreator = tournament.value.creator?.id === user.value.id
   if (!userIsAdmin && !userIsCreator) return false
-  
+
   // Check if it's past the start date
   try {
     let startDate: DateTime
@@ -482,7 +517,7 @@ const canStartTournament = computed(() => {
     } else {
       return false
     }
-    
+
     return DateTime.now() >= startDate
   } catch (error) {
     return false
@@ -538,6 +573,14 @@ const joinTournament = async () => {
   } finally {
     isJoining.value = false
   }
+}
+
+const navigateToEdit = () => {
+  isEditModalOpen.value = true
+}
+
+const closeEditModal = () => {
+  isEditModalOpen.value = false
 }
 
 const leaveTournament = async () => {
@@ -613,7 +656,7 @@ const startTournament = async () => {
       const data = await response.json()
       matches.value = data.matches
       tournament.value.isStarted = true
-      
+
       // Show success message
       showSuccessMessage.value = true
       setTimeout(() => {
@@ -656,12 +699,12 @@ const handleMatchUpdated = (data: any) => {
   if (data.matches) {
     matches.value = data.matches
   }
-  
+
   // If tournament is completed, update tournament data
   if (data.tournament) {
     Object.assign(tournament, data.tournament)
   }
-  
+
   // Show success message
   showSuccessMessage.value = true
   setTimeout(() => {
