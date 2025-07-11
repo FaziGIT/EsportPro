@@ -59,3 +59,4 @@ router.put('/teams/:id', [TournamentsController, 'updateTeam']).use(middleware.a
 router.get('/games', [GamesController, 'index'])
 router.get('/api/games', [GamesController, 'api'])
 router.get('/games/:id/image', [GamesController, 'getImageFromGame'])
+router.post('/games/new', [GamesController, 'store']).use(middleware.auth())

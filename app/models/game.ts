@@ -2,6 +2,7 @@ import { BaseModel, column, manyToMany } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 import User from './user.js'
 import type { ManyToMany } from '@adonisjs/lucid/types/relations'
+import { GamePlatform } from '#enums/game_platform'
 
 export default class Game extends BaseModel {
   @column({ isPrimary: true })
@@ -11,7 +12,7 @@ export default class Game extends BaseModel {
   declare name: string
 
   @column()
-  declare platform: string
+  declare platform: GamePlatform
 
   @column()
   declare image: Uint8Array

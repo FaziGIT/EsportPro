@@ -1,5 +1,17 @@
 {
   "gameNameUndefined": "Nom du jeu non défini",
   "ourGames": "Nos jeux",
-  "allGamesLoaded": "Tous les jeux sont chargés."
+  "allGamesLoaded": "Tous les jeux sont chargés.",
+  "newGame": "Nouveau jeu",
+  "generalInformation": "Informations générales",
+  "image": "Image",
+  "gameName": "Nom du jeu",
+  "gameNamePlaceholder": "Nom de votre jeu",
+  "platform": "Plateforme",
+  "platformPlaceholder": "PC, Console, Mobile...",
+  "addGameImage": "Ajouter une image du jeu",
+  "import": "Importer",
+  "noImageSelected": "Aucune image sélectionnée",
+  "cancel": "Annuler",
+  "save": "Sauvegarder"
 }

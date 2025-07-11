@@ -1,7 +1,8 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Game from '#models/game'
-import { Uint8ArrayToBuffer } from '#services/transform_image.ts'
+import { BufferToUint8Array, Uint8ArrayToBuffer } from '#services/transform_image.ts'
 import { getAllGamesWithoutImages } from '../repository/game.js'
+import { gameValidator } from '#validators/game'
 
 export default class GamesController {
   public async index({ inertia }: HttpContext) {
@@ -33,6 +34,26 @@ export default class GamesController {
 
     const games = await baseQuery.paginate(page, limit)
     return games.toJSON().data
+  }
+
+  public async store({ request, i18n, response }: HttpContext) {
+    const data = await request.validateUsing(gameValidator, {
+      messagesProvider: i18n.createMessagesProvider(),
+    })
+
+    const gameModel: Partial<Game> = {
+      name: data.name,
+      platform: data.platform,
+    }
+
+    // If the image is provided, we read the temporary file and convert it to a Uint8Array
+    if (data.image) {
+      gameModel.image = BufferToUint8Array(data.image.tmpPath!)
+    }
+
+    await Game.create(gameModel)
+
+    return response.redirect().toRoute('/')
   }
 
   /**
