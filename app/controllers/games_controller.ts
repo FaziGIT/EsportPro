@@ -51,7 +51,7 @@ export default class GamesController {
 
     await Game.create(gameModel)
 
-    return response.redirect().toRoute('/games')
+    return response.redirect().toRoute('/')
   }
 
   public async show({ params, inertia }: HttpContext) {
