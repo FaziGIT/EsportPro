@@ -308,9 +308,13 @@ import TournamentBracket from '../../components/TournamentBracket.vue'
 import { getCsrfToken } from '~/utils'
 import imageNotFound from '~/img/Image-not-found.png'
 import { useI18n } from '../../../resources/js/composables/useI18n'
+//import { useAuth } from '../../../resources/js/composables/useAuth'
+//import { useTournamentData } from '../../../resources/js/composables/usePageProps'
 import { useChatStore } from '~/store/chat_store'
 
 const { t } = useI18n()
+//const { user } = useAuth()
+//const { tournament, teams: initialTeams, matches: initialMatches } = useTournamentData()
 const chatStore = useChatStore()
 
 interface User {
@@ -404,7 +408,7 @@ const userHasJoined = computed(() => {
 
 const isUserTeam = (team: Team): boolean => {
   if (!user.value) return false
-  return team.players?.some((player) => player.id === user.value?.id) || false
+  return team.players?.some((player) => player.id === String(user.value?.id)) || false
 }
 
 const isEditingTeam = (team: Team): boolean => {

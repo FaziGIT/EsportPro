@@ -192,14 +192,16 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { router, usePage } from '@inertiajs/vue3'
+import { router } from '@inertiajs/vue3'
 import Layout from '~/components/layouts/layout.vue'
 import { DateTime } from 'luxon'
 import imageNotFound from '~/img/Image-not-found.png'
 import { useI18n } from '../../../resources/js/composables/useI18n'
+import { useGameData } from '../../../resources/js/composables/usePageProps'
 import { GamePlatform } from '#enums/game_platform'
 
 const { t } = useI18n()
+const { game, tournaments } = useGameData()
 
 interface Game {
   id: string
@@ -218,13 +220,9 @@ interface Tournament {
   endDate: DateTime | string | Date
 }
 
-const { props } = usePage()
-const game = props.game as Game
-const tournaments = props.tournaments as Tournament[]
-
 const imageSource = computed(() => {
-  if (game.id) {
-    return `/games/${game.id}/image`
+  if (game.value?.id) {
+    return `/games/${game.value.id}/image`
   }
   return imageNotFound
 })
@@ -324,19 +322,19 @@ const formatPlatform = (platform: GamePlatform): string => {
 
 // Statistics computed properties
 const activeTournamentsCount = computed(() => {
-  return tournaments.filter(
-    (tournament) => isTournamentStarted(tournament) && !isTournamentFinished(tournament)
-  ).length
+  return tournaments.value?.filter(
+    (tournament: Tournament) => isTournamentStarted(tournament) && !isTournamentFinished(tournament)
+  ).length || 0
 })
 
 const upcomingTournamentsCount = computed(() => {
-  return tournaments.filter(
-    (tournament) => !isTournamentStarted(tournament) && !isTournamentFinished(tournament)
-  ).length
+  return tournaments.value?.filter(
+    (tournament: Tournament) => !isTournamentStarted(tournament) && !isTournamentFinished(tournament)
+  ).length || 0
 })
 
 const finishedTournamentsCount = computed(() => {
-  return tournaments.filter((tournament) => isTournamentFinished(tournament)).length
+  return tournaments.value?.filter((tournament: Tournament) => isTournamentFinished(tournament)).length || 0
 })
 </script>
 

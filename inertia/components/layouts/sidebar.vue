@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { Link, router, usePage } from '@inertiajs/vue3'
+import { Link, router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import logo from '../../img/logo.png'
 import imageNotFound from '../../img/Image-not-found.png'
 import { PlusIcon } from '../icons'
 import { useI18n } from '../../../resources/js/composables/useI18n'
+import { useAuth } from '../../../resources/js/composables/useAuth'
+import { useUserData } from '../../../resources/js/composables/usePageProps'
 import Game from '#models/game'
 import Tournament from '#models/tournament'
 
 const { t } = useI18n()
-const page = usePage()
-
-const user = computed(() => page.props.user)
-const isAuthenticated = computed(() => !!user.value)
+const { user, isAuthenticated } = useAuth()
+const { userTournaments, userGames } = useUserData()
 
 interface SimpleGame extends Partial<Game> {
   id: string
@@ -24,8 +24,8 @@ interface SimpleTournament extends Partial<Tournament> {
   name: string
 }
 
-const joinedTournaments = computed(() => (page.props.userTournaments as SimpleTournament[]) || [])
-const favoriteGames = computed(() => (page.props.userGames as SimpleGame[]) || [])
+const joinedTournaments = computed(() => userTournaments.value as SimpleTournament[])
+const favoriteGames = computed(() => userGames.value as SimpleGame[])
 
 const isDropdownOpen = ref(false)
 const isTournamentsDropdownOpen = ref(false)

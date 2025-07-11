@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import Layout from '~/components/layouts/layout.vue'
 import background from '~/img/auth/bg.png'
-import { Head, Link, useForm, usePage } from '@inertiajs/vue3'
-import { computed } from 'vue'
+import { Head, Link, useForm } from '@inertiajs/vue3'
 import { useI18n } from '../../../resources/js/composables/useI18n'
+import { useErrors } from '../../../resources/js/composables/useErrors'
 
-const page = usePage()
-
-const errors = computed(() => page.props.errors)
+const { errors } = useErrors()
 
 const form = useForm({
   emailPseudo: null,

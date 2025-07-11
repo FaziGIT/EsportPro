@@ -4,22 +4,20 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { useInfiniteScroll } from '@vueuse/core'
 import { useI18n } from '../../../resources/js/composables/useI18n'
+import { useAuth } from '../../../resources/js/composables/useAuth'
 import Tournament from '#models/tournament'
 import TournamentCard from '~/components/TournamentCard.vue'
 import { ChevronDown } from '~/components/icons'
 import TournamentModal from '~/components/tournaments/new.vue'
 import Game from '#models/game'
-import { usePage } from '@inertiajs/vue3'
 
 const { t } = useI18n()
+const { user } = useAuth()
 
 // Props from controller
 const props = defineProps<{
   games?: Game[]
 }>()
-
-const usePageInertia = usePage()
-const user = computed(() => usePageInertia.props.user)
 
 const tournaments = ref<Tournament[]>([])
 const page = ref(1)
