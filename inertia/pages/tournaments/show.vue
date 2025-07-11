@@ -308,8 +308,10 @@ import TournamentBracket from '../../components/TournamentBracket.vue'
 import { getCsrfToken } from '~/utils'
 import imageNotFound from '~/img/Image-not-found.png'
 import { useI18n } from '../../../resources/js/composables/useI18n'
+import { useChatStore } from '~/store/chat_store'
 
 const { t } = useI18n()
+const chatStore = useChatStore()
 
 interface User {
   id: string
@@ -547,6 +549,11 @@ const joinTournament = async () => {
       setTimeout(() => {
         showSuccessMessage.value = false
       }, 5000)
+
+      // Trigger chat channels refresh
+      chatStore.triggerChannelRefresh()
+
+      router.reload({ only: ['userTournaments'] })
     } else {
       const errorData = await response.json()
       console.error('Error joining tournament:', errorData.error)
