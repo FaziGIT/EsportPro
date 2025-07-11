@@ -5,11 +5,10 @@ import { UserFactory } from '#database/factories/user_factory'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { readFileSync } from 'node:fs'
+import { GamePlatform } from '#enums/game_platform'
 
 export const GameFactory = factory
   .define(Game, async ({ faker }) => {
-    const platforms = ['PC', 'PS4', 'PS5', 'XBOX', 'SWITCH']
-
     let imageBytes: Uint8Array
     try {
       const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -29,7 +28,7 @@ export const GameFactory = factory
       image: imageBytes,
       createdAt: DateTime.fromJSDate(faker.date.past()),
       updatedAt: DateTime.fromJSDate(faker.date.past()),
-      platform: faker.helpers.arrayElement(platforms),
+      platform: faker.helpers.arrayElement(Object.values(GamePlatform)),
     }
   })
   .relation('users', () => UserFactory)

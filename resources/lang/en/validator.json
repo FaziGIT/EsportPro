@@ -5,9 +5,9 @@
       "pseudo": "pseudo",
       "email": "email",
       "password": "password",
-      "name": "tournament name",
+      "name": "name",
       "tier": "skill level",
-      "format": "tournament format",
+      "format": "format",
       "price": "prize amount",
       "rules": "rules",
       "numberParticipants": "number of participants",
@@ -22,7 +22,8 @@
       "endDate": "end date",
       "gameId": "game selection",
       "isOnline": "online mode",
-      "image": "tournament image"
+      "image": "image",
+      "platform": "platform"
     },
     "messages": {
       "required": "The {field} field cannot be empty. Please fill it out.",
