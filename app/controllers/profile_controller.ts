@@ -17,9 +17,7 @@ export default class ProfileController {
         .filter((tournament) => tournament && tournament.endDate >= DateTime.now())
         .sort((a, b) => a.endDate.valueOf() - b.endDate.valueOf())
 
-      const favoriteGames = user.favoriteGames
-        .slice()
-        .sort((a, b) => a.name.localeCompare(b.name))
+      const favoriteGames = user.favoriteGames.slice().sort((a, b) => a.name.localeCompare(b.name))
 
       return inertia.render('profile/index', {
         user: user,
