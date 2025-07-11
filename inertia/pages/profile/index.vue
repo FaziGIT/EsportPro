@@ -4,9 +4,11 @@ import GeneralInfoUser from '~/components/profile/GeneralInfoUser.vue'
 import { defineProps } from 'vue'
 import User from '#models/user'
 import TournamentCard from '~/components/TournamentCard.vue'
+import GameCard from '~/components/GameCard.vue'
 import { Carousel, Navigation, Slide } from 'vue3-carousel'
 import 'vue3-carousel/dist/carousel.css'
 import Tournament from '#models/tournament'
+import Game from '#models/game'
 
 defineProps({
   user: {
@@ -17,6 +19,10 @@ defineProps({
     type: Array as () => Tournament[],
     default: () => [],
   },
+  favoriteGames: {
+    type: Array as () => Game[],
+    default: () => [],
+  },
 })
 </script>
 <template>
@@ -24,12 +30,13 @@ defineProps({
     <p class="text-4xl font-semibold">Mon profil</p>
     <GeneralInfoUser :user="user" />
 
-    <p class="text-2xl font-semibold mt-12">Mes tournois</p>
+    <p class="text-2xl font-semibold mt-12">Mes prochains tournois</p>
     <div v-if="!tournaments || tournaments.length === 0" class="text-center py-8 text-gray-500">
       Aucun tournoi en cours.
     </div>
     <div v-else class="py-8">
       <Carousel
+        snapAlign="start"
         :items-to-show="4"
         :wrap-around="false"
         :breakpoints="{
@@ -46,6 +53,36 @@ defineProps({
           class="flex justify-center px-4"
         >
           <TournamentCard :tournament="tournament" />
+        </Slide>
+        <template #addons>
+          <Navigation />
+        </template>
+      </Carousel>
+    </div>
+
+    <p class="text-2xl font-semibold mt-12">Mes jeux favoris</p>
+    <div v-if="!favoriteGames || favoriteGames.length === 0" class="text-center py-8 text-gray-500">
+      Aucun jeu favori.
+    </div>
+    <div v-else class="py-8">
+      <Carousel
+        snapAlign="start"
+        :items-to-show="6"
+        :wrap-around="false"
+        :breakpoints="{
+          1280: { itemsToShow: 6 },
+          1024: { itemsToShow: 4 },
+          768: { itemsToShow: 3 },
+          0: { itemsToShow: 2 },
+        }"
+        class="game-carousel"
+      >
+        <Slide
+          v-for="game in favoriteGames"
+          :key="game.id"
+          class="flex justify-center px-4"
+        >
+          <GameCard :game="game" />
         </Slide>
         <template #addons>
           <Navigation />

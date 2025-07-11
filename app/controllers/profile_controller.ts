@@ -10,11 +10,22 @@ export default class ProfileController {
       await user.load('teams', (query) => {
         query.preload('tournament')
       })
+      await user.load('favoriteGames')
 
       tournaments = user.teams
         .map((team) => team.tournament)
         .filter((tournament) => tournament && tournament.endDate >= DateTime.now())
         .sort((a, b) => a.endDate.valueOf() - b.endDate.valueOf())
+
+      const favoriteGames = user.favoriteGames
+        .slice()
+        .sort((a, b) => a.name.localeCompare(b.name))
+
+      return inertia.render('profile/index', {
+        user: user,
+        tournaments: tournaments,
+        favoriteGames: favoriteGames,
+      })
     }
     return inertia.render('profile/index', {
       user: user,
