@@ -7,6 +7,8 @@ import { DateTime } from 'luxon'
 import { getAllTournamentsWithoutImages } from '../repository/tournament.js'
 import Team from '#models/team'
 import Match from '#models/match'
+import Channel from '#models/channel'
+import { ChannelEntityType } from '#enums/channel_entity_type'
 
 export default class TournamentsController {
   public async index({ inertia }: HttpContext) {
@@ -423,6 +425,38 @@ export default class TournamentsController {
 
     // Add user to the team
     await team.related('players').attach([user.id])
+
+    if (tournament.numberPlayersPerTeam > 1) {
+      // Create a channel for the team if don't exist
+      let channelTeam = await Channel.query().where('team_id', team.id).first()
+      if (!channelTeam) {
+        channelTeam = await Channel.create({
+          name: `${tournament.name} - ${team.name}`,
+          entityType: ChannelEntityType.Team,
+          teamId: team.id,
+          tournamentId: null,
+        })
+
+        // Add the team to the channel
+        await channelTeam.related('team').associate(team)
+        await channelTeam.save()
+      }
+
+      // Create a channel for the tournament if don't exist, and add the tournament to the channel
+      let channelTournament = await Channel.query().where('tournament_id', params.id).first()
+      if (!channelTournament) {
+        channelTournament = await Channel.create({
+          name: tournament.name,
+          entityType: ChannelEntityType.Tournament,
+          tournamentId: tournament.id,
+          teamId: null,
+        })
+
+        // Add the tournament to the channel
+        await channelTournament.related('tournament').associate(tournament)
+        await channelTournament.save()
+      }
+    }
 
     // Return updated data for dynamic refresh
     const updatedTeams = await Team.query().where('tournament_id', params.id).preload('players')
