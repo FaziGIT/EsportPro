@@ -69,7 +69,7 @@ const handleGameClick = (game: SimpleGame) => {
   <div
     class="bg-[#779E7E] lg:w-[114px] h-full fixed left-0 top-0 flex-col items-center pt-3 shadow-md z-50 hidden lg:flex"
     @click="
-      isDropdownOpen = false
+      isDropdownOpen = false;
       isTournamentsDropdownOpen = false
     "
   >
@@ -137,7 +137,7 @@ const handleGameClick = (game: SimpleGame) => {
               v-for="tournament in hiddenTournaments"
               :key="tournament.id"
               @click.stop="
-                handleTournamentClick(tournament)
+                handleTournamentClick(tournament);
                 isTournamentsDropdownOpen = false
               "
               class="flex items-center space-x-3 px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors duration-150"
@@ -219,7 +219,7 @@ const handleGameClick = (game: SimpleGame) => {
               v-for="game in hiddenGames"
               :key="game.id"
               @click.stop="
-                handleGameClick(game)
+                handleGameClick(game);
                 isDropdownOpen = false
               "
               class="flex items-center space-x-3 px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors duration-150"
@@ -245,7 +245,7 @@ const handleGameClick = (game: SimpleGame) => {
   <div
     v-if="isDropdownOpen || isTournamentsDropdownOpen"
     @click="
-      isDropdownOpen = false
+      isDropdownOpen = false;
       isTournamentsDropdownOpen = false
     "
     class="fixed inset-0 z-[40]"
