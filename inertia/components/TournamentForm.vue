@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, defineEmits, defineProps, ref, watch } from 'vue'
+import { computed, defineEmits, defineProps, ref, watch, onUnmounted } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import { useI18n } from '../../resources/js/composables/useI18n'
 import { TierType } from '#enums/tier_type'
@@ -214,7 +214,6 @@ watch(
   }
 )
 
-// Reset form when tournament data changes (for edit mode)
 watch(
   () => props.tournament,
   () => {
@@ -228,6 +227,27 @@ watch(
   },
   { deep: true }
 )
+
+function handleEscapeKey(event: KeyboardEvent) {
+  if (event.key === 'Escape' && props.isOpen) {
+    closeModal()
+  }
+}
+
+watch(
+  () => props.isOpen,
+  (newValue) => {
+    if (newValue) {
+      document.addEventListener('keydown', handleEscapeKey)
+    } else {
+      document.removeEventListener('keydown', handleEscapeKey)
+    }
+  }
+)
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleEscapeKey)
+})
 </script>
 
 <template>
@@ -238,12 +258,15 @@ watch(
       <div
         class="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
         @click="closeModal"
+        @keydown.enter.stop
       >
         <!-- Modal content with transition -->
         <Transition name="modal-content" appear>
           <div
             class="bg-white rounded-lg shadow-xl w-full max-w-[800px] h-[600px] sm:h-[600px] max-h-[90vh] flex flex-col transform mx-auto"
             @click.stop
+            @keydown.enter="submitForm"
+            tabindex="-1"
           >
             <!-- Modal header -->
             <div
