@@ -1,5 +1,9 @@
 import { usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
+import Game from '#models/game'
+import Tournament from '#models/tournament'
+import Team from '#models/team'
+import Match from '#models/match'
 
 export function usePageProps<T = any>() {
   const page = usePage()
@@ -19,8 +23,8 @@ export function usePageProps<T = any>() {
 export function useUserData() {
   const { getProp } = usePageProps()
 
-  const userTournaments = computed(() => getProp('userTournaments') || [])
-  const userGames = computed(() => getProp('userGames') || [])
+  const userTournaments = computed(() => getProp('userTournaments') as Tournament[])
+  const userGames = computed(() => getProp('userGames') as Game[])
 
   return {
     userTournaments,
@@ -31,8 +35,8 @@ export function useUserData() {
 export function useGameData() {
   const { getProp } = usePageProps()
 
-  const game = computed(() => getProp('game'))
-  const tournaments = computed(() => getProp('tournaments') || [])
+  const game = computed(() => getProp('game') as Game)
+  const tournaments = computed(() => getProp('tournaments') as Tournament[])
 
   return {
     game,
@@ -43,9 +47,9 @@ export function useGameData() {
 export function useTournamentData() {
   const { getProp } = usePageProps()
 
-  const tournament = computed(() => getProp('tournament'))
-  const teams = computed(() => getProp('teams') || [])
-  const matches = computed(() => getProp('matches') || [])
+  const tournament = computed(() => getProp('tournament') as Tournament)
+  const teams = computed(() => getProp('teams') as Team[])
+  const matches = computed(() => getProp('matches') as Match[])
 
   return {
     tournament,
