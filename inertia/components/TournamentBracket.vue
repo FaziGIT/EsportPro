@@ -164,7 +164,9 @@ const tournamentStarted = computed(() => {
 const bracketRounds = computed(() => {
   // If tournament hasn't been started yet, show TBD placeholder bracket
   if (!tournamentStarted.value) {
-    return generateTBDBracket(props.tournament.numberParticipants)
+    // Use the actual number of teams registered, not the maximum participants
+    const actualParticipants = props.teams.length > 0 ? props.teams.length : props.tournament.numberParticipants
+    return generateTBDBracket(actualParticipants)
   }
   
   // If tournament has been started, organize real matches by rounds
@@ -173,17 +175,26 @@ const bracketRounds = computed(() => {
   }
   
   // If tournament started but no matches yet, show TBD
-  return generateTBDBracket(props.tournament.numberParticipants)
+  const actualParticipants = props.teams.length > 0 ? props.teams.length : props.tournament.numberParticipants
+  return generateTBDBracket(actualParticipants)
 })
 
 // Generate TBD bracket structure (before tournament starts)
 const generateTBDBracket = (participants: number): Match[][] => {
   const rounds: Match[][] = []
-  let currentRoundSize = participants
+  
+  // For a proper single elimination tournament, we need to calculate the correct bracket size
+  // The bracket should accommodate the number of participants, using powers of 2
+  let bracketSize = 1
+  while (bracketSize < participants) {
+    bracketSize *= 2
+  }
+  
+  let currentRoundSize = bracketSize
   
   while (currentRoundSize > 1) {
     const roundMatches: Match[] = []
-    const matchesInRound = Math.ceil(currentRoundSize / 2)
+    const matchesInRound = currentRoundSize / 2
     
     for (let i = 0; i < matchesInRound; i++) {
       const match: Match = {
@@ -199,7 +210,7 @@ const generateTBDBracket = (participants: number): Match[][] => {
     }
     
     rounds.push(roundMatches)
-    currentRoundSize = Math.ceil(currentRoundSize / 2)
+    currentRoundSize = currentRoundSize / 2
   }
   
   return rounds
@@ -266,18 +277,26 @@ const isLoser = (team: Team | undefined, match: Match): boolean => {
 }
 
 const getRoundName = (roundIndex: number, totalRounds: number): string => {
+  // Determine round names based on total rounds
   if (totalRounds === 1) return 'Final'
+  
   if (totalRounds === 2) {
     return roundIndex === 0 ? 'Semi Finals' : 'Final'
   }
+  
   if (totalRounds === 3) {
     return roundIndex === 0 ? 'Quarter Finals' : roundIndex === 1 ? 'Semi Finals' : 'Final'
   }
   
-  // For more rounds, use generic naming
+  if (totalRounds === 4) {
+    return roundIndex === 0 ? 'Round of 16' : roundIndex === 1 ? 'Quarter Finals' : roundIndex === 2 ? 'Semi Finals' : 'Final'
+  }
+  
+  // For more rounds, use generic naming from the end
   if (roundIndex === totalRounds - 1) return 'Final'
   if (roundIndex === totalRounds - 2) return 'Semi Finals'
   if (roundIndex === totalRounds - 3) return 'Quarter Finals'
+  if (roundIndex === totalRounds - 4) return 'Round of 16'
   
   return `Round ${roundIndex + 1}`
 }

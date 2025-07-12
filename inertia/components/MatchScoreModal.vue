@@ -93,7 +93,6 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { router } from '@inertiajs/vue3'
 import { useI18n } from '../../resources/js/composables/useI18n'
 import { getCsrfToken } from '~/utils'
 
