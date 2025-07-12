@@ -301,7 +301,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue'
-import { router, usePage } from '@inertiajs/vue3'
+import { router } from '@inertiajs/vue3'
 import Layout from '~/components/layouts/layout.vue'
 import { DateTime } from 'luxon'
 import TournamentBracket from '../../components/TournamentBracket.vue'
@@ -313,7 +313,7 @@ import { useTournamentData } from '../../../resources/js/composables/usePageProp
 import { useChatStore } from '~/store/chat_store'
 
 const { t } = useI18n()
-const { user } = useAuth()
+const { user, isAdmin } = useAuth()
 const { tournament, teams: initialTeams, matches: initialMatches } = useTournamentData()
 const chatStore = useChatStore()
 
@@ -348,34 +348,8 @@ interface Match {
   tournamentId: string
 }
 
-interface Tournament {
-  id: string
-  name: string
-  format: string
-  price: number
-  rules: string
-  numberPlayersPerTeam: number
-  numberParticipants: number
-  tier: string
-  region: string
-  address: string
-  city: string
-  country: string
-  postalCode: string
-  startDate: DateTime | string | Date
-  endDate: DateTime | string | Date
-  isStarted: boolean
-  creator?: {
-    id: string
-    email: string
-    pseudo?: string
-  }
-}
-
-const { props } = usePage()
 const teams = ref(initialTeams.value as Team[])
 const matches = ref(initialMatches.value as Match[])
-const isAdmin = computed(() => props.isAdmin as boolean)
 
 // Team editing state
 const editingTeamId = ref<string | null>(null)
@@ -392,10 +366,7 @@ const isStarting = ref(false)
 const allTeams = computed(() => {
   // Sort by createdAt (or id)
   return [...teams.value].sort((a, b) => {
-    // If you have createdAt as a Date or ISO string:
     return new Date(a.createdAt || '').getTime() - new Date(b.createdAt || '').getTime()
-    // Ou, si tu veux trier par id (mais ce n'est pas toujours séquentiel) :
-    // return a.id.localeCompare(b.id)
   })
 })
 
