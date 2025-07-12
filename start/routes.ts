@@ -66,6 +66,7 @@ router.get('/api/games', [GamesController, 'api'])
 router.get('/games/:id/image', [GamesController, 'getImageFromGame'])
 router.get('/games/:id', [GamesController, 'show'])
 router.post('/games/new', [GamesController, 'store']).use(middleware.auth())
+router.put('/games/:id/edit', [GamesController, 'update']).use(middleware.auth())
 router
   .post('/games/:id/toggle-favorite', [GamesController, 'toggleFavorite'])
   .use(middleware.auth())

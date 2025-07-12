@@ -26,5 +26,8 @@
   "totalTournaments": "Total des tournois",
   "activeTournaments": "Tournois actifs",
   "upcomingTournaments": "Tournois à venir",
-  "finishedTournaments": "Tournois terminés"
+  "finishedTournaments": "Tournois terminés",
+  "editGame": "Modifier le jeu",
+  "update": "Modifier",
+  "currentImage": "Image actuelle"
 }

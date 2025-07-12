@@ -26,5 +26,8 @@
   "totalTournaments": "Total tournaments",
   "activeTournaments": "Active tournaments",
   "upcomingTournaments": "Upcoming tournaments",
-  "finishedTournaments": "Finished tournaments"
+  "finishedTournaments": "Finished tournaments",
+  "editGame": "Edit Game",
+  "update": "Update",
+  "currentImage": "Current image"
 }

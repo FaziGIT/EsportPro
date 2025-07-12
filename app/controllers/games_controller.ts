@@ -3,7 +3,7 @@ import Game from '#models/game'
 import { BufferToUint8Array, Uint8ArrayToBuffer } from '#services/transform_image.ts'
 import { getAllGamesWithoutImages } from '../repository/game.js'
 import { getAllTournamentsWithoutImages } from '../repository/tournament.js'
-import { gameValidator } from '#validators/game'
+import { gameUpdateValidator, gameValidator } from '#validators/game'
 import User from '#models/user'
 
 export default class GamesController {
@@ -88,6 +88,33 @@ export default class GamesController {
     }
 
     return response.status(200).json({ message })
+  }
+
+  public async update({ params, request, i18n, response }: HttpContext) {
+    if (!params.id) {
+      throw new Error('Game ID is required')
+    }
+
+    const game = await Game.query().where('id', params.id).firstOrFail()
+
+    const data = await request.validateUsing(gameUpdateValidator, {
+      messagesProvider: i18n.createMessagesProvider(),
+    })
+
+    const gameModel: Partial<Game> = {
+      name: data.name,
+      platform: data.platform,
+    }
+
+    // If the image is provided, we read the temporary file and convert it to a Uint8Array
+    if (data.image) {
+      gameModel.image = BufferToUint8Array(data.image.tmpPath!)
+    }
+
+    // Update the game
+    await game.merge(gameModel).save()
+
+    return response.redirect().back()
   }
 
   /**

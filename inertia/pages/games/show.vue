@@ -1,11 +1,145 @@
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+import { router } from '@inertiajs/vue3'
+import Layout from '~/components/layouts/layout.vue'
+import { DateTime } from 'luxon'
+import imageNotFound from '~/img/Image-not-found.png'
+import { useI18n } from '../../../resources/js/composables/useI18n'
+import { useGameData } from '../../../resources/js/composables/usePageProps'
+import { useAuth } from '../../../resources/js/composables/useAuth'
+import GameForm from '~/components/GameForm.vue'
+import { GameStatus } from '#types/game'
+
+const { t } = useI18n()
+const { user } = useAuth()
+const { game, tournaments } = useGameData()
+
+// Modal state
+const isEditModalOpen = ref(false)
+
+interface Tournament {
+  id: string
+  name: string
+  format: string
+  price: number
+  tier: string
+  numberParticipants: number
+  startDate: DateTime | string | Date
+  endDate: DateTime | string | Date
+}
+
+const imageSource = computed(() => {
+  if (game.value?.id) {
+    return `/games/${game.value.id}/image`
+  }
+  return imageNotFound
+})
+
+const handleImageError = (event: Event) => {
+  const target = event.target as HTMLImageElement
+  if (target) {
+    target.src = imageNotFound
+  }
+}
+
+const handleTournamentImageError = (event: Event) => {
+  const target = event.target as HTMLImageElement
+  if (target) {
+    target.src = imageNotFound
+  }
+}
+
+const goToTournament = (tournamentId: string) => {
+  router.visit(`/tournaments/${tournamentId}`)
+}
+
+const isTournamentFinished = (tournament: Tournament): boolean => {
+  try {
+    const endDate = DateTime.fromISO(String(tournament.endDate))
+    return DateTime.now() > endDate
+  } catch (error) {
+    return false
+  }
+}
+
+const isTournamentStarted = (tournament: Tournament): boolean => {
+  try {
+    const startDate = DateTime.fromISO(String(tournament.startDate))
+    return DateTime.now() >= startDate && !isTournamentFinished(tournament)
+  } catch (error) {
+    return false
+  }
+}
+
+const formatDate = (date: DateTime | string | Date): string => {
+  try {
+    const dateTime = DateTime.fromISO(String(date))
+    return dateTime.toFormat('dd/MM/yyyy HH:mm')
+  } catch (error) {
+    return 'N/A'
+  }
+}
+
+// Statistics computed properties
+const activeTournamentsCount = computed(() => {
+  return tournaments.value?.filter(
+    (tournament: Tournament) => isTournamentStarted(tournament) && !isTournamentFinished(tournament)
+  ).length || 0
+})
+
+const upcomingTournamentsCount = computed(() => {
+  return tournaments.value?.filter(
+    (tournament: Tournament) => !isTournamentStarted(tournament) && !isTournamentFinished(tournament)
+  ).length || 0
+})
+
+const finishedTournamentsCount = computed(() => {
+  return tournaments.value?.filter((tournament: Tournament) => isTournamentFinished(tournament)).length || 0
+})
+
+// Modal functions
+const navigateToEdit = () => {
+  isEditModalOpen.value = true
+}
+
+const closeEditModal = () => {
+  isEditModalOpen.value = false
+}
+</script>
 <template>
   <Layout>
-    <div class="px-6 py-6">
+    <div class="px-4 sm:px-6 py-6">
       <!-- Header with title -->
-      <div class="flex justify-between items-start mb-6">
-        <h1 class="text-4xl font-semibold text-gray-900">{{ game.name }}</h1>
-        <div class="text-lg font-medium text-gray-600 bg-gray-100 px-4 py-2 rounded-lg">
-          {{ game.platform }}
+      <div class="flex flex-col sm:flex-row justify-between items-start mb-6 gap-4">
+        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-900">{{ game.name }}</h1>
+        <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 items-center w-full sm:w-auto">
+          <!-- Edit button (visible only when user is logged in) -->
+          <button
+            v-if="user"
+            @click="navigateToEdit"
+            class="font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition bg-gray-600 text-white hover:bg-gray-700 flex items-center justify-center gap-2 text-sm sm:text-base w-full sm:w-auto"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+              ></path>
+            </svg>
+            <span class="hidden sm:inline">{{ t('game.editGame') }}</span>
+            <span class="sm:hidden">{{ t('game.editGame') }}</span>
+          </button>
+          
+          <div class="text-sm sm:text-base lg:text-lg font-medium text-gray-600 bg-gray-100 px-3 sm:px-4 py-2 rounded-lg text-center w-full sm:w-auto">
+            {{ game.platform }}
+          </div>
         </div>
       </div>
 
@@ -63,7 +197,7 @@
             <!-- Show tournaments grid when tournaments exist -->
             <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div
-                v-for="tournament in tournaments"
+                v-for="tournament in tournaments as Tournament[]"
                 :key="tournament.id"
                 class="relative border rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
                 @click="goToTournament(tournament.id)"
@@ -94,7 +228,7 @@
                     :src="`/tournaments/${tournament.id}/image`"
                     :alt="tournament.name"
                     class="w-full h-full object-cover"
-                    @error="(e) => handleTournamentImageError(e, tournament)"
+                    @error="handleTournamentImageError"
                   />
                 </div>
 
@@ -120,7 +254,7 @@
                     </div>
                     <div class="flex justify-between">
                       <span>{{ t('tournament.tier') }}:</span>
-                      <span class="font-medium">{{ formatTier(tournament.tier) }}</span>
+                      <span class="font-medium">{{ tournament.tier }}</span>
                     </div>
                     <div class="flex justify-between">
                       <span>{{ t('tournament.participants') }}:</span>
@@ -158,7 +292,7 @@
 
               <div class="flex justify-between items-center">
                 <span class="text-gray-600">{{ t('game.platform') }}:</span>
-                <span class="font-medium text-gray-900">{{ formatPlatform(game.platform) }}</span>
+                <span class="font-medium text-gray-900">{{ game.platform }}</span>
               </div>
 
               <div class="pt-4 border-t border-gray-200">
@@ -187,156 +321,17 @@
         </div>
       </div>
     </div>
+
+    <!-- Game Edit Modal -->
+    <GameForm
+      v-if="user"
+      :isOpen="isEditModalOpen"
+      :mode="GameStatus.EDIT"
+      :game="game"
+      @close="closeEditModal"
+    />
   </Layout>
 </template>
-
-<script setup lang="ts">
-import { computed } from 'vue'
-import { router } from '@inertiajs/vue3'
-import Layout from '~/components/layouts/layout.vue'
-import { DateTime } from 'luxon'
-import imageNotFound from '~/img/Image-not-found.png'
-import { useI18n } from '../../../resources/js/composables/useI18n'
-import { useGameData } from '../../../resources/js/composables/usePageProps'
-import { GamePlatform } from '#enums/game_platform'
-
-const { t } = useI18n()
-const { game, tournaments } = useGameData()
-
-interface Game {
-  id: string
-  name: string
-  platform: GamePlatform
-}
-
-interface Tournament {
-  id: string
-  name: string
-  format: string
-  price: number
-  tier: string
-  numberParticipants: number
-  startDate: DateTime | string | Date
-  endDate: DateTime | string | Date
-}
-
-const imageSource = computed(() => {
-  if (game.value?.id) {
-    return `/games/${game.value.id}/image`
-  }
-  return imageNotFound
-})
-
-const handleImageError = (event: Event) => {
-  const target = event.target as HTMLImageElement
-  if (target) {
-    target.src = imageNotFound
-  }
-}
-
-const handleTournamentImageError = (event: Event, tournament: Tournament) => {
-  const target = event.target as HTMLImageElement
-  if (target) {
-    target.src = imageNotFound
-  }
-}
-
-const goToTournament = (tournamentId: string) => {
-  router.visit(`/tournaments/${tournamentId}`)
-}
-
-const isTournamentFinished = (tournament: Tournament): boolean => {
-  try {
-    let endDate: DateTime
-    if (tournament.endDate instanceof DateTime) {
-      endDate = tournament.endDate
-    } else if (typeof tournament.endDate === 'string') {
-      endDate = DateTime.fromISO(tournament.endDate)
-    } else if (tournament.endDate instanceof Date) {
-      endDate = DateTime.fromJSDate(tournament.endDate)
-    } else {
-      return false
-    }
-    return DateTime.now() > endDate
-  } catch (error) {
-    return false
-  }
-}
-
-const isTournamentStarted = (tournament: Tournament): boolean => {
-  try {
-    let startDate: DateTime
-    if (tournament.startDate instanceof DateTime) {
-      startDate = tournament.startDate
-    } else if (typeof tournament.startDate === 'string') {
-      startDate = DateTime.fromISO(tournament.startDate)
-    } else if (tournament.startDate instanceof Date) {
-      startDate = DateTime.fromJSDate(tournament.startDate)
-    } else {
-      return false
-    }
-    return DateTime.now() >= startDate && !isTournamentFinished(tournament)
-  } catch (error) {
-    return false
-  }
-}
-
-const formatDate = (date: DateTime | string | Date): string => {
-  try {
-    let dateTime: DateTime
-    if (date instanceof DateTime) {
-      dateTime = date
-    } else if (typeof date === 'string') {
-      dateTime = DateTime.fromISO(date)
-    } else if (date instanceof Date) {
-      dateTime = DateTime.fromJSDate(date)
-    } else {
-      return 'N/A'
-    }
-    return dateTime.toFormat('dd/MM/yyyy HH:mm')
-  } catch (error) {
-    return 'N/A'
-  }
-}
-
-const formatTier = (tier: string): string => {
-  const tierMap: { [key: string]: string } = {
-    beginner: t('tournament.beginners'),
-    intermediate: t('tournament.intermediate'),
-    advanced: t('tournament.advanced'),
-    pro: t('tournament.professional'),
-  }
-  return tierMap[tier] || tier
-}
-
-const formatPlatform = (platform: GamePlatform): string => {
-  const platformMap: { [key: string]: string } = {
-    PC: 'PC',
-    PS4: 'PlayStation 4',
-    PS5: 'PlayStation 5',
-    XBOX: 'Xbox',
-    SWITCH: 'Nintendo Switch',
-  }
-  return platformMap[platform] || platform
-}
-
-// Statistics computed properties
-const activeTournamentsCount = computed(() => {
-  return tournaments.value?.filter(
-    (tournament: Tournament) => isTournamentStarted(tournament) && !isTournamentFinished(tournament)
-  ).length || 0
-})
-
-const upcomingTournamentsCount = computed(() => {
-  return tournaments.value?.filter(
-    (tournament: Tournament) => !isTournamentStarted(tournament) && !isTournamentFinished(tournament)
-  ).length || 0
-})
-
-const finishedTournamentsCount = computed(() => {
-  return tournaments.value?.filter((tournament: Tournament) => isTournamentFinished(tournament)).length || 0
-})
-</script>
 
 <style scoped>
 .line-clamp-1 {
