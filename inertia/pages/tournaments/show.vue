@@ -229,7 +229,7 @@
               :teams="teams" 
               :matches="matches" 
               :tournament="tournament"
-              :user="user"
+              :user="user as User | null"
               :isAdmin="isAdmin"
               @matchUpdated="handleMatchUpdated"
             />
@@ -308,13 +308,13 @@ import TournamentBracket from '../../components/TournamentBracket.vue'
 import { getCsrfToken } from '~/utils'
 import imageNotFound from '~/img/Image-not-found.png'
 import { useI18n } from '../../../resources/js/composables/useI18n'
-//import { useAuth } from '../../../resources/js/composables/useAuth'
-//import { useTournamentData } from '../../../resources/js/composables/usePageProps'
+import { useAuth } from '../../../resources/js/composables/useAuth'
+import { useTournamentData } from '../../../resources/js/composables/usePageProps'
 import { useChatStore } from '~/store/chat_store'
 
 const { t } = useI18n()
-//const { user } = useAuth()
-//const { tournament, teams: initialTeams, matches: initialMatches } = useTournamentData()
+const { user } = useAuth()
+const { tournament, teams: initialTeams, matches: initialMatches } = useTournamentData()
 const chatStore = useChatStore()
 
 interface User {
@@ -373,10 +373,8 @@ interface Tournament {
 }
 
 const { props } = usePage()
-const tournament = props.tournament as Tournament
-const teams = ref(props.teams as Team[])
-const matches = ref(props.matches as Match[])
-const user = computed(() => props.user as User | null)
+const teams = ref(initialTeams.value as Team[])
+const matches = ref(initialMatches.value as Match[])
 const isAdmin = computed(() => props.isAdmin as boolean)
 
 // Team editing state
@@ -463,16 +461,16 @@ const saveTeamName = async (team: Team) => {
 }
 
 const tournamentStarted = computed(() => {
-  if (!tournament.startDate) return false
+  if (!tournament.value.startDate) return false
 
   try {
     let startDate: DateTime
-    if (tournament.startDate instanceof DateTime) {
-      startDate = tournament.startDate
-    } else if (typeof tournament.startDate === 'string') {
-      startDate = DateTime.fromISO(tournament.startDate)
-    } else if (tournament.startDate instanceof Date) {
-      startDate = DateTime.fromJSDate(tournament.startDate)
+    if (tournament.value.startDate instanceof DateTime) {
+      startDate = tournament.value.startDate
+    } else if (typeof tournament.value.startDate === 'string') {
+      startDate = DateTime.fromISO(tournament.value.startDate)
+    } else if (tournament.value.startDate instanceof Date) {
+      startDate = DateTime.fromJSDate(tournament.value.startDate)
     } else {
       return false
     }
@@ -490,26 +488,26 @@ const isTournamentFull = computed(() => {
     return total + (team.players?.length || 0)
   }, 0)
   
-  return totalPlayers >= tournament.numberParticipants
+  return totalPlayers >= tournament.value.numberParticipants
 })
 
 const canStartTournament = computed(() => {
-  if (!user.value || tournament.isStarted) return false
+  if (!user.value || tournament.value.isStarted) return false
   
   // Check if user is admin or creator
   const userIsAdmin = isAdmin.value
-  const userIsCreator = tournament.creator?.id === user.value.id
+  const userIsCreator = tournament.value.creator?.id === user.value.id
   if (!userIsAdmin && !userIsCreator) return false
   
   // Check if it's past the start date
   try {
     let startDate: DateTime
-    if (tournament.startDate instanceof DateTime) {
-      startDate = tournament.startDate
-    } else if (typeof tournament.startDate === 'string') {
-      startDate = DateTime.fromISO(tournament.startDate)
-    } else if (tournament.startDate instanceof Date) {
-      startDate = DateTime.fromJSDate(tournament.startDate)
+    if (tournament.value.startDate instanceof DateTime) {
+      startDate = tournament.value.startDate
+    } else if (typeof tournament.value.startDate === 'string') {
+      startDate = DateTime.fromISO(tournament.value.startDate)
+    } else if (tournament.value.startDate instanceof Date) {
+      startDate = DateTime.fromJSDate(tournament.value.startDate)
     } else {
       return false
     }
@@ -532,7 +530,7 @@ const joinTournament = async () => {
     // Get CSRF token from Inertia props
     const token = getCsrfToken()
 
-    const response = await fetch(`/tournaments/${tournament.id}/join`, {
+    const response = await fetch(`/tournaments/${tournament.value.id}/join`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -587,7 +585,7 @@ const leaveTournament = async () => {
   try {
     const token = getCsrfToken()
 
-    const response = await fetch(`/tournaments/${tournament.id}/leave`, {
+    const response = await fetch(`/tournaments/${tournament.value.id}/leave`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -631,7 +629,7 @@ const startTournament = async () => {
 
   try {
     const token = getCsrfToken()
-    const response = await fetch(`/tournaments/${tournament.id}/launch`, {
+    const response = await fetch(`/tournaments/${tournament.value.id}/launch`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -643,7 +641,7 @@ const startTournament = async () => {
     if (response.ok) {
       const data = await response.json()
       matches.value = data.matches
-      tournament.isStarted = true
+      tournament.value.isStarted = true
       
       // Show success message
       showSuccessMessage.value = true
@@ -668,8 +666,8 @@ const redirectToLogin = () => {
 }
 
 const imageSource = computed(() => {
-  if (tournament.id) {
-    return `/tournaments/${tournament.id}/image`
+  if (tournament.value.id) {
+    return `/tournaments/${tournament.value.id}/image`
   }
 
   return imageNotFound
