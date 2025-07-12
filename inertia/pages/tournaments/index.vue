@@ -95,13 +95,13 @@ const closeModal = () => {
 
 <template>
   <Layout>
-    <div class="text-4xl font-semibold text-center py-6">{{ t('tournament.tournaments') }}</div>
+    <div class="text-2xl sm:text-3xl lg:text-4xl font-semibold text-center py-6">{{ t('tournament.tournaments') }}</div>
 
-    <div class="px-6 mb-4 flex justify-between items-center gap-4">
-      <Menu as="div" class="relative inline-block text-left">
+    <div class="px-4 sm:px-6 mb-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <Menu as="div" class="relative inline-block text-left w-full sm:w-auto">
         <div>
           <MenuButton
-            class="inline-flex w-48 justify-between rounded-md bg-white border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5C4741]"
+            class="inline-flex w-full sm:w-48 justify-between rounded-md bg-white border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5C4741]"
           >
             {{ selectedLabel }}
             <ChevronDown />
@@ -117,7 +117,7 @@ const closeModal = () => {
           leave-to-class="transform scale-95 opacity-0"
         >
           <MenuItems
-            class="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-50"
+            class="absolute right-0 mt-2 w-full sm:w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none z-50"
           >
             <div class="px-1 py-1">
               <MenuItem v-for="option in options" :key="option.id" v-slot="{ active }">
@@ -139,17 +139,17 @@ const closeModal = () => {
       <button
         v-if="user"
         @click="openModal"
-        class="font-semibold px-6 py-3 rounded-lg transition bg-[#5C4741] hover:bg-[#7b5f57] text-white cursor-pointer"
+        class="font-semibold px-4 sm:px-6 py-2 sm:py-3 rounded-lg transition bg-[#5C4741] hover:bg-[#7b5f57] text-white cursor-pointer text-sm sm:text-base w-full sm:w-auto"
       >
         {{ t('tournament.newTournament') }}
       </button>
     </div>
 
     <!-- InfiniteScroll container -->
-    <div ref="container" class="h-[calc(100vh-200px)] overflow-y-auto px-6">
-      <div class="grid gap-6 grid-cols-[repeat(auto-fit,minmax(350px,1fr))]">
+    <div ref="container" class="h-[calc(100vh-200px)] overflow-y-auto px-4 sm:px-6">
+      <div class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center">
         <TournamentCard
-          class="my-6"
+          class="my-6 w-full max-w-sm"
           v-for="tournament in tournaments"
           :key="tournament.id"
           :tournament="tournament as Tournament"
