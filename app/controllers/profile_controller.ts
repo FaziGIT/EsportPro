@@ -106,7 +106,7 @@ export default class ProfileController {
         .first()
 
       if (!tournament) {
-        return response.notFound('Tournoi non trouvé')
+        return response.notFound('Tournament not found')
       }
 
       // Vérifier si les équipes ont des joueurs
@@ -117,7 +117,7 @@ export default class ProfileController {
       if (hasTeamsWithPlayers) {
         return response.status(400).json({
           error: true,
-          message: 'Ce tournoi possède des équipes avec des joueurs et ne peut pas être supprimé.',
+          message: 'This tournament has teams with players and cannot be refused.',
         })
       }
 
@@ -130,11 +130,10 @@ export default class ProfileController {
       await tournament.delete()
       return response.redirect().back()
     } catch (error) {
-      console.error('Erreur lors de la suppression du tournoi:', error)
+      console.error('An error occurred while refusing the tournament:', error)
       return response.status(400).json({
         error: true,
-        message:
-          'Une erreur est survenue lors de la suppression du tournoi: ' + (error.message || ''),
+        message: 'An error occurred while refusing the tournament' + (error.message || ''),
       })
     }
   }

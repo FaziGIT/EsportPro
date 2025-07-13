@@ -14,34 +14,61 @@ defineProps({
 
 const showConfirmRefuse = ref(false)
 const tournamentToRefuse = ref('')
-const errorMessage = ref('')
-const showError = ref(false)
+const showNotification = ref(false)
+const notificationMessage = ref('')
+const notificationType = ref('success') // 'success' ou 'error'
 
 function validateTournament(id: string) {
-  router.post(`/profile/tournaments/${id}/validate`)
+  // Gérer le bouton de validation
+  router.post(`/profile/tournaments/${id}/validate`, {}, {
+    preserveScroll: true,
+    onSuccess: () => {
+      showNotification.value = true
+      notificationMessage.value = 'Le tournoi a été validé avec succès'
+      notificationType.value = 'success'
+      setTimeout(() => {
+        showNotification.value = false
+      }, 5000)
+    },
+    onError: () => {
+      showNotification.value = true
+      notificationMessage.value = 'Une erreur est survenue lors de la validation du tournoi'
+      notificationType.value = 'error'
+      setTimeout(() => {
+        showNotification.value = false
+      }, 5000)
+    }
+  })
 }
 
 function openRefuseConfirmation(id: string) {
   tournamentToRefuse.value = id
   showConfirmRefuse.value = true
-  errorMessage.value = ''
-  showError.value = false
 }
 
 function refuseTournament() {
-  router.post(`/profile/tournaments/${tournamentToRefuse.value}/refuse`, {}, {
+  // Fermer la popup immédiatement
+  showConfirmRefuse.value = false
+  const tournamentId = tournamentToRefuse.value
+  tournamentToRefuse.value = ''
+
+  router.post(`/profile/tournaments/${tournamentId}/refuse`, {}, {
+    preserveScroll: true,
     onSuccess: () => {
-      showConfirmRefuse.value = false
-      tournamentToRefuse.value = ''
+      showNotification.value = true
+      notificationMessage.value = 'Le tournoi a été refusé avec succès'
+      notificationType.value = 'success'
+      setTimeout(() => {
+        showNotification.value = false
+      }, 5000)
     },
-    onError: (errors) => {
-      console.error('Erreur de refus:', errors)
-      if (errors.message) {
-        errorMessage.value = errors.message
-      } else {
-        errorMessage.value = "Une erreur s'est produite lors de la suppression du tournoi."
-      }
-      showError.value = true
+    onError: () => {
+      showNotification.value = true
+      notificationMessage.value = 'Une erreur est survenue lors du refus du tournoi'
+      notificationType.value = 'error'
+      setTimeout(() => {
+        showNotification.value = false
+      }, 5000)
     }
   })
 }
@@ -49,13 +76,26 @@ function refuseTournament() {
 function cancelRefuse() {
   showConfirmRefuse.value = false
   tournamentToRefuse.value = ''
-  errorMessage.value = ''
-  showError.value = false
 }
 </script>
 
 <template>
   <div class="mt-12">
+    <div v-if="showNotification"
+         class="mb-4 px-4 py-3 rounded flex items-center"
+         :class="notificationType === 'success' ?
+                'bg-green-100 border border-green-400 text-green-700' :
+                'bg-red-100 border border-red-400 text-red-700'">
+      <span>{{ notificationMessage }}</span>
+      <button
+        @click="showNotification = false"
+        class="ml-auto hover:opacity-70 cursor-pointer"
+        :class="notificationType === 'success' ? 'text-green-500' : 'text-red-500'"
+      >
+        ✕
+      </button>
+    </div>
+
     <p class="text-2xl font-semibold mb-4">Tournois en attente de validation</p>
 
     <div v-if="pendingTournaments.length === 0" class="text-center py-8 text-gray-500">
@@ -126,19 +166,15 @@ function cancelRefuse() {
           Êtes-vous sûr de vouloir refuser ce tournoi ? Cette action est irréversible.
         </p>
 
-        <!-- Message d'erreur -->
-        <div v-if="showError" class="mb-6 p-3 bg-red-100 text-red-700 rounded-md text-sm">
-          {{ errorMessage }}
-        </div>
-
         <div class="flex justify-end gap-2">
-          <Button @click="refuseTournament" :use-redirection="false" value="Valider"/>
+          <Button @click="refuseTournament" :use-redirection="false" color="#E74C3C" value="Refuser"/>
           <Button @click="cancelRefuse" :use-redirection="false" color="#CBD3CD" text-color="#000000" value="Annuler"/>
         </div>
       </div>
     </div>
   </div>
 </template>
+
 <style scoped>
 .max-h-96 {
   will-change: transform;
