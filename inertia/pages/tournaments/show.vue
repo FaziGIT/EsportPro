@@ -20,26 +20,68 @@
       <!-- Header with title and join button -->
       <div class="flex justify-between items-start mb-6">
         <h1 class="text-4xl font-semibold text-gray-900">{{ tournament.name }}</h1>
-        <button
-          v-if="!userHasJoined && !tournamentStarted && user"
-          @click="joinTournament"
-          :disabled="isJoining"
-          class="font-semibold px-6 py-3 rounded-lg transition bg-[#5C4741] text-white hover:bg-[#7b5f57] disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {{ isJoining ? t('tournament.joining') : t('tournament.join') }}
-        </button>
-        <button
-          v-else-if="!user"
-          @click="redirectToLogin"
-          class="font-semibold px-6 py-3 rounded-lg transition bg-[#5C4741] text-white hover:bg-[#7b5f57]"
-        >
-          {{ t('tournament.loginToJoin') }}
-        </button>
-        <div
-          v-else-if="userHasJoined"
-          class="font-semibold px-6 py-3 rounded-lg bg-green-100 text-green-700"
-        >
-          {{ t('tournament.alreadyJoined') }}
+        <div class="flex gap-3">
+          <!-- Start Tournament Button (Admin or Creator only, after start date) -->
+          <button
+            v-if="canStartTournament"
+            @click="startTournament"
+            :disabled="isStarting"
+            class="font-semibold px-6 py-3 rounded-lg transition bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {{ isStarting ? t('tournament.starting') : t('tournament.startTournament') }}
+          </button>
+
+          <!-- Join Tournament Button -->
+          <button
+            v-if="!userHasJoined && !tournamentStarted && user && !tournament.isStarted && !isTournamentFull"
+            @click="joinTournament"
+            :disabled="isJoining"
+            class="font-semibold px-6 py-3 rounded-lg transition bg-[#5C4741] text-white hover:bg-[#7b5f57] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {{ isJoining ? t('tournament.joining') : t('tournament.join') }}
+          </button>
+
+          <!-- Leave Tournament Button -->
+          <button
+            v-if="userHasJoined && !tournament.isStarted"
+            @click="leaveTournament"
+            :disabled="isLeaving"
+            class="font-semibold px-6 py-3 rounded-lg transition bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {{ isLeaving ? t('tournament.leaving') : t('tournament.leave') }}
+          </button>
+          <button
+            v-else-if="!userHasJoined && !tournamentStarted && user && !tournament.isStarted && isTournamentFull"
+            disabled
+            class="font-semibold px-6 py-3 rounded-lg bg-red-100 text-red-700 cursor-not-allowed"
+          >
+            {{ t('tournament.full') }}
+          </button>
+          <button
+            v-else-if="!user && !tournament.isStarted && !isTournamentFull"
+            @click="redirectToLogin"
+            class="font-semibold px-6 py-3 rounded-lg transition bg-[#5C4741] text-white hover:bg-[#7b5f57]"
+          >
+            {{ t('tournament.loginToJoin') }}
+          </button>
+          <div
+            v-else-if="!user && !tournament.isStarted && isTournamentFull"
+            class="font-semibold px-6 py-3 rounded-lg bg-red-100 text-red-700"
+          >
+            {{ t('tournament.full') }}
+          </div>
+          <div
+            v-else-if="userHasJoined"
+            class="font-semibold px-6 py-3 rounded-lg bg-green-100 text-green-700"
+          >
+            {{ t('tournament.alreadyJoined') }}
+          </div>
+          <div
+            v-else-if="tournament.isStarted"
+            class="font-semibold px-6 py-3 rounded-lg bg-blue-100 text-blue-700"
+          >
+            {{ t('tournament.started') }}
+          </div>
         </div>
       </div>
 
@@ -183,7 +225,14 @@
 
           <!-- Bracket section -->
           <div class="w-full overflow-hidden">
-            <TournamentBracket :teams="teams" :matches="matches" :tournament="tournament" />
+            <TournamentBracket 
+              :teams="teams" 
+              :matches="matches" 
+              :tournament="tournament"
+              :user="user as User | null"
+              :isAdmin="isAdmin"
+              @matchUpdated="handleMatchUpdated"
+            />
           </div>
         </div>
 
@@ -264,9 +313,16 @@ import { useTournamentData } from '../../../resources/js/composables/usePageProp
 import { useChatStore } from '~/store/chat_store'
 
 const { t } = useI18n()
-const { user } = useAuth()
+const { user, isAdmin } = useAuth()
 const { tournament, teams: initialTeams, matches: initialMatches } = useTournamentData()
 const chatStore = useChatStore()
+
+interface User {
+  id: string
+  email: string
+  pseudo?: string
+  role: string
+}
 
 interface Player {
   id: string
@@ -303,15 +359,14 @@ const teamNameInput = ref<HTMLInputElement | null>(null)
 // UI state
 const showSuccessMessage = ref(false)
 const isJoining = ref(false)
+const isLeaving = ref(false)
+const isStarting = ref(false)
 
 // Generate all possible teams based on tournament participants
 const allTeams = computed(() => {
   // Sort by createdAt (or id)
   return [...teams.value].sort((a, b) => {
-    // If you have createdAt as a Date or ISO string:
     return new Date(a.createdAt || '').getTime() - new Date(b.createdAt || '').getTime()
-    // Ou, si tu veux trier par id (mais ce n'est pas toujours séquentiel) :
-    // return a.id.localeCompare(b.id)
   })
 })
 
@@ -377,16 +432,16 @@ const saveTeamName = async (team: Team) => {
 }
 
 const tournamentStarted = computed(() => {
-  if (!tournament.startDate) return false
+  if (!tournament.value.startDate) return false
 
   try {
     let startDate: DateTime
-    if (tournament.startDate instanceof DateTime) {
-      startDate = tournament.startDate
-    } else if (typeof tournament.startDate === 'string') {
-      startDate = DateTime.fromISO(tournament.startDate)
-    } else if (tournament.startDate instanceof Date) {
-      startDate = DateTime.fromJSDate(tournament.startDate)
+    if (tournament.value.startDate instanceof DateTime) {
+      startDate = tournament.value.startDate
+    } else if (typeof tournament.value.startDate === 'string') {
+      startDate = DateTime.fromISO(tournament.value.startDate)
+    } else if (tournament.value.startDate instanceof Date) {
+      startDate = DateTime.fromJSDate(tournament.value.startDate)
     } else {
       return false
     }
@@ -394,6 +449,42 @@ const tournamentStarted = computed(() => {
     return DateTime.now() >= startDate
   } catch (error) {
     console.error('Error checking tournament start date:', error)
+    return false
+  }
+})
+
+const isTournamentFull = computed(() => {
+  // Count total players across all teams
+  const totalPlayers = teams.value.reduce((total, team) => {
+    return total + (team.players?.length || 0)
+  }, 0)
+  
+  return totalPlayers >= tournament.value.numberParticipants
+})
+
+const canStartTournament = computed(() => {
+  if (!user.value || tournament.value.isStarted) return false
+  
+  // Check if user is admin or creator
+  const userIsAdmin = isAdmin.value
+  const userIsCreator = tournament.value.creator?.id === user.value.id
+  if (!userIsAdmin && !userIsCreator) return false
+  
+  // Check if it's past the start date
+  try {
+    let startDate: DateTime
+    if (tournament.value.startDate instanceof DateTime) {
+      startDate = tournament.value.startDate
+    } else if (typeof tournament.value.startDate === 'string') {
+      startDate = DateTime.fromISO(tournament.value.startDate)
+    } else if (tournament.value.startDate instanceof Date) {
+      startDate = DateTime.fromJSDate(tournament.value.startDate)
+    } else {
+      return false
+    }
+    
+    return DateTime.now() >= startDate
+  } catch (error) {
     return false
   }
 })
@@ -410,7 +501,7 @@ const joinTournament = async () => {
     // Get CSRF token from Inertia props
     const token = getCsrfToken()
 
-    const response = await fetch(`/tournaments/${tournament.id}/join`, {
+    const response = await fetch(`/tournaments/${tournament.value.id}/join`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -449,13 +540,105 @@ const joinTournament = async () => {
   }
 }
 
+const leaveTournament = async () => {
+  if (!user.value) {
+    redirectToLogin()
+    return
+  }
+
+  // Confirm before leaving
+  if (!confirm(t('tournament.confirmLeave'))) {
+    return
+  }
+
+  isLeaving.value = true
+
+  try {
+    const token = getCsrfToken()
+
+    const response = await fetch(`/tournaments/${tournament.value.id}/leave`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': token || '',
+        'Accept': 'application/json',
+      },
+    })
+
+    if (response.ok) {
+      const data = await response.json()
+
+      // Update local data dynamically
+      teams.value = data.teams
+      matches.value = data.matches
+
+      // Show success message
+      showSuccessMessage.value = true
+      setTimeout(() => {
+        showSuccessMessage.value = false
+      }, 5000)
+    } else {
+      const errorData = await response.json()
+      console.error('Error leaving tournament:', errorData.error)
+      alert(errorData.error || t('tournament.leaveError'))
+    }
+  } catch (error) {
+    console.error('Error leaving tournament:', error)
+    alert(t('tournament.leaveError'))
+  } finally {
+    isLeaving.value = false
+  }
+}
+
+const startTournament = async () => {
+  if (!user.value) {
+    redirectToLogin()
+    return
+  }
+
+  isStarting.value = true
+
+  try {
+    const token = getCsrfToken()
+    const response = await fetch(`/tournaments/${tournament.value.id}/launch`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': token || '',
+        'Accept': 'application/json',
+      },
+    })
+
+    if (response.ok) {
+      const data = await response.json()
+      matches.value = data.matches
+      tournament.value.isStarted = true
+      
+      // Show success message
+      showSuccessMessage.value = true
+      setTimeout(() => {
+        showSuccessMessage.value = false
+      }, 5000)
+    } else {
+      const errorData = await response.json()
+      console.error('Error starting tournament:', errorData.error)
+      alert(errorData.error || t('tournament.startError'))
+    }
+  } catch (error) {
+    console.error('Error starting tournament:', error)
+    alert(t('tournament.startError'))
+  } finally {
+    isStarting.value = false
+  }
+}
+
 const redirectToLogin = () => {
   router.visit('/login')
 }
 
 const imageSource = computed(() => {
-  if (tournament.id) {
-    return `/tournaments/${tournament.id}/image`
+  if (tournament.value.id) {
+    return `/tournaments/${tournament.value.id}/image`
   }
 
   return imageNotFound
@@ -467,6 +650,26 @@ const handleImageError = (event: Event) => {
     target.src = <string>imageNotFound
   }
 }
+
+const handleMatchUpdated = (data: any) => {
+  // Update local data with returned data like join tournament does
+  if (data.matches) {
+    matches.value = data.matches
+  }
+  
+  // If tournament is completed, update tournament data
+  if (data.tournament) {
+    Object.assign(tournament, data.tournament)
+  }
+  
+  // Show success message
+  showSuccessMessage.value = true
+  setTimeout(() => {
+    showSuccessMessage.value = false
+  }, 3000)
+}
+
+
 </script>
 
 <style scoped>

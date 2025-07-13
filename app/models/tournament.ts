@@ -4,6 +4,7 @@ import type { BelongsTo, HasMany, HasOne } from '@adonisjs/lucid/types/relations
 import Team from './team.js'
 import Game from './game.js'
 import Channel from './channel.js'
+import User from './user.js'
 import { FormatType } from '#enums/format_type'
 import { TierType } from '#enums/tier_type'
 
@@ -60,6 +61,9 @@ export default class Tournament extends BaseModel {
   declare isValidated: boolean
 
   @column()
+  declare isStarted: boolean
+
+  @column()
   declare winnerId: string | null
 
   @belongsTo(() => Team)
@@ -73,6 +77,14 @@ export default class Tournament extends BaseModel {
 
   @belongsTo(() => Game)
   declare game: BelongsTo<typeof Game>
+
+  @column()
+  declare creatorId: string | null
+
+  @belongsTo(() => User, {
+    foreignKey: 'creatorId',
+  })
+  declare creator: BelongsTo<typeof User>
 
   @hasOne(() => Channel)
   declare channel: HasOne<typeof Channel>

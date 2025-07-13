@@ -43,7 +43,7 @@ export default class TournamentsController {
     return tournaments.toJSON().data
   }
 
-  public async store({ request, i18n, response }: HttpContext) {
+  public async store({ request, i18n, response, auth }: HttpContext) {
     const data = await request.validateUsing(tournamentValidator, {
       messagesProvider: i18n.createMessagesProvider(),
     })
@@ -59,7 +59,10 @@ export default class TournamentsController {
       endDate: DateTime.fromJSDate(data.endDate),
       winnerId: null,
       gameId: data.gameId,
-      numberPlayersPerTeam: data.numberPlayersPerTeam,
+      numberPlayersPerTeam:
+        data.teamMode && data.numberPlayersPerTeam ? data.numberPlayersPerTeam : 1,
+      creatorId: auth.user?.id || null,
+      isStarted: false,
     }
 
     if (data.isOnline) {
@@ -88,10 +91,243 @@ export default class TournamentsController {
 
     await tournament.related('game').associate(game!)
 
+    // Calculate the number of teams needed and create them
+    let numberOfTeams: number
+    let playersPerTeam: number
+
+    if (data.teamMode && data.numberPlayersPerTeam) {
+      // Team-based tournament: create teams with multiple players
+      playersPerTeam = data.numberPlayersPerTeam
+      numberOfTeams = Math.ceil(data.numberParticipants / playersPerTeam)
+    } else {
+      // Individual tournament: create "teams" with 1 player each
+      playersPerTeam = 1
+      numberOfTeams = data.numberParticipants
+    }
+
+    // Create all teams for the tournament
+    const teamsToCreate = []
+    for (let i = 1; i <= numberOfTeams; i++) {
+      teamsToCreate.push({
+        name: `Team ${i}`,
+        tournamentId: tournament.id,
+        isWinner: false,
+      })
+    }
+
+    await Team.createMany(teamsToCreate)
+
     return response.redirect().toRoute('/')
   }
 
-  public async launch({}: HttpContext) {} // TODO: Implement the logic to launch a tournament, e.g., create first matches, create all the channels, etc.
+  public async launch({ params, auth, response }: HttpContext) {
+    if (!params.id) {
+      throw new Error('Tournament ID is required')
+    }
+
+    const user = auth.user!
+    const tournament = await Tournament.query()
+      .where('id', params.id)
+      .preload('creator')
+      .firstOrFail()
+
+    // Check permissions: only admin or creator can start tournament
+    const isAdmin = user.role === 'admin'
+    const isCreator = tournament.creatorId === user.id
+    if (!isAdmin && !isCreator) {
+      return response.forbidden({
+        error: 'Only admin or tournament creator can start the tournament',
+      })
+    }
+
+    // Check if tournament can be started
+    if (tournament.isStarted) {
+      return response.badRequest({ error: 'Tournament has already been started' })
+    }
+
+    // Check if it's time to start (current date >= start date)
+    const now = DateTime.now()
+    if (now < tournament.startDate) {
+      return response.badRequest({ error: 'Tournament cannot be started before the start date' })
+    }
+
+    // Get all teams with players
+    const allTeams = await Team.query().where('tournament_id', params.id).preload('players')
+    const teamsWithPlayers = allTeams.filter((team) => team.players && team.players.length > 0)
+
+    if (teamsWithPlayers.length < 2) {
+      return response.badRequest({
+        error: 'At least 2 teams with players are required to start the tournament',
+      })
+    }
+
+    // Generate complete tournament bracket
+    const { allMatches, roundMatches, nextMatchMapping } = this.generateAllTournamentMatches(
+      teamsWithPlayers,
+      tournament.id,
+      tournament.format
+    )
+
+    // Create all matches in database
+    const createdMatches = await Match.createMany(allMatches)
+
+    // Now update nextMatchId fields with actual database IDs
+    await this.linkMatchesWithNextMatchId(createdMatches, roundMatches, nextMatchMapping)
+
+    // Mark tournament as started
+    tournament.isStarted = true
+    await tournament.save()
+
+    // Return success response with updated data
+    const updatedMatches = await Match.query()
+      .where('tournament_id', params.id)
+      .preload('team1')
+      .preload('team2')
+      .preload('winner')
+      .orderBy('created_at', 'asc')
+
+    return response.json({
+      success: true,
+      tournament: tournament,
+      matches: updatedMatches,
+      message: 'Tournament started successfully!',
+    })
+  }
+
+  private generateAllTournamentMatches(
+    teams: any[],
+    tournamentId: string,
+    tournamentFormat: string
+  ): { allMatches: any[]; roundMatches: any[][]; nextMatchMapping: any[] } {
+    const shuffledTeams = [...teams].sort(() => Math.random() - 0.5) // Shuffle teams for fairness
+
+    // Calculate max score based on BO format
+    const getMaxScore = (format: string): number => {
+      switch (format) {
+        case 'BO1':
+          return 1
+        case 'BO3':
+          return 2 // First to 2 wins
+        case 'BO5':
+          return 3 // First to 3 wins
+        default:
+          return 1
+      }
+    }
+
+    const maxScore = getMaxScore(tournamentFormat)
+
+    // Calculate bracket size (next power of 2)
+    const nextPowerOf2 = Math.pow(2, Math.ceil(Math.log2(shuffledTeams.length)))
+    const totalRounds = Math.log2(nextPowerOf2)
+
+    // Generate all matches for the entire bracket
+    const allMatches: any[] = []
+    const roundMatches: any[][] = []
+    const nextMatchMapping: any[] = [] // Separate tracking for next match relationships
+
+    // Create matches for each round (bottom-up approach)
+    for (let round = 0; round < totalRounds; round++) {
+      const matchesInRound = Math.pow(2, totalRounds - round - 1)
+      const matches = []
+
+      for (let i = 0; i < matchesInRound; i++) {
+        const match = {
+          tournamentId,
+          scoreTeam1: 0,
+          scoreTeam2: 0,
+          winnerId: null,
+          nextMatchId: null,
+          team1Id: null,
+          team2Id: null,
+        }
+
+        // For first round, assign actual teams
+        if (round === 0) {
+          const team1 = shuffledTeams[i * 2] || null
+          const team2 = shuffledTeams[i * 2 + 1] || null
+
+          if (team1) {
+            match.team1Id = team1.id
+          }
+          if (team2) {
+            match.team2Id = team2.id
+          }
+
+          // Handle bye matches (team1 vs no one)
+          if (team1 && !team2) {
+            match.scoreTeam1 = maxScore
+            match.winnerId = team1.id
+          }
+        }
+
+        matches.push(match)
+      }
+
+      roundMatches.push(matches)
+      allMatches.push(...matches)
+    }
+
+    // Create next match mapping separately (don't add to match objects)
+    let matchIndex = 0
+    for (let round = 0; round < totalRounds - 1; round++) {
+      const currentRound = roundMatches[round]
+
+      for (let i = 0; i < currentRound.length; i++) {
+        const nextMatchIndex = Math.floor(i / 2)
+
+        // Store mapping separately from match data
+        nextMatchMapping.push({
+          currentMatchIndex: matchIndex,
+          nextMatchInfo: {
+            round: round + 1,
+            index: nextMatchIndex,
+          },
+        })
+
+        matchIndex++
+      }
+    }
+
+    // Add remaining matches that don't have next matches (final match)
+    for (let round = totalRounds - 1; round < totalRounds; round++) {
+      matchIndex += roundMatches[round].length
+    }
+
+    return { allMatches, roundMatches, nextMatchMapping }
+  }
+
+  private async linkMatchesWithNextMatchId(
+    createdMatches: Match[],
+    roundMatches: any[][],
+    nextMatchMapping: any[]
+  ): Promise<void> {
+    for (const mapping of nextMatchMapping) {
+      const currentMatch = createdMatches[mapping.currentMatchIndex]
+      const nextMatchGlobalIndex = this.getGlobalMatchIndex(
+        mapping.nextMatchInfo.round,
+        mapping.nextMatchInfo.index,
+        roundMatches
+      )
+      const nextMatch = createdMatches[nextMatchGlobalIndex]
+
+      await currentMatch.merge({ nextMatchId: nextMatch.id }).save()
+    }
+  }
+
+  private getGlobalMatchIndex(
+    targetRound: number,
+    targetIndex: number,
+    roundMatches: any[][]
+  ): number {
+    let globalIndex = 0
+
+    for (let round = 0; round < targetRound; round++) {
+      globalIndex += roundMatches[round].length
+    }
+
+    return globalIndex + targetIndex
+  }
 
   /**
    * Endpoint to retrieve the image of a tournament
@@ -109,12 +345,19 @@ export default class TournamentsController {
     }
   }
 
-  public async show({ params, inertia }: HttpContext) {
+  public async show({ params, inertia, auth }: HttpContext) {
     if (!params.id) {
       throw new Error('Tournament ID is required')
     }
 
+    // First get the tournament
     const tournament = await getAllTournamentsWithoutImages().where('id', params.id).firstOrFail()
+
+    // Load creator if creatorId exists
+    if (tournament.creatorId) {
+      await tournament.load('creator')
+    }
+
     const teams = await Team.query().where('tournament_id', params.id).preload('players')
     const matches = await Match.query()
       .where('tournament_id', params.id)
@@ -123,7 +366,13 @@ export default class TournamentsController {
       .preload('winner')
       .orderBy('created_at', 'asc')
 
-    return inertia.render('tournaments/show', { tournament, teams, matches })
+    return inertia.render('tournaments/show', {
+      tournament,
+      teams,
+      matches,
+      user: auth.user,
+      isAdmin: auth.user?.role === 'admin',
+    })
   }
 
   public async join({ params, auth, response }: HttpContext) {
@@ -168,15 +417,10 @@ export default class TournamentsController {
       .orderBy('created_at', 'asc')
 
     // Find the first team with available slots
-    let team = teams.find((t) => t.players.length < tournament.numberPlayersPerTeam)
+    const team = teams.find((t) => t.players.length < tournament.numberPlayersPerTeam)
 
     if (!team) {
-      // Create a new team (no plus de logique de nom, juste une nouvelle équipe)
-      team = await Team.create({
-        name: `Team ${teams.length + 1}`,
-        tournamentId: params.id,
-        isWinner: false,
-      })
+      return response.badRequest({ error: 'No available teams with open slots' })
     }
 
     // Add user to the team
@@ -233,6 +477,71 @@ export default class TournamentsController {
     })
   }
 
+  public async leave({ params, auth, response }: HttpContext) {
+    if (!params.id) {
+      throw new Error('Tournament ID is required')
+    }
+
+    const user = auth.user!
+    const tournament = await Tournament.query().where('id', params.id).firstOrFail()
+
+    // Check if tournament has started
+    if (tournament.isStarted) {
+      return response.badRequest({ error: 'Cannot leave tournament after it has started' })
+    }
+
+    // Find the team the user is in for this tournament
+    const userTeam = await Team.query()
+      .where('tournament_id', params.id)
+      .whereHas('players', (query) => {
+        query.where('user_id', user.id)
+      })
+      .preload('players')
+      .first()
+
+    if (!userTeam) {
+      return response.badRequest({ error: 'You are not registered for this tournament' })
+    }
+
+    // Remove user from the team
+    await userTeam.related('players').detach([user.id])
+
+    // Reload players to get updated count
+    await userTeam.load('players')
+
+    // If team becomes empty, reset the team name to default
+    if (userTeam.players.length === 0) {
+      // Get all teams for this tournament to determine the team number
+      const allTeams = await Team.query()
+        .where('tournament_id', params.id)
+        .orderBy('created_at', 'asc')
+
+      // Find the position of this team to generate the default name
+      const teamIndex = allTeams.findIndex((team) => team.id === userTeam.id)
+      const defaultName = `Team ${teamIndex + 1}`
+
+      await userTeam.merge({ name: defaultName }).save()
+    }
+
+    // Return updated data for dynamic refresh
+    const updatedTeams = await Team.query().where('tournament_id', params.id).preload('players')
+
+    const matches = await Match.query()
+      .where('tournament_id', params.id)
+      .preload('team1')
+      .preload('team2')
+      .preload('winner')
+      .orderBy('created_at', 'asc')
+
+    // Return JSON response with updated data
+    return response.json({
+      success: true,
+      teams: updatedTeams,
+      matches: matches,
+      message: 'Successfully left the tournament',
+    })
+  }
+
   public async updateTeam({ params, auth, request, response }: HttpContext) {
     if (!params.id) {
       throw new Error('Team ID is required')
@@ -260,5 +569,176 @@ export default class TournamentsController {
       success: true,
       team: team,
     })
+  }
+
+  public async updateMatchScore({ params, auth, request, response }: HttpContext) {
+    if (!params.id || !params.matchId) {
+      throw new Error('Tournament ID and Match ID are required')
+    }
+
+    const user = auth.user!
+    const { scoreTeam1, scoreTeam2 } = request.only(['scoreTeam1', 'scoreTeam2'])
+
+    // Get tournament and match
+    const tournament = await Tournament.query()
+      .where('id', params.id)
+      .preload('creator')
+      .firstOrFail()
+
+    const match = await Match.query()
+      .where('id', params.matchId)
+      .where('tournament_id', params.id)
+      .preload('team1')
+      .preload('team2')
+      .firstOrFail()
+
+    // Check permissions: only admin or tournament creator can update scores
+    const isAdmin = user.role === 'admin'
+    const isCreator = tournament.creatorId === user.id
+    if (!isAdmin && !isCreator) {
+      return response.forbidden({
+        error: 'Only admin or tournament creator can update match scores',
+      })
+    }
+
+    // Validate tournament has started
+    if (!tournament.isStarted) {
+      return response.badRequest({ error: 'Tournament must be started to update scores' })
+    }
+
+    // Validate scores
+    if (typeof scoreTeam1 !== 'number' || typeof scoreTeam2 !== 'number') {
+      return response.badRequest({ error: 'Invalid score values' })
+    }
+
+    if (scoreTeam1 < 0 || scoreTeam2 < 0) {
+      return response.badRequest({ error: 'Scores cannot be negative' })
+    }
+
+    // Calculate max score based on tournament format
+    const getMaxScore = (format: string): number => {
+      switch (format) {
+        case 'BO1':
+          return 1
+        case 'BO3':
+          return 2
+        case 'BO5':
+          return 3
+        default:
+          return 1
+      }
+    }
+
+    const maxScore = getMaxScore(tournament.format)
+
+    if (scoreTeam1 > maxScore || scoreTeam2 > maxScore) {
+      return response.badRequest({
+        error: `Scores cannot exceed ${maxScore} for ${tournament.format} format`,
+      })
+    }
+
+    // Determine winner
+    let winnerId: string | null = null
+    if (scoreTeam1 === maxScore && scoreTeam2 < maxScore) {
+      winnerId = match.team1Id
+    } else if (scoreTeam2 === maxScore && scoreTeam1 < maxScore) {
+      winnerId = match.team2Id || null // Handle bye case
+    } else if (scoreTeam1 !== maxScore && scoreTeam2 !== maxScore) {
+      // Neither team has reached max score yet
+      winnerId = null
+    } else {
+      return response.badRequest({ error: 'Invalid score combination' })
+    }
+
+    // Update match
+    await match
+      .merge({
+        scoreTeam1,
+        scoreTeam2,
+        winnerId,
+      })
+      .save()
+
+    // If match has a winner, advance them to the next match
+    if (winnerId) {
+      await this.advanceWinnerToNextMatch(match, winnerId, tournament.format)
+    }
+
+    // Return updated matches and tournament data like join tournament does
+    const updatedMatches = await Match.query()
+      .where('tournament_id', params.id)
+      .preload('team1')
+      .preload('team2')
+      .preload('winner')
+      .orderBy('created_at', 'asc')
+
+    const updatedTournament = await Tournament.query()
+      .where('id', params.id)
+      .preload('creator')
+      .firstOrFail()
+
+    return response.json({
+      success: true,
+      matches: updatedMatches,
+      tournament: updatedTournament,
+    })
+  }
+
+  private async advanceWinnerToNextMatch(match: Match, winnerId: string, tournamentFormat: string) {
+    if (!match.nextMatchId) {
+      // This is the final match, update tournament winner
+      await Tournament.query().where('id', match.tournamentId).update({ winnerId })
+      return
+    }
+
+    // Get the next match
+    const nextMatch = await Match.query().where('id', match.nextMatchId).first()
+
+    if (!nextMatch) return
+
+    // Advance winner to next match
+    if (!nextMatch.team1Id) {
+      // First team slot is empty, place winner there
+      await nextMatch.merge({ team1Id: winnerId }).save()
+    } else if (!nextMatch.team2Id) {
+      // Second team slot is empty, place winner there
+      await nextMatch.merge({ team2Id: winnerId }).save()
+
+      // Now both teams are set, check if it's a bye situation
+      await this.handlePotentialBye(nextMatch, tournamentFormat)
+    }
+  }
+
+  private async handlePotentialBye(match: Match, tournamentFormat: string) {
+    // If only one team in the match (bye situation), auto-advance them
+    if ((match.team1Id && match.team2Id === null) || (match.team1Id === null && match.team2Id)) {
+      const winnerId = match.team1Id || match.team2Id!
+
+      const getMaxScore = (format: string): number => {
+        switch (format) {
+          case 'BO1':
+            return 1
+          case 'BO3':
+            return 2
+          case 'BO5':
+            return 3
+          default:
+            return 1
+        }
+      }
+
+      const maxScore = getMaxScore(tournamentFormat)
+
+      await match
+        .merge({
+          scoreTeam1: match.team1Id ? maxScore : 0,
+          scoreTeam2: match.team2Id ? maxScore : 0,
+          winnerId,
+        })
+        .save()
+
+      // Continue advancing if there's a next match
+      await this.advanceWinnerToNextMatch(match, winnerId, tournamentFormat)
+    }
   }
 }

@@ -44,6 +44,10 @@
   "joinSuccess": "Successfully joined the tournament!",
   "joining": "Joining...",
   "join": "Join Tournament",
+  "leave": "Leave Tournament",
+  "leaving": "Leaving...",
+  "confirmLeave": "Are you sure you want to leave this tournament?",
+  "leaveError": "Failed to leave tournament",
   "loginToJoin": "Login to Join",
   "alreadyJoined": "✓ Already Joined",
   "registeredTeams": "Registered Teams",
@@ -57,5 +61,16 @@
   "tier": "Tier",
   "location": "Location",
   "dates": "Dates",
-  "joinError": "Failed to join tournament"
+  "joinError": "Failed to join tournament",
+  "startTournament": "Start Tournament",
+  "starting": "Starting...",
+  "started": "✓ Tournament Started",
+  "startError": "Failed to start tournament",
+  "full": "Tournament Full",
+  "updateMatchScore": "Update Match Score",
+  "score": "Score",
+  "firstTo": "First to",
+  "wins": "wins",
+  "updateScore": "Update Score",
+  "updating": "Updating..."
 }
