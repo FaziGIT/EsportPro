@@ -40,15 +40,16 @@ defineProps({
 
     <div v-else class="py-8">
       <Carousel
-        :items-to-show="4"
+        class="w-full"
+        snapAlign="start"
         :wrap-around="false"
+        :items-to-show="4"
         :breakpoints="{
-          1280: { itemsToShow: 4 },
-          1024: { itemsToShow: 3 },
+          1450: { itemsToShow: 4 },
+          1130: { itemsToShow: 3 },
           768: { itemsToShow: 2 },
           0: { itemsToShow: 1 },
         }"
-        class="tournament-carousel"
       >
         <Slide
           v-for="tournament in tournaments"
@@ -84,7 +85,6 @@ defineProps({
           768: { itemsToShow: 3 },
           0: { itemsToShow: 2 },
         }"
-        class="game-carousel"
       >
         <Slide v-for="game in games" :key="game.id" class="flex justify-center px-4">
           <GameCard :game="game" />
