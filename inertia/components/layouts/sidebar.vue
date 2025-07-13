@@ -11,7 +11,7 @@ import Game from '#models/game'
 import Tournament from '#models/tournament'
 
 const { t } = useI18n()
-const { user, isAuthenticated } = useAuth()
+const { isAuthenticated } = useAuth()
 const { userTournaments, userGames } = useUserData()
 
 interface SimpleGame extends Partial<Game> {
@@ -24,18 +24,15 @@ interface SimpleTournament extends Partial<Tournament> {
   name: string
 }
 
-const joinedTournaments = computed(() => userTournaments.value as SimpleTournament[])
-const favoriteGames = computed(() => userGames.value as SimpleGame[])
-
 const isDropdownOpen = ref(false)
 const isTournamentsDropdownOpen = ref(false)
 const maxDisplayedItems = 4
 
-const displayedTournaments = computed(() => joinedTournaments.value.slice(0, maxDisplayedItems))
-const hiddenTournaments = computed(() => joinedTournaments.value.slice(maxDisplayedItems))
+const displayedTournaments = computed(() => userTournaments.value.slice(0, maxDisplayedItems))
+const hiddenTournaments = computed(() => userTournaments.value.slice(maxDisplayedItems))
 
-const displayedGames = computed(() => favoriteGames.value.slice(0, maxDisplayedItems))
-const hiddenGames = computed(() => favoriteGames.value.slice(maxDisplayedItems))
+const displayedGames = computed(() => userGames.value.slice(0, maxDisplayedItems))
+const hiddenGames = computed(() => userGames.value.slice(maxDisplayedItems))
 
 const getImageUrl = (type: 'game' | 'tournament', id: string) => {
   return `/${type}s/${id}/image`
@@ -69,7 +66,7 @@ const handleGameClick = (game: SimpleGame) => {
   <div
     class="bg-[#779E7E] lg:w-[114px] h-full fixed left-0 top-0 flex-col items-center pt-3 shadow-md z-50 hidden lg:flex"
     @click="
-      isDropdownOpen = false;
+      isDropdownOpen = false
       isTournamentsDropdownOpen = false
     "
   >
@@ -79,7 +76,7 @@ const handleGameClick = (game: SimpleGame) => {
       </Link>
     </div>
 
-    <template v-if="isAuthenticated && joinedTournaments.length > 0">
+    <template v-if="isAuthenticated && userTournaments.length > 0">
       <div class="relative mb-3">
         <div
           class="text-center text-white text-xs font-bold tracking-wider uppercase mb-1 drop-shadow-sm"
@@ -95,7 +92,7 @@ const handleGameClick = (game: SimpleGame) => {
         <div
           v-for="tournament in displayedTournaments"
           :key="tournament.id"
-          @click.stop="handleTournamentClick(tournament)"
+          @click.stop="handleTournamentClick(tournament as SimpleTournament)"
           class="w-12 h-12 rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-white hover:ring-opacity-70 transition-all duration-200 border-2 border-white border-opacity-30"
           :title="tournament.name"
         >
@@ -137,7 +134,7 @@ const handleGameClick = (game: SimpleGame) => {
               v-for="tournament in hiddenTournaments"
               :key="tournament.id"
               @click.stop="
-                handleTournamentClick(tournament);
+                handleTournamentClick(tournament as SimpleTournament)
                 isTournamentsDropdownOpen = false
               "
               class="flex items-center space-x-3 px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors duration-150"
@@ -157,11 +154,10 @@ const handleGameClick = (game: SimpleGame) => {
           </div>
         </Transition>
       </div>
-
-      <div v-if="favoriteGames.length > 0" class="w-16 h-px bg-white bg-opacity-30 mb-5"></div>
+      <div v-if="userGames.length > 0" class="w-16 h-px bg-white bg-opacity-30 mb-5"></div>
     </template>
 
-    <template v-if="isAuthenticated && favoriteGames.length > 0">
+    <template v-if="isAuthenticated && userGames.length > 0">
       <div class="relative mb-3">
         <div
           class="text-center text-white text-xs font-bold tracking-wider uppercase mb-1 drop-shadow-sm"
@@ -177,7 +173,7 @@ const handleGameClick = (game: SimpleGame) => {
         <div
           v-for="game in displayedGames"
           :key="game.id"
-          @click.stop="handleGameClick(game)"
+          @click.stop="handleGameClick(game as SimpleGame)"
           class="w-12 h-12 rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-[#5C4741] hover:ring-opacity-70 transition-all duration-200 border-2 border-[#5C4741] border-opacity-30"
           :title="game.name"
         >
@@ -219,7 +215,7 @@ const handleGameClick = (game: SimpleGame) => {
               v-for="game in hiddenGames"
               :key="game.id"
               @click.stop="
-                handleGameClick(game);
+                handleGameClick(game as SimpleGame)
                 isDropdownOpen = false
               "
               class="flex items-center space-x-3 px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors duration-150"
@@ -245,7 +241,7 @@ const handleGameClick = (game: SimpleGame) => {
   <div
     v-if="isDropdownOpen || isTournamentsDropdownOpen"
     @click="
-      isDropdownOpen = false;
+      isDropdownOpen = false
       isTournamentsDropdownOpen = false
     "
     class="fixed inset-0 z-[40]"
