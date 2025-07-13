@@ -29,5 +29,7 @@
   "finishedTournaments": "Finished tournaments",
   "editGame": "Edit Game",
   "update": "Update",
-  "currentImage": "Current image"
+  "currentImage": "Current image",
+  "addToFavorites": "Add to Favorites",
+  "removeFromFavorites": "Remove from Favorites"
 }

@@ -59,7 +59,10 @@ export default class GamesController {
       throw new Error('Game ID is required')
     }
 
-    const game = await getAllGamesWithoutImages().where('id', params.id).firstOrFail()
+    const game = await getAllGamesWithoutImages()
+      .where('id', params.id)
+      .preload('favoriteOfUsers')
+      .firstOrFail()
 
     // Get all tournaments for this game, sorted by start date (closest first)
     const tournaments = await getAllTournamentsWithoutImages()

@@ -9,10 +9,18 @@ import { useGameData } from '../../../resources/js/composables/usePageProps'
 import { useAuth } from '../../../resources/js/composables/useAuth'
 import GameForm from '~/components/GameForm.vue'
 import { GameStatus } from '#types/game'
+import { useFavoriteToggle } from '../../../resources/js/composables/useFavoriteToggle'
 
 const { t } = useI18n()
 const { user } = useAuth()
 const { game, tournaments } = useGameData()
+
+// Gestion des favoris
+const { isFavorite, toggleFavorite } = useFavoriteToggle(
+  game.value?.id || '',
+  computed(() => game.value?.favoriteOfUsers as any[]),
+  user.value?.id
+)
 
 // Modal state
 const isEditModalOpen = ref(false)
@@ -82,19 +90,28 @@ const formatDate = (date: DateTime | string | Date): string => {
 
 // Statistics computed properties
 const activeTournamentsCount = computed(() => {
-  return tournaments.value?.filter(
-    (tournament: Tournament) => isTournamentStarted(tournament) && !isTournamentFinished(tournament)
-  ).length || 0
+  return (
+    tournaments.value?.filter(
+      (tournament: Tournament) =>
+        isTournamentStarted(tournament) && !isTournamentFinished(tournament)
+    ).length || 0
+  )
 })
 
 const upcomingTournamentsCount = computed(() => {
-  return tournaments.value?.filter(
-    (tournament: Tournament) => !isTournamentStarted(tournament) && !isTournamentFinished(tournament)
-  ).length || 0
+  return (
+    tournaments.value?.filter(
+      (tournament: Tournament) =>
+        !isTournamentStarted(tournament) && !isTournamentFinished(tournament)
+    ).length || 0
+  )
 })
 
 const finishedTournamentsCount = computed(() => {
-  return tournaments.value?.filter((tournament: Tournament) => isTournamentFinished(tournament)).length || 0
+  return (
+    tournaments.value?.filter((tournament: Tournament) => isTournamentFinished(tournament))
+      .length || 0
+  )
 })
 
 // Modal functions
@@ -111,13 +128,45 @@ const closeEditModal = () => {
     <div class="px-4 sm:px-6 py-6">
       <!-- Header with title -->
       <div class="flex flex-col sm:flex-row justify-between items-start mb-6 gap-4">
-        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-900">{{ game.name }}</h1>
+        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-900">
+          {{ game.name }}
+        </h1>
         <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 items-center w-full sm:w-auto">
+          <!-- Favorite button (visible only when user is logged in) -->
+          <button
+            v-if="user"
+            @click="toggleFavorite"
+            class="font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition flex items-center justify-center gap-2 text-sm sm:text-base w-full sm:w-auto cursor-pointer"
+            :class="
+              isFavorite
+                ? 'bg-red-100 text-red-600 hover:bg-red-200'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            "
+          >
+            <svg
+              class="w-6 h-6"
+              fill="currentColor"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+              />
+            </svg>
+            <span class="hidden sm:inline">{{
+              isFavorite ? t('game.removeFromFavorites') : t('game.addToFavorites')
+            }}</span>
+          </button>
+
           <!-- Edit button (visible only when user is logged in) -->
           <button
             v-if="user"
             @click="navigateToEdit"
-            class="font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition bg-gray-600 text-white hover:bg-gray-700 flex items-center justify-center gap-2 text-sm sm:text-base w-full sm:w-auto"
+            class="font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition bg-gray-600 text-white hover:bg-gray-700 flex items-center justify-center gap-2 text-sm sm:text-base w-full sm:w-auto cursor-pointer"
           >
             <svg
               class="w-4 h-4"
@@ -136,10 +185,6 @@ const closeEditModal = () => {
             <span class="hidden sm:inline">{{ t('game.editGame') }}</span>
             <span class="sm:hidden">{{ t('game.editGame') }}</span>
           </button>
-          
-          <div class="text-sm sm:text-base lg:text-lg font-medium text-gray-600 bg-gray-100 px-3 sm:px-4 py-2 rounded-lg text-center w-full sm:w-auto">
-            {{ game.platform }}
-          </div>
         </div>
       </div>
 
@@ -327,20 +372,13 @@ const closeEditModal = () => {
       v-if="user"
       :isOpen="isEditModalOpen"
       :mode="GameStatus.EDIT"
-      :game="game"
+      :game="game as any"
       @close="closeEditModal"
     />
   </Layout>
 </template>
 
 <style scoped>
-.line-clamp-1 {
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
 .hover\:shadow-lg:hover {
   box-shadow:
     0 10px 15px -3px rgba(0, 0, 0, 0.1),

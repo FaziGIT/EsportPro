@@ -8,9 +8,9 @@ import User from '#models/user'
 import { router } from '@inertiajs/vue3'
 import Game from '#models/game'
 import { GamePlatform } from '#enums/game_platform'
-import { getCsrfToken } from '~/utils'
 import GameForm from './GameForm.vue'
 import { GameStatus } from '#types/game'
+import { useFavoriteToggle } from '../../resources/js/composables/useFavoriteToggle'
 
 const { t } = useI18n()
 const { user: userProps } = useAuth()
@@ -31,14 +31,19 @@ const imageSource = computed(() => {
 })
 
 const isHovered = ref(false)
-const isFavorite = ref(
-  props.game?.favoriteOfUsers?.some((user: User) => user.id === String(userProps.value?.id))
+
+// Utiliser le composable pour la gestion des favoris
+const { isFavorite, toggleFavorite: toggleFavoriteBase } = useFavoriteToggle(
+  props.game?.id || '',
+  computed(() => props.game?.favoriteOfUsers as User[]),
+  userProps.value?.id
 )
 
 // Modal state for game editing
 const isEditModalOpen = ref(false)
 
 const handleImageError = (event: Event) => {
+  console.log('handleImageError')
   const target = event.target as HTMLImageElement
   if (target) {
     target.src = <string>imageNotFound
@@ -54,22 +59,9 @@ const goToGame = () => {
 const formatPlatform = (platform: GamePlatform): string => platform.toString()
 
 const toggleFavorite = async () => {
-  try {
-    const response = await fetch(`/games/${props.game.id}/toggle-favorite`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': getCsrfToken(),
-      },
-    })
-
-    if (response.ok) {
-      isFavorite.value = !isFavorite.value
-      playHeartAnimation()
-      router.reload({ only: ['userGames'] })
-    }
-  } catch (error) {
-    console.error('Erreur toggle favorite:', error)
+  const success = await toggleFavoriteBase()
+  if (success) {
+    playHeartAnimation()
   }
 }
 

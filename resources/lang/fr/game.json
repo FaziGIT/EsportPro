@@ -29,5 +29,7 @@
   "finishedTournaments": "Tournois terminés",
   "editGame": "Modifier le jeu",
   "update": "Modifier",
-  "currentImage": "Image actuelle"
+  "currentImage": "Image actuelle",
+  "addToFavorites": "Ajouter aux favoris",
+  "removeFromFavorites": "Retirer des favoris"
 }
