@@ -16,7 +16,7 @@ import User from '#models/user'
 
 const { t } = useI18n()
 const { user, isAdmin } = useAuth()
-const { tournament, teams: initialTeams, matches: initialMatches } = useTournamentData()
+const { tournament, teams, matches } = useTournamentData()
 const chatStore = useChatStore()
 
 const props = defineProps<{
@@ -25,25 +25,6 @@ const props = defineProps<{
     name: string
   }>
 }>()
-
-interface Player {
-  id: string
-  email: string
-  pseudo?: string
-}
-
-interface Match {
-  id: string
-  team1?: Team
-  team2?: Team
-  winner?: Team
-  scoreTeam1: number | null
-  scoreTeam2: number | null
-  tournamentId: string
-}
-
-const teams = ref(initialTeams.value as Team[])
-const matches = ref(initialMatches.value as Match[])
 
 const isEditModalOpen = ref(false)
 
@@ -54,6 +35,7 @@ const teamNameInput = ref<HTMLInputElement | null>(null)
 
 // UI state
 const showSuccessMessage = ref(false)
+const message = ref<['success' | 'error', string]>(['success', ''])
 const isJoining = ref(false)
 const isLeaving = ref(false)
 const isStarting = ref(false)
@@ -62,7 +44,17 @@ const isStarting = ref(false)
 const allTeams = computed(() => {
   // Sort by createdAt (or id)
   return [...teams.value].sort((a, b) => {
-    return new Date(a.createdAt || '').getTime() - new Date(b.createdAt || '').getTime()
+    const aTime = a.createdAt
+      ? typeof a.createdAt === 'string'
+        ? new Date(a.createdAt).getTime()
+        : a.createdAt.toMillis()
+      : 0
+    const bTime = b.createdAt
+      ? typeof b.createdAt === 'string'
+        ? new Date(b.createdAt).getTime()
+        : b.createdAt.toMillis()
+      : 0
+    return aTime - bTime
   })
 })
 
@@ -142,7 +134,6 @@ const tournamentStarted = computed(() => {
   }
 })
 
-
 const isTournamentFull = computed(() => {
   // Count total players across all teams
   const totalPlayers = teams.value.reduce((total, team) => {
@@ -162,16 +153,7 @@ const canStartTournament = computed(() => {
 
   // Check if it's past the start date
   try {
-    let startDate: DateTime
-    if (tournament.value.startDate instanceof DateTime) {
-      startDate = tournament.value.startDate
-    } else if (typeof tournament.value.startDate === 'string') {
-      startDate = DateTime.fromISO(tournament.value.startDate)
-    } else if (tournament.value.startDate instanceof Date) {
-      startDate = DateTime.fromJSDate(tournament.value.startDate)
-    } else {
-      return false
-    }
+    const startDate = DateTime.fromISO(String(tournament.value.startDate))
 
     return DateTime.now() >= startDate
   } catch (error) {
@@ -201,22 +183,15 @@ const joinTournament = async () => {
     })
 
     if (response.ok) {
-      const data = await response.json()
-
-      // Update local data dynamically
-      teams.value = data.teams
-      matches.value = data.matches
-
-      // Show success message
       showSuccessMessage.value = true
+      message.value = ['success', t('tournament.joinSuccess')]
       setTimeout(() => {
         showSuccessMessage.value = false
       }, 5000)
 
-      // Trigger chat channels refresh
       chatStore.triggerChannelRefresh()
 
-      router.reload({ only: ['userTournaments'] })
+      router.reload({ only: ['teams', 'matches', 'userTournaments'] })
     } else {
       const errorData = await response.json()
       console.error('Error joining tournament:', errorData.error)
@@ -264,17 +239,13 @@ const leaveTournament = async () => {
     })
 
     if (response.ok) {
-      const data = await response.json()
-
-      // Update local data dynamically
-      teams.value = data.teams
-      matches.value = data.matches
-
-      // Show success message
       showSuccessMessage.value = true
+      message.value = ['error', t('tournament.leaveSuccess')]
       setTimeout(() => {
         showSuccessMessage.value = false
       }, 5000)
+
+      router.reload({ only: ['teams', 'matches', 'userTournaments'] })
     } else {
       const errorData = await response.json()
       console.error('Error leaving tournament:', errorData.error)
@@ -308,15 +279,13 @@ const startTournament = async () => {
     })
 
     if (response.ok) {
-      const data = await response.json()
-      matches.value = data.matches
-      tournament.value.isStarted = true
-
-      // Show success message
       showSuccessMessage.value = true
+      message.value = ['success', t('tournament.startSuccess')]
       setTimeout(() => {
         showSuccessMessage.value = false
       }, 5000)
+
+      router.reload({ only: ['tournament', 'matches'] })
     } else {
       const errorData = await response.json()
       console.error('Error starting tournament:', errorData.error)
@@ -350,24 +319,14 @@ const handleImageError = (event: Event) => {
 }
 
 const handleMatchUpdated = (data: any) => {
-  // Update local data with returned data like join tournament does
-  if (data.matches) {
-    matches.value = data.matches
-  }
-
-  // If tournament is completed, update tournament data
-  if (data.tournament) {
-    Object.assign(tournament, data.tournament)
-  }
-
   // Show success message
   showSuccessMessage.value = true
   setTimeout(() => {
     showSuccessMessage.value = false
   }, 3000)
+
+  router.reload({ only: ['tournament', 'matches'] })
 }
-
-
 </script>
 <template>
   <Layout>
@@ -375,13 +334,22 @@ const handleMatchUpdated = (data: any) => {
       <!-- Success notification -->
       <div
         v-if="showSuccessMessage"
-        class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded"
+        :class="
+          message[0] === 'success'
+            ? 'bg-green-100 border border-green-400 text-green-700'
+            : 'bg-red-100 border border-red-400 text-red-700'
+        "
+        class="mb-4 px-4 py-3 rounded"
       >
         <div class="flex items-center">
-          <span>{{ t('tournament.joinSuccess') }}</span>
+          <span>{{ message[1] }}</span>
           <button
             @click="showSuccessMessage = false"
-            class="ml-auto text-green-500 hover:text-green-700"
+            :class="
+              message[0] === 'success'
+                ? 'ml-auto text-green-500 hover:text-green-700'
+                : 'ml-auto text-red-500 hover:text-red-700'
+            "
           >
             ✕
           </button>
@@ -390,13 +358,15 @@ const handleMatchUpdated = (data: any) => {
 
       <!-- Header with title and join button -->
       <div class="flex flex-col sm:flex-row justify-between items-start mb-6 gap-4">
-        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-900">{{ tournament.name }}</h1>
+        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-900">
+          {{ tournament.name }}
+        </h1>
         <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
           <!-- Edit button (visible only when user is logged in) -->
           <button
             v-if="user"
             @click="navigateToEdit"
-            class="font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition bg-gray-600 text-white hover:bg-gray-700 flex items-center justify-center gap-2 text-sm sm:text-base"
+            class="font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition bg-gray-600 text-white hover:bg-gray-700 flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer"
           >
             <svg
               class="w-4 h-4"
@@ -421,17 +391,23 @@ const handleMatchUpdated = (data: any) => {
             v-if="canStartTournament"
             @click="startTournament"
             :disabled="isStarting"
-            class="font-semibold px-6 py-3 rounded-lg transition bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="font-semibold px-6 py-3 rounded-lg transition bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             {{ isStarting ? t('tournament.starting') : t('tournament.startTournament') }}
           </button>
 
           <!-- Join Tournament Button -->
           <button
-            v-if="!userHasJoined && !tournamentStarted && user && !tournament.isStarted && !isTournamentFull"
+            v-if="
+              !userHasJoined &&
+              !tournamentStarted &&
+              user &&
+              !tournament.isStarted &&
+              !isTournamentFull
+            "
             @click="joinTournament"
             :disabled="isJoining"
-            class="font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition bg-[#5C4741] text-white hover:bg-[#7b5f57] disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+            class="font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition bg-[#5C4741] text-white hover:bg-[#7b5f57] disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base cursor-pointer"
           >
             {{ isJoining ? t('tournament.joining') : t('tournament.join') }}
           </button>
@@ -441,12 +417,18 @@ const handleMatchUpdated = (data: any) => {
             v-if="userHasJoined && !tournament.isStarted"
             @click="leaveTournament"
             :disabled="isLeaving"
-            class="font-semibold px-6 py-3 rounded-lg transition bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="font-semibold px-6 py-3 rounded-lg transition bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             {{ isLeaving ? t('tournament.leaving') : t('tournament.leave') }}
           </button>
           <button
-            v-else-if="!userHasJoined && !tournamentStarted && user && !tournament.isStarted && isTournamentFull"
+            v-else-if="
+              !userHasJoined &&
+              !tournamentStarted &&
+              user &&
+              !tournament.isStarted &&
+              isTournamentFull
+            "
             disabled
             class="font-semibold px-6 py-3 rounded-lg bg-red-100 text-red-700 cursor-not-allowed"
           >
@@ -455,7 +437,7 @@ const handleMatchUpdated = (data: any) => {
           <button
             v-else-if="!user && !tournament.isStarted && !isTournamentFull"
             @click="redirectToLogin"
-            class="font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition bg-[#5C4741] text-white hover:bg-[#7b5f57] text-sm sm:text-base"
+            class="font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition bg-[#5C4741] text-white hover:bg-[#7b5f57] text-sm sm:text-base cursor-pointer"
           >
             {{ t('tournament.loginToJoin') }}
           </button>
@@ -466,7 +448,7 @@ const handleMatchUpdated = (data: any) => {
             {{ t('tournament.full') }}
           </div>
           <div
-            v-else-if="userHasJoined"
+            v-else-if="userHasJoined && !tournament.isStarted"
             class="font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg bg-green-100 text-green-700 text-center text-sm sm:text-base"
           >
             {{ t('tournament.alreadyJoined') }}
@@ -620,11 +602,12 @@ const handleMatchUpdated = (data: any) => {
 
           <!-- Bracket section -->
           <div class="w-full overflow-hidden">
+            <!-- I dont know how to fix this error, he dont want to use the Adonis model types -->
             <TournamentBracket
-              :teams="teams"
-              :matches="matches"
-              :tournament="tournament"
-              :user="user as User | null"
+              :teams="teams as any"
+              :matches="matches as any"
+              :tournament="tournament as any"
+              :user="user as any"
               :isAdmin="isAdmin"
               @matchUpdated="handleMatchUpdated"
             />
@@ -637,6 +620,11 @@ const handleMatchUpdated = (data: any) => {
             <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ t('tournament.details') }}</h2>
 
             <div class="space-y-4">
+              <div class="flex justify-between items-center">
+                <span class="text-gray-600">{{ t('game.gameName') }}:</span>
+                <span class="font-medium text-gray-900">{{ tournament.game.name }}</span>
+              </div>
+
               <div class="flex justify-between items-center">
                 <span class="text-gray-600">{{ t('tournament.format') }}:</span>
                 <span class="font-medium text-gray-900">{{ tournament.format }}</span>
@@ -696,14 +684,12 @@ const handleMatchUpdated = (data: any) => {
       v-if="user"
       :isOpen="isEditModalOpen"
       mode="edit"
-      :tournament="tournament"
+      :tournament="tournament as any"
       :games="props.games"
       @close="closeEditModal"
     />
   </Layout>
 </template>
-
-
 
 <style scoped>
 /* Custom animations for team updates */

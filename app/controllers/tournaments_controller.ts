@@ -9,11 +9,16 @@ import Team from '#models/team'
 import Match from '#models/match'
 import Channel from '#models/channel'
 import { ChannelEntityType } from '#enums/channel_entity_type'
+import { getAllGamesWithoutImages } from '../repository/game.js'
+import path from 'node:path'
+
+// To get the imageNotFound path in the server
+const imageNotFound = path.join(process.cwd(), 'inertia', 'img', 'Image-not-found.png')
 
 export default class TournamentsController {
   private async processTournamentData(
     data: any,
-    { auth }: HttpContext
+    auth: HttpContext['auth']
   ): Promise<Partial<Tournament>> {
     const tournamentData: Partial<Tournament> = {
       name: data.name,
@@ -48,6 +53,8 @@ export default class TournamentsController {
     // Handle image upload
     if (data.image) {
       tournamentData.image = BufferToUint8Array(data.image.tmpPath!)
+    } else {
+      tournamentData.image = BufferToUint8Array(imageNotFound)
     }
 
     return tournamentData
@@ -55,7 +62,7 @@ export default class TournamentsController {
 
   public async index({ inertia }: HttpContext) {
     // Fetch all games to display in the dropdown when creating new tournament
-    const games = await Game.query().select('id', 'name').orderBy('name', 'asc')
+    const games = await getAllGamesWithoutImages().orderBy('name', 'asc')
 
     return inertia.render('tournaments/index', {
       games,
@@ -90,7 +97,7 @@ export default class TournamentsController {
       messagesProvider: i18n.createMessagesProvider(),
     })
 
-    const tournamentModel: Partial<Tournament> = await this.processTournamentData(data)
+    const tournamentModel: Partial<Tournament> = await this.processTournamentData(data, auth)
 
     const tournament = await Tournament.create(tournamentModel)
 
@@ -352,13 +359,22 @@ export default class TournamentsController {
     }
   }
 
-  public async show({ params, inertia, auth }: HttpContext) {
+  public async show({ params, inertia, response }: HttpContext) {
     if (!params.id) {
       throw new Error('Tournament ID is required')
     }
 
     // First get the tournament
-    const tournament = await getAllTournamentsWithoutImages().where('id', params.id).firstOrFail()
+    const tournament = await getAllTournamentsWithoutImages()
+      .preload('game', (query) => {
+        query.select('id', 'name')
+      })
+      .where('id', params.id)
+      .firstOrFail()
+
+    if (!tournament.isValidated) {
+      return response.redirect().back()
+    }
 
     // Load creator if creatorId exists
     if (tournament.creatorId) {
@@ -374,7 +390,7 @@ export default class TournamentsController {
       .orderBy('created_at', 'asc')
 
     // Fetch all games to display in the dropdown for editing
-    const games = await Game.query().select('id', 'name').orderBy('name', 'asc')
+    const games = await getAllGamesWithoutImages().orderBy('name', 'asc')
 
     return inertia.render('tournaments/show', { tournament, teams, matches, games })
   }
@@ -388,17 +404,9 @@ export default class TournamentsController {
     const tournament = await Tournament.query().where('id', params.id).firstOrFail()
 
     // Check if tournament has started
-    let startDate: Date
-    if (tournament.startDate instanceof Date) {
-      startDate = tournament.startDate
-    } else if (typeof tournament.startDate === 'string') {
-      startDate = new Date(tournament.startDate)
-    } else {
-      // Assume it's a Luxon DateTime
-      startDate = tournament.startDate.toJSDate()
-    }
+    const startDate = tournament.startDate
 
-    if (new Date() >= startDate) {
+    if (DateTime.now() >= startDate) {
       return response.badRequest({ error: 'Tournament has already started' })
     }
 
@@ -575,7 +583,7 @@ export default class TournamentsController {
     })
   }
 
-  public async update({ params, request, i18n, response }: HttpContext) {
+  public async update({ params, request, i18n, response, auth }: HttpContext) {
     if (!params.id) {
       throw new Error('Tournament ID is required')
     }
@@ -586,7 +594,7 @@ export default class TournamentsController {
       messagesProvider: i18n.createMessagesProvider(),
     })
 
-    const updateData: Partial<Tournament> = await this.processTournamentData(data)
+    const updateData: Partial<Tournament> = await this.processTournamentData(data, auth)
 
     // Update the tournament
     await tournament.merge(updateData).save()

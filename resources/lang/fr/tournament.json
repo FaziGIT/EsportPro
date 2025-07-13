@@ -75,5 +75,7 @@
   "firstTo": "Premier à",
   "wins": "victoires",
   "updateScore": "Mettre à jour le score",
-  "updating": "Mise à jour..."
+  "updating": "Mise à jour...",
+  "startSuccess": "Tournoi démarré avec succès",
+  "leaveSuccess": "Vous avez quitté le tournoi avec succès"
 }

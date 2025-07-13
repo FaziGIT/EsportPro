@@ -12,7 +12,7 @@ export const tournamentValidator = vine.compile(
     numberParticipants: vine.number().min(2).max(128),
     numberPlayersPerTeam: vine
       .number()
-      .min(2)
+      .min(1)
       .max(10)
       .optional()
       .requiredWhen('teamMode', '=', '1'),

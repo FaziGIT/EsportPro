@@ -20,6 +20,7 @@ export const getAllTournamentsWithoutImages = () => {
     'is_started',
     'winner_id',
     'creator_id',
+    'is_validated',
     'game_id',
     'created_at',
     'updated_at',

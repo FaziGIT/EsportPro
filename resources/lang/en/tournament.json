@@ -75,5 +75,7 @@
   "firstTo": "First to",
   "wins": "wins",
   "updateScore": "Update Score",
-  "updating": "Updating..."
+  "updating": "Updating...",
+  "startSuccess": "Tournament started successfully",
+  "leaveSuccess": "Successfully left the tournament"
 }
