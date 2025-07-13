@@ -63,7 +63,6 @@ export default class GamesController {
 
     // Get all tournaments for this game, sorted by start date (closest first)
     const tournaments = await getAllTournamentsWithoutImages()
-      .preload('game')
       .where('game_id', params.id)
       .where('is_validated', true)
       .orderBy('start_date', 'asc')
