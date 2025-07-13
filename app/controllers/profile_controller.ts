@@ -97,11 +97,45 @@ export default class ProfileController {
       return response.unauthorized('Unauthorized access')
     }
 
-    const tournament = await Tournament.find(params.id)
-    if (tournament) {
-      await tournament.delete()
-    }
+    try {
+      const tournament = await Tournament.query()
+        .where('id', params.id)
+        .preload('teams', (teamsQuery) => {
+          teamsQuery.preload('players')
+        })
+        .first()
 
-    return response.redirect().back()
+      if (!tournament) {
+        return response.notFound('Tournoi non trouvé')
+      }
+
+      // Vérifier si les équipes ont des joueurs
+      const hasTeamsWithPlayers = tournament.teams.some(
+        (team) => team.players && team.players.length > 0
+      )
+
+      if (hasTeamsWithPlayers) {
+        return response.status(400).json({
+          error: true,
+          message: 'Ce tournoi possède des équipes avec des joueurs et ne peut pas être supprimé.',
+        })
+      }
+
+      // Suppression des équipes vides associées au tournoi
+      if (tournament.teams && tournament.teams.length > 0) {
+        await tournament.related('teams').query().delete()
+      }
+
+      // Supprimer le tournoi
+      await tournament.delete()
+      return response.redirect().back()
+    } catch (error) {
+      console.error('Erreur lors de la suppression du tournoi:', error)
+      return response.status(400).json({
+        error: true,
+        message:
+          'Une erreur est survenue lors de la suppression du tournoi: ' + (error.message || ''),
+      })
+    }
   }
 }

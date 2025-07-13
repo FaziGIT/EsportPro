@@ -2,6 +2,8 @@
 import { router } from '@inertiajs/vue3'
 import Tournament from '#models/tournament'
 import { DateTime } from 'luxon'
+import { ref } from 'vue'
+import Button from '~/components/Button.vue'
 
 defineProps({
   pendingTournaments: {
@@ -10,16 +12,46 @@ defineProps({
   }
 })
 
+const showConfirmRefuse = ref(false)
+const tournamentToRefuse = ref('')
+const errorMessage = ref('')
+const showError = ref(false)
+
 function validateTournament(id: string) {
   router.post(`/profile/tournaments/${id}/validate`)
 }
 
-function refuseTournament(id: string) {
-  if (confirm('Êtes-vous sûr de vouloir refuser ce tournoi ? Cette action est irréversible.')) {
-    router.post(`/profile/tournaments/${id}/refuse`)
-  }
+function openRefuseConfirmation(id: string) {
+  tournamentToRefuse.value = id
+  showConfirmRefuse.value = true
+  errorMessage.value = ''
+  showError.value = false
 }
 
+function refuseTournament() {
+  router.post(`/profile/tournaments/${tournamentToRefuse.value}/refuse`, {}, {
+    onSuccess: () => {
+      showConfirmRefuse.value = false
+      tournamentToRefuse.value = ''
+    },
+    onError: (errors) => {
+      console.error('Erreur de refus:', errors)
+      if (errors.message) {
+        errorMessage.value = errors.message
+      } else {
+        errorMessage.value = "Une erreur s'est produite lors de la suppression du tournoi."
+      }
+      showError.value = true
+    }
+  })
+}
+
+function cancelRefuse() {
+  showConfirmRefuse.value = false
+  tournamentToRefuse.value = ''
+  errorMessage.value = ''
+  showError.value = false
+}
 </script>
 
 <template>
@@ -30,7 +62,7 @@ function refuseTournament(id: string) {
       Aucun tournoi en attente de validation.
     </div>
 
-    <div class="border border-gray-300 rounded-lg shadow-sm overflow-hidden">
+    <div v-else class="border border-gray-300 rounded-lg shadow-sm overflow-hidden">
       <div class="overflow-x-auto">
         <div class="max-h-96 overflow-y-auto custom-scrollbar">
           <table class="min-w-[1300px] w-full table-fixed">
@@ -48,7 +80,7 @@ function refuseTournament(id: string) {
             </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 bg-white">
-            <tr v-for="tournament in pendingTournaments" :key="tournament.id" class="hover:bg-gray-50">
+            <tr v-for="tournament in pendingTournaments" :key="tournament.id" class="hover:bg-gray-50 cursor-default">
               <td class="px-4 py-3 text-sm text-gray-700 truncate">{{ tournament.name }}</td>
               <td class="px-4 py-3 text-sm text-gray-700 truncate">{{ tournament.game?.name }}</td>
               <td class="px-4 py-3 text-sm text-gray-700 truncate">{{ tournament.format }}</td>
@@ -65,13 +97,13 @@ function refuseTournament(id: string) {
                 <div class="flex flex-row gap-1">
                   <button
                     @click="validateTournament(tournament.id)"
-                    class="px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded hover:bg-green-600 transition-colors"
+                    class="cursor-pointer px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded hover:bg-green-600 transition-colors"
                   >
                     Valider
                   </button>
                   <button
-                    @click="refuseTournament(tournament.id)"
-                    class="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded hover:bg-red-600 transition-colors"
+                    @click="openRefuseConfirmation(tournament.id)"
+                    class="cursor-pointer px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded hover:bg-red-600 transition-colors"
                   >
                     Refuser
                   </button>
@@ -83,10 +115,30 @@ function refuseTournament(id: string) {
         </div>
       </div>
     </div>
+
+    <!-- Popup de confirmation de refus -->
+    <div v-if="showConfirmRefuse" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 shadow-lg max-w-sm w-full">
+        <p class="text-lg font-semibold mb-4">
+          Confirmer le refus
+        </p>
+        <p class="mb-6">
+          Êtes-vous sûr de vouloir refuser ce tournoi ? Cette action est irréversible.
+        </p>
+
+        <!-- Message d'erreur -->
+        <div v-if="showError" class="mb-6 p-3 bg-red-100 text-red-700 rounded-md text-sm">
+          {{ errorMessage }}
+        </div>
+
+        <div class="flex justify-end gap-2">
+          <Button @click="refuseTournament" :use-redirection="false" value="Valider"/>
+          <Button @click="cancelRefuse" :use-redirection="false" color="#CBD3CD" text-color="#000000" value="Annuler"/>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
-
-
 <style scoped>
 .max-h-96 {
   will-change: transform;
