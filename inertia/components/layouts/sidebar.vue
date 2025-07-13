@@ -41,7 +41,7 @@ const getImageUrl = (type: 'game' | 'tournament', id: string) => {
 const handleImageError = (event: Event) => {
   const target = event.target as HTMLImageElement
   if (target) {
-    target.src = imageNotFound
+    target.src = <string>imageNotFound
   }
 }
 

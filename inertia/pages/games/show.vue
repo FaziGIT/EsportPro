@@ -46,14 +46,14 @@ const imageSource = computed(() => {
 const handleImageError = (event: Event) => {
   const target = event.target as HTMLImageElement
   if (target) {
-    target.src = imageNotFound
+    target.src = <string>imageNotFound
   }
 }
 
 const handleTournamentImageError = (event: Event) => {
   const target = event.target as HTMLImageElement
   if (target) {
-    target.src = imageNotFound
+    target.src = <string>imageNotFound
   }
 }
 
