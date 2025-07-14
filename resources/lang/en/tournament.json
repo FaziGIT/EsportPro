@@ -81,5 +81,9 @@
   "validateSuccess": "Tournament validated successfully",
   "validateError": "An error occurred while validating the tournament",
   "refuseSuccess": "Tournament refused successfully",
-  "refuseError": "An error occurred while refusing the tournament"
+  "refuseError": "An error occurred while refusing the tournament",
+  "pendingValidation": "The tournament is pending validation",
+  "creationError": "An error occurred while creating the tournament. Please try again.",
+  "updateSuccess": "The tournament has been updated successfully.",
+  "updateError": "An error occurred while updating the tournament. Please try again."
 }

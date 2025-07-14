@@ -28,6 +28,10 @@ const emit = defineEmits(['close', 'submit'])
 const activeTab = ref('general')
 const imageInput = ref<HTMLInputElement>()
 const imageLoadError = ref(false)
+const showNotification = ref(false)
+const notificationMessage = ref('')
+const notificationType = ref('success')
+const processingForm = ref(false)
 
 // Initialize form data based on mode
 const initializeFormData = (): TournamentFormData => {
@@ -111,6 +115,7 @@ const closeModal = () => {
 
 const submitForm = () => {
   form.clearErrors()
+  processingForm.value = true
 
   const imagePreview = form.imagePreview
   form.imagePreview = ''
@@ -124,14 +129,39 @@ const submitForm = () => {
 
   form[method](submitUrl, {
     forceFormData: true,
+    headers: {
+      'Accept': 'application/json',
+    },
+    preserveScroll: true,
+    preserveState: true,
     onSuccess: () => {
-      emit('close')
-      window.location.reload()
+      // Afficher la notification de succès
+      notificationType.value = 'success'
+      notificationMessage.value = props.mode === TournamentStatus.EDIT
+        ? t('tournament.updateSuccess')
+        : t('tournament.pendingValidation')
+      showNotification.value = true
+
+      setTimeout(() => {
+        emit('close')
+        window.location.reload()
+      }, 3000)
     },
     onError: () => {
       form.imagePreview = imagePreview
+      // Afficher la notification d'erreur
+      notificationType.value = 'error'
+      notificationMessage.value = props.mode === TournamentStatus.EDIT
+        ? t('tournament.updateError')
+        : t('tournament.creationError')
+      showNotification.value = true
+
+      setTimeout(() => {
+        showNotification.value = false
+      }, 5000)
     },
     onFinish: () => {
+      processingForm.value = false
       if (!form.imagePreview) {
         form.imagePreview = imagePreview
       }
@@ -250,9 +280,104 @@ onUnmounted(() => {
 })
 </script>
 
+<style scoped>
+/* Modal overlay transitions - smooth backdrop fade */
+.modal-overlay-enter-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-overlay-leave-active {
+  transition: all 0.25s cubic-bezier(0.4, 0, 1, 1);
+}
+
+.modal-overlay-enter-from,
+.modal-overlay-leave-to {
+  opacity: 0;
+  backdrop-filter: blur(0px);
+}
+
+.modal-overlay-enter-to,
+.modal-overlay-leave-from {
+  opacity: 1;
+  backdrop-filter: blur(4px);
+}
+
+/* Modal content transitions - smooth scale and fade with bounce */
+.modal-content-enter-active {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-content-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 1, 1);
+}
+
+.modal-content-enter-from {
+  opacity: 0;
+  transform: scale(0.85) translateY(-20px);
+}
+
+.modal-content-leave-to {
+  opacity: 0;
+  transform: scale(0.95) translateY(-10px);
+}
+
+.modal-content-enter-to,
+.modal-content-leave-from {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+/* Tab content transitions - smooth slide and fade */
+.tab-content-enter-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tab-content-leave-active {
+  transition: all 0.2s cubic-bezier(0.4, 0, 1, 1);
+}
+
+.tab-content-enter-from {
+  opacity: 0;
+  transform: translateX(16px);
+}
+
+.tab-content-leave-to {
+  opacity: 0;
+  transform: translateX(-16px);
+}
+
+.tab-content-enter-to,
+.tab-content-leave-from {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Ensure smooth backdrop blur transition */
+.modal-overlay-enter-active .backdrop-blur-sm,
+.modal-overlay-leave-active .backdrop-blur-sm {
+  transition: backdrop-filter 0.3s ease;
+}
+</style>
+
 <template>
   <!-- Modal only renders when isOpen is true -->
   <div v-if="isOpen">
+    <!-- Notification -->
+    <div v-if="showNotification"
+         class="fixed top-4 right-4 z-[60] px-4 py-3 rounded flex items-center shadow-lg max-w-md"
+         :class="notificationType === 'success' ?
+                'bg-green-100 border border-green-400 text-green-700' :
+                'bg-red-100 border border-red-400 text-red-700'">
+      <span>{{ notificationMessage }}</span>
+      <button
+        @click="showNotification = false"
+        class="ml-auto hover:opacity-70 cursor-pointer"
+        :class="notificationType === 'success' ? 'text-green-500' : 'text-red-500'"
+      >
+        ✕
+      </button>
+    </div>
+
     <!-- Modal overlay with transition -->
     <Transition name="modal-overlay">
       <div
@@ -904,83 +1029,20 @@ onUnmounted(() => {
       </div>
     </Transition>
   </div>
+
+  <!-- Notification outside of modal so it remains visible after modal closes -->
+  <div v-if="showNotification && !isOpen"
+       class="fixed top-4 right-4 z-[60] px-4 py-3 rounded flex items-center shadow-lg max-w-md"
+       :class="notificationType === 'success' ?
+              'bg-green-100 border border-green-400 text-green-700' :
+              'bg-red-100 border border-red-400 text-red-700'">
+    <span>{{ notificationMessage }}</span>
+    <button
+      @click="showNotification = false"
+      class="ml-auto hover:opacity-70 cursor-pointer"
+      :class="notificationType === 'success' ? 'text-green-500' : 'text-red-500'"
+    >
+      ✕
+    </button>
+  </div>
 </template>
-
-<style scoped>
-/* Modal overlay transitions - smooth backdrop fade */
-.modal-overlay-enter-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.modal-overlay-leave-active {
-  transition: all 0.25s cubic-bezier(0.4, 0, 1, 1);
-}
-
-.modal-overlay-enter-from,
-.modal-overlay-leave-to {
-  opacity: 0;
-  backdrop-filter: blur(0px);
-}
-
-.modal-overlay-enter-to,
-.modal-overlay-leave-from {
-  opacity: 1;
-  backdrop-filter: blur(4px);
-}
-
-/* Modal content transitions - smooth scale and fade with bounce */
-.modal-content-enter-active {
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.modal-content-leave-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 1, 1);
-}
-
-.modal-content-enter-from {
-  opacity: 0;
-  transform: scale(0.85) translateY(-20px);
-}
-
-.modal-content-leave-to {
-  opacity: 0;
-  transform: scale(0.95) translateY(-10px);
-}
-
-.modal-content-enter-to,
-.modal-content-leave-from {
-  opacity: 1;
-  transform: scale(1) translateY(0);
-}
-
-/* Tab content transitions - smooth slide and fade */
-.tab-content-enter-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.tab-content-leave-active {
-  transition: all 0.2s cubic-bezier(0.4, 0, 1, 1);
-}
-
-.tab-content-enter-from {
-  opacity: 0;
-  transform: translateX(16px);
-}
-
-.tab-content-leave-to {
-  opacity: 0;
-  transform: translateX(-16px);
-}
-
-.tab-content-enter-to,
-.tab-content-leave-from {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-/* Ensure smooth backdrop blur transition */
-.modal-overlay-enter-active .backdrop-blur-sm,
-.modal-overlay-leave-active .backdrop-blur-sm {
-  transition: backdrop-filter 0.3s ease;
-}
-</style>

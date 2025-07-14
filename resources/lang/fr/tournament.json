@@ -81,5 +81,9 @@
   "validateSuccess": "Le tournoi a été validé avec succès",
   "validateError": "Une erreur s'est produite lors de la validation du tournoi",
   "refuseSuccess": "Le tournoi a été refusé avec succès",
-  "refuseError": "Une erreur s'est produite lors du refus du tournoi"
+  "refuseError": "Une erreur s'est produite lors du refus du tournoi",
+  "pendingValidation": "Le tournoi a été créé avec succès et est en attente de validation par un administrateur.",
+  "creationError": "Une erreur est survenue lors de la création du tournoi. Veuillez réessayer.",
+  "updateSuccess": "Le tournoi a été mis à jour avec succès.",
+  "updateError": "Une erreur est survenue lors de la mise à jour du tournoi. Veuillez réessayer."
 }
