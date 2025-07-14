@@ -77,5 +77,9 @@
   "updateScore": "Mettre à jour le score",
   "updating": "Mise à jour...",
   "startSuccess": "Tournoi démarré avec succès",
-  "leaveSuccess": "Vous avez quitté le tournoi avec succès"
+  "leaveSuccess": "Vous avez quitté le tournoi avec succès",
+  "validateSuccess": "Le tournoi a été validé avec succès",
+  "validateError": "Une erreur s'est produite lors de la validation du tournoi",
+  "refuseSuccess": "Le tournoi a été refusé avec succès",
+  "refuseError": "Une erreur s'est produite lors du refus du tournoi"
 }

@@ -79,22 +79,44 @@ export default class ProfileController {
   public async validateTournament({ params, response, auth }: HttpContext) {
     const user = auth.user
     if (!user || user.role !== UserRole.Admin) {
-      return response.unauthorized('Unauthorized access')
+      return response.status(401).json({
+        error: true,
+        message: 'Unauthorized access',
+      })
     }
 
-    const tournament = await Tournament.find(params.id)
-    if (tournament) {
+    try {
+      const tournament = await Tournament.find(params.id)
+      if (!tournament) {
+        return response.status(404).json({
+          error: true,
+          message: 'Tournament not found',
+        })
+      }
+
       tournament.isValidated = true
       await tournament.save()
-    }
 
-    return response.redirect().back()
+      return response.json({
+        success: true,
+        message: 'Le tournoi a été validé avec succès',
+      })
+    } catch (error) {
+      console.error('An error occurred while validating the tournament:', error)
+      return response.status(500).json({
+        error: true,
+        message: 'An error occurred while validating the tournament',
+      })
+    }
   }
 
   public async refuseTournament({ params, response, auth }: HttpContext) {
     const user = auth.user
     if (!user || user.role !== UserRole.Admin) {
-      return response.unauthorized('Unauthorized access')
+      return response.status(401).json({
+        error: true,
+        message: 'Unauthorized access',
+      })
     }
 
     try {
@@ -106,7 +128,10 @@ export default class ProfileController {
         .first()
 
       if (!tournament) {
-        return response.notFound('Tournament not found')
+        return response.status(404).json({
+          error: true,
+          message: 'Tournament not found',
+        })
       }
 
       // Vérifier si les équipes ont des joueurs
@@ -128,12 +153,16 @@ export default class ProfileController {
 
       // Supprimer le tournoi
       await tournament.delete()
-      return response.redirect().back()
+
+      return response.json({
+        success: true,
+        message: 'Tournament refused successfully',
+      })
     } catch (error) {
       console.error('An error occurred while refusing the tournament:', error)
-      return response.status(400).json({
+      return response.status(500).json({
         error: true,
-        message: 'An error occurred while refusing the tournament' + (error.message || ''),
+        message: 'An error occurred while refusing the tournament',
       })
     }
   }

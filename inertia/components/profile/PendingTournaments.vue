@@ -4,6 +4,9 @@ import Tournament from '#models/tournament'
 import { DateTime } from 'luxon'
 import { ref } from 'vue'
 import Button from '~/components/Button.vue'
+import { getCsrfToken } from '~/utils'
+import { useI18n } from '../../../resources/js/composables/useI18n'
+const { t } = useI18n()
 
 defineProps({
   pendingTournaments: {
@@ -16,29 +19,54 @@ const showConfirmRefuse = ref(false)
 const tournamentToRefuse = ref('')
 const showNotification = ref(false)
 const notificationMessage = ref('')
-const notificationType = ref('success') // 'success' ou 'error'
+const notificationType = ref('success')
+const isProcessing = ref(false)
 
-function validateTournament(id: string) {
-  // Gérer le bouton de validation
-  router.post(`/profile/tournaments/${id}/validate`, {}, {
-    preserveScroll: true,
-    onSuccess: () => {
+async function validateTournament(id: string) {
+  if (isProcessing.value) return
+
+  isProcessing.value = true
+
+  try {
+    const token = getCsrfToken()
+
+    const response = await fetch(`/profile/tournaments/${id}/validate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': token || '',
+        'Accept': 'application/json',
+      },
+    })
+
+    if (response.ok) {
       showNotification.value = true
-      notificationMessage.value = 'Le tournoi a été validé avec succès'
+      notificationMessage.value = t('tournament.validateSuccess')
       notificationType.value = 'success'
       setTimeout(() => {
         showNotification.value = false
       }, 5000)
-    },
-    onError: () => {
+
+      router.reload({ only: ['pendingTournaments'] })
+    } else {
       showNotification.value = true
-      notificationMessage.value = 'Une erreur est survenue lors de la validation du tournoi'
+      notificationMessage.value = t('tournament.validateError')
       notificationType.value = 'error'
       setTimeout(() => {
         showNotification.value = false
       }, 5000)
     }
-  })
+  } catch (error) {
+    console.error('Error validating tournament:', error)
+    showNotification.value = true
+    notificationMessage.value = t('tournament.validateError')
+    notificationType.value = 'error'
+    setTimeout(() => {
+      showNotification.value = false
+    }, 5000)
+  } finally {
+    isProcessing.value = false
+  }
 }
 
 function openRefuseConfirmation(id: string) {
@@ -46,31 +74,55 @@ function openRefuseConfirmation(id: string) {
   showConfirmRefuse.value = true
 }
 
-function refuseTournament() {
+async function refuseTournament() {
+  if (isProcessing.value) return
+
   // Fermer la popup immédiatement
   showConfirmRefuse.value = false
   const tournamentId = tournamentToRefuse.value
   tournamentToRefuse.value = ''
 
-  router.post(`/profile/tournaments/${tournamentId}/refuse`, {}, {
-    preserveScroll: true,
-    onSuccess: () => {
+  isProcessing.value = true
+
+  try {
+    const token = getCsrfToken()
+    const response = await fetch(`/profile/tournaments/${tournamentId}/refuse`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': token || '',
+        'Accept': 'application/json',
+      },
+    })
+
+    if (response.ok) {
       showNotification.value = true
-      notificationMessage.value = 'Le tournoi a été refusé avec succès'
+      notificationMessage.value = t('tournament.refuseSuccess')
       notificationType.value = 'success'
       setTimeout(() => {
         showNotification.value = false
       }, 5000)
-    },
-    onError: () => {
+
+      router.reload({ only: ['pendingTournaments'] })
+    } else {
       showNotification.value = true
-      notificationMessage.value = 'Une erreur est survenue lors du refus du tournoi'
+      notificationMessage.value = t('tournament.refuseError')
       notificationType.value = 'error'
       setTimeout(() => {
         showNotification.value = false
       }, 5000)
     }
-  })
+  } catch (error) {
+    console.error('Error refusing tournament:', error)
+    showNotification.value = true
+    notificationMessage.value = t('tournament.refuseError')
+    notificationType.value = 'error'
+    setTimeout(() => {
+      showNotification.value = false
+    }, 5000)
+  } finally {
+    isProcessing.value = false
+  }
 }
 
 function cancelRefuse() {
@@ -137,13 +189,15 @@ function cancelRefuse() {
                 <div class="flex flex-row gap-1">
                   <button
                     @click="validateTournament(tournament.id)"
-                    class="cursor-pointer px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded hover:bg-green-600 transition-colors"
+                    :disabled="isProcessing"
+                    class="cursor-pointer px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Valider
                   </button>
                   <button
                     @click="openRefuseConfirmation(tournament.id)"
-                    class="cursor-pointer px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded hover:bg-red-600 transition-colors"
+                    :disabled="isProcessing"
+                    class="cursor-pointer px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Refuser
                   </button>
