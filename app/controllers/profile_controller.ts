@@ -10,7 +10,7 @@ export default class ProfileController {
     let tournaments: Tournament[] = []
     let favoriteGames: Game[] = []
     let pendingTournaments: Tournament[] = []
-    let myCreatedTournaments: Tournament[] = []
+    let createdTournaments: Tournament[] = []
 
     if (user) {
       await user.load('teams', (query) => {
@@ -36,7 +36,7 @@ export default class ProfileController {
       }
 
       // Récupération des tournois créés par l'utilisateur
-      myCreatedTournaments = await Tournament.query()
+      createdTournaments = await Tournament.query()
         .where('creatorId', user.id)
         .preload('game')
         .orderBy('created_at', 'desc')
@@ -46,7 +46,7 @@ export default class ProfileController {
         tournaments: tournaments,
         favoriteGames: favoriteGames,
         pendingTournaments: pendingTournaments,
-        myCreatedTournaments: myCreatedTournaments,
+        createdTournaments: createdTournaments,
       })
     }
 
@@ -55,7 +55,7 @@ export default class ProfileController {
       tournaments: tournaments,
       favoriteGames: favoriteGames,
       pendingTournaments: [],
-      myCreatedTournaments: [],
+      createdTournaments: [],
     })
   }
 
