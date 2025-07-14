@@ -89,5 +89,6 @@
   "updateSuccess": "Le tournoi a été mis à jour avec succès.",
   "updateError": "Une erreur est survenue lors de la mise à jour du tournoi. Veuillez réessayer.",
   "unauthorizedUpdate": "Vous n'êtes pas autorisé à modifier ce tournoi. Seul un administrateur ou le créateur peut le faire.",
-  "noCreatedTournaments": "Vous n'avez pas encore créé de tournois."
+  "noCreatedTournaments": "Vous n'avez pas encore créé de tournois.",
+  "finished": "Terminé"
 }

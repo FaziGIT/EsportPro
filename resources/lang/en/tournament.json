@@ -89,5 +89,6 @@
   "updateSuccess": "The tournament has been updated successfully.",
   "updateError": "An error occurred while updating the tournament. Please try again.",
   "unauthorizedUpdate": "You are not authorized to update this tournament. Only an administrator or the creator can do so.",
-  "noCreatedTournaments": "You haven't created any tournaments yet."
+  "noCreatedTournaments": "You haven't created any tournaments yet.",
+  "finished": "Finished"
 }

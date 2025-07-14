@@ -4,6 +4,7 @@ import Tournament from '#models/tournament'
 import { Carousel, Navigation, Slide } from 'vue3-carousel'
 import 'vue3-carousel/dist/carousel.css'
 import { useI18n } from '../../../resources/js/composables/useI18n'
+import { DateTime } from 'luxon'
 
 const { t } = useI18n()
 
@@ -14,12 +15,23 @@ defineProps({
   },
 })
 
-const getTournamentStatusColor = (isValidated: boolean) => {
-  return isValidated ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+const getTagsStatusText = (isValidated: boolean, isFinished: boolean) => {
+  if (isFinished) {
+    return t('tournament.finished')
+  }
+  return isValidated ? t('tournament.validated') : t('tournament.pendingValidation')
 }
 
-const getTournamentStatusText = (isValidated: boolean) => {
-  return isValidated ? t('tournament.validated') : t('tournament.pendingValidation')
+const isTournamentFinished = (tournament: Tournament) => {
+  // Un tournoi est considéré comme terminé s'il a un gagnant ou si sa date de fin est passée
+  return !!tournament.winnerId || (tournament.endDate && tournament.endDate < DateTime.now())
+}
+
+const getTournamentStyleTags = (isValidated: boolean, isFinished: boolean) => {
+  if (isFinished) {
+    return 'bg-blue-100 text-blue-800'
+  }
+  return isValidated ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
 }
 
 </script>
@@ -49,10 +61,10 @@ const getTournamentStatusText = (isValidated: boolean) => {
             <div
               :class="[
                   'absolute top-2 left-2 z-20 px-2 py-1 rounded-md text-xs font-medium',
-                  getTournamentStatusColor(tournament.isValidated),
+                  getTournamentStyleTags(tournament.isValidated, isTournamentFinished(tournament)),
                 ]"
             >
-              {{ getTournamentStatusText(tournament.isValidated) }}
+              {{ getTagsStatusText(tournament.isValidated, isTournamentFinished(tournament)) }}
             </div>
 
             <TournamentCard :tournament="tournament" />
