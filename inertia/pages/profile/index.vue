@@ -2,7 +2,7 @@
 import Layout from '~/components/layouts/layout.vue'
 import GeneralInfoUser from '~/components/profile/GeneralInfoUser.vue'
 import PendingTournaments from '~/components/profile/PendingTournaments.vue'
-import { defineProps, computed } from 'vue'
+import { defineProps } from 'vue'
 import User from '#models/user'
 import TournamentCard from '~/components/TournamentCard.vue'
 import GameCard from '~/components/GameCard.vue'
