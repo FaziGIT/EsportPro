@@ -4,15 +4,13 @@ import GeneralInfoUser from '~/components/profile/GeneralInfoUser.vue'
 import PendingTournaments from '~/components/profile/PendingTournaments.vue'
 import { defineProps } from 'vue'
 import User from '#models/user'
-import TournamentCard from '~/components/TournamentCard.vue'
-import { Carousel, Navigation, Slide } from 'vue3-carousel'
-import 'vue3-carousel/dist/carousel.css'
 import Tournament from '#models/tournament'
 import Game from '#models/game'
 import { UserRole } from '#enums/user_role'
 import { useI18n } from '../../../resources/js/composables/useI18n'
 import CreatedTournamentsSection from '~/components/profile/CreatedTournamentsSection.vue'
 import GamesCarousel from '~/components/game/GamesCarousel.vue'
+import TournamentsCarousel from '~/components/tournament/TournamentsCarousel.vue'
 
 const { t } = useI18n()
 
@@ -52,40 +50,13 @@ defineProps({
       :pendingTournaments="pendingTournaments"
     />
 
-    <p class="text-2xl font-semibold mt-12">Mes prochains tournois</p>
-    <div v-if="!tournaments || tournaments.length === 0" class="text-center py-8 text-gray-500">
-      Aucun tournoi en cours.
-    </div>
-    <div v-else class="py-8">
-      <Carousel
-        class="w-full"
-        snapAlign="start"
-        :wrap-around="false"
-        :items-to-show="4"
-        :breakpoints="{
-          1450: { itemsToShow: 4 },
-          1130: { itemsToShow: 3 },
-          768: { itemsToShow: 2 },
-          0: { itemsToShow: 1 },
-        }"
-      >
-        <Slide
-          v-for="tournament in tournaments"
-          :key="tournament.id"
-          class="flex justify-center px-4"
-        >
-          <TournamentCard :tournament="tournament" />
-        </Slide>
-        <template #addons>
-          <Navigation />
-        </template>
-      </Carousel>
-    </div>
+    <!-- Section des prochains tournois -->
+    <TournamentsCarousel :listTournaments="tournaments" :noElementMessage="'Aucun tournoi en cours.'" :title="'Mes prochains tournois'" />
 
-    <!--     Section des tournois créés par l'utilisateur -->
-    <CreatedTournamentsSection v-if="myCreatedTournaments && myCreatedTournaments.length > 0 && user.role ==='user'" :my-created-tournaments="myCreatedTournaments" />
+    <!-- Section des tournois créés par l'utilisateur -->
+    <CreatedTournamentsSection v-if="myCreatedTournaments && myCreatedTournaments.length > 0 && user.role ==='user'" :myCreatedTournaments="myCreatedTournaments" />
 
-    <!--     Section des jeux favoris -->
+    <!-- Section des jeux favoris -->
     <GamesCarousel :listGames="favoriteGames" :noElementMessage="'Aucun jeu favori.'" :title="'Mes jeux favoris'" />
 
   </Layout>

@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { defineProps } from 'vue'
 import Layout from '~/components/layouts/layout.vue'
-import TournamentCard from '~/components/TournamentCard.vue'
 import Tournament from '#models/tournament'
 import Game from '#models/game'
-import { Carousel, Navigation, Slide } from 'vue3-carousel'
-import 'vue3-carousel/dist/carousel.css'
 import { useI18n } from '../../../resources/js/composables/useI18n'
 import Button from '~/components/Button.vue'
 import GamesCarousel from '~/components/game/GamesCarousel.vue'
+import TournamentsCarousel from '~/components/tournament/TournamentsCarousel.vue'
+import { Slide } from 'vue3-carousel'
 
 const { t } = useI18n()
 
@@ -32,33 +31,13 @@ defineProps({
 
 <template>
   <Layout class="bg-[#fafafa]">
-    <p class="text-4xl font-semibold">{{ t('home.currentTournament') }}</p>
-
-    <div v-if="tournaments.length === 0" class="text-center py-8 text-gray-500">
-      {{ t('i18n.unvaliableCurrentlyTournament') }}
-    </div>
-
-    <div v-else class="py-8">
-      <Carousel
-        class="w-full"
-        snapAlign="start"
-        :wrap-around="false"
-        :items-to-show="4"
-        :breakpoints="{
-          1450: { itemsToShow: 4 },
-          1130: { itemsToShow: 3 },
-          768: { itemsToShow: 2 },
-          0: { itemsToShow: 1 },
-        }"
-      >
-        <Slide
-          v-for="tournament in tournaments"
-          :key="tournament.id"
-          class="flex justify-center px-4"
-        >
-          <TournamentCard :tournament="tournament" :games="allGames" />
-        </Slide>
-
+    <TournamentsCarousel
+      :listTournaments="tournaments"
+      :games="allGames"
+      :noElementMessage="t('home.unvaliableCurrentlyTournament')"
+      :title="t('home.currentTournament')"
+    >
+      <template #extra-slide>
         <Slide class="flex justify-center items-center px-4">
           <Button
             :value="t('home.showAllTournaments')"
@@ -66,12 +45,8 @@ defineProps({
             redirection-path="/tournaments"
           />
         </Slide>
-
-        <template #addons>
-          <Navigation />
-        </template>
-      </Carousel>
-    </div>
+      </template>
+    </TournamentsCarousel>
 
     <GamesCarousel
       :listGames="games"

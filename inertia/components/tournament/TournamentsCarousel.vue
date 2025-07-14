@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import GameCard from '~/components/GameCard.vue'
 import { Carousel, Navigation, Slide } from 'vue3-carousel'
 import { defineProps } from 'vue'
 import Game from '#models/game'
+import TournamentCard from '~/components/TournamentCard.vue'
+import Tournament from '#models/tournament'
 
 defineProps({
   title: {
@@ -12,7 +13,11 @@ defineProps({
     type: String,
     required: true
   },
-  listGames: {
+  listTournaments: {
+    type: Array as () => Tournament[],
+    default: () => [],
+  },
+  games: {
     type: Array as () => Game[],
     default: () => [],
   }
@@ -21,27 +26,27 @@ defineProps({
 
 <template>
   <p v-if="title" class="text-2xl font-semibold mt-12">{{ title }}</p>
-  <div v-if="!listGames || listGames.length === 0" class="text-center py-8 text-gray-500">
+  <div v-if="!listTournaments || listTournaments.length === 0" class="text-center py-8 text-gray-500">
     {{ noElementMessage }}
   </div>
   <div v-else class="py-8">
     <Carousel
       snapAlign="start"
-      :items-to-show="6"
+      :items-to-show="4"
       :wrap-around="false"
       :breakpoints="{
-          1280: { itemsToShow: 6 },
-          1024: { itemsToShow: 4 },
-          768: { itemsToShow: 3 },
-          0: { itemsToShow: 2 },
-        }"
+        1450: { itemsToShow: 4 },
+        1130: { itemsToShow: 3 },
+        768: { itemsToShow: 2 },
+        0: { itemsToShow: 1 },
+      }"
     >
       <Slide
-        v-for="game in listGames"
-        :key="game.id"
+        v-for="tournament in listTournaments"
+        :key="tournament.id"
         class="flex justify-center px-4"
       >
-        <GameCard :game="game" />
+        <TournamentCard :tournament="tournament" :games="games" />
       </Slide>
 
       <!-- Slot pour permettre l'ajout d'éléments personnalisés -->
