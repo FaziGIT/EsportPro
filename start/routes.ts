@@ -49,6 +49,7 @@ router.get('/tournaments/:id/image', [TournamentsController, 'getImageFromTourna
 router.post('/tournaments/new', [TournamentsController, 'store']).use(middleware.auth())
 
 router.get('/tournaments/:id', [TournamentsController, 'show'])
+router.put('/tournaments/:id/edit', [TournamentsController, 'update']).use(middleware.auth())
 router.post('/tournaments/:id/join', [TournamentsController, 'join']).use(middleware.auth())
 router.post('/tournaments/:id/leave', [TournamentsController, 'leave']).use(middleware.auth())
 router.post('/tournaments/:id/launch', [TournamentsController, 'launch']).use(middleware.auth())
@@ -65,6 +66,7 @@ router.get('/api/games', [GamesController, 'api'])
 router.get('/games/:id/image', [GamesController, 'getImageFromGame'])
 router.get('/games/:id', [GamesController, 'show'])
 router.post('/games/new', [GamesController, 'store']).use(middleware.auth())
+router.put('/games/:id/edit', [GamesController, 'update']).use(middleware.auth())
 router
   .post('/games/:id/toggle-favorite', [GamesController, 'toggleFavorite'])
   .use(middleware.auth())

@@ -25,3 +25,8 @@ export interface TournamentFormData {
 
   [key: string]: any
 }
+
+export const TournamentStatus = {
+  NEW: 'new',
+  EDIT: 'edit',
+} as const

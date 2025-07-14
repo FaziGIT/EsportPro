@@ -9,11 +9,60 @@ import Team from '#models/team'
 import Match from '#models/match'
 import Channel from '#models/channel'
 import { ChannelEntityType } from '#enums/channel_entity_type'
+import { getAllGamesWithoutImages } from '../repository/game.js'
+import path from 'node:path'
+
+// To get the imageNotFound path in the server
+const imageNotFound = path.join(process.cwd(), 'inertia', 'img', 'Image-not-found.png')
 
 export default class TournamentsController {
+  private async processTournamentData(
+    data: any,
+    auth: HttpContext['auth']
+  ): Promise<Partial<Tournament>> {
+    const tournamentData: Partial<Tournament> = {
+      name: data.name,
+      tier: data.tier,
+      format: data.format,
+      price: data.price,
+      rules: data.rules,
+      numberParticipants: data.numberParticipants,
+      startDate: DateTime.fromJSDate(data.startDate),
+      endDate: DateTime.fromJSDate(data.endDate),
+      gameId: data.gameId,
+      numberPlayersPerTeam: data.numberPlayersPerTeam,
+      creatorId: auth.user?.id || null,
+      isStarted: false,
+    }
+
+    // Handle online/offline mode
+    if (data.isOnline) {
+      tournamentData.region = null
+      tournamentData.address = null
+      tournamentData.city = null
+      tournamentData.country = null
+      tournamentData.postalCode = null
+    } else {
+      tournamentData.region = data.region!
+      tournamentData.address = data.address!
+      tournamentData.city = data.city!
+      tournamentData.country = data.country!
+      tournamentData.postalCode = data.postalCode!
+    }
+
+    // Handle image upload
+    if (data.image) {
+      tournamentData.image = BufferToUint8Array(data.image.tmpPath!)
+    } else {
+      tournamentData.image = BufferToUint8Array(imageNotFound)
+    }
+
+    return tournamentData
+  }
+
   public async index({ inertia }: HttpContext) {
     // Fetch all games to display in the dropdown when creating new tournament
-    const games = await Game.query().select('id', 'name').orderBy('name', 'asc')
+    const games = await getAllGamesWithoutImages().orderBy('name', 'asc')
 
     return inertia.render('tournaments/index', {
       games,
@@ -25,7 +74,7 @@ export default class TournamentsController {
     const limit = request.input('limit', 20)
     const sort = request.input('sort', 'closest')
 
-    const baseQuery = getAllTournamentsWithoutImages().where('is_validated', true).preload('game')
+    const baseQuery = getAllTournamentsWithoutImages().where('is_validated', true)
 
     switch (sort) {
       case 'furthest':
@@ -48,47 +97,12 @@ export default class TournamentsController {
       messagesProvider: i18n.createMessagesProvider(),
     })
 
-    const tournamentModel: Partial<Tournament> = {
-      name: data.name,
-      tier: data.tier,
-      format: data.format,
-      price: data.price,
-      rules: data.rules,
-      numberParticipants: data.numberParticipants,
-      startDate: DateTime.fromJSDate(data.startDate),
-      endDate: DateTime.fromJSDate(data.endDate),
-      winnerId: null,
-      gameId: data.gameId,
-      numberPlayersPerTeam:
-        data.teamMode && data.numberPlayersPerTeam ? data.numberPlayersPerTeam : 1,
-      creatorId: auth.user?.id || null,
-      isStarted: false,
-    }
-
-    if (data.isOnline) {
-      tournamentModel.region = null
-      tournamentModel.address = null
-      tournamentModel.city = null
-      tournamentModel.country = null
-      tournamentModel.postalCode = null
-    } else {
-      // If not online, we need to fill the region, address, city, country and postalCode, who are checked in the validator
-      tournamentModel.region = data.region!
-      tournamentModel.address = data.address!
-      tournamentModel.city = data.city!
-      tournamentModel.country = data.country!
-      tournamentModel.postalCode = data.postalCode!
-    }
-
-    // If the image is provided, we read the temporary file and convert it to a Uint8Array
-    if (data.image) {
-      tournamentModel.image = BufferToUint8Array(data.image.tmpPath!)
-    }
-
-    const game = await Game.find(data.gameId) // Find because we check in the validator, so it's not null
+    const tournamentModel: Partial<Tournament> = await this.processTournamentData(data, auth)
 
     const tournament = await Tournament.create(tournamentModel)
 
+    // Associate with game
+    const game = await Game.find(data.gameId)
     await tournament.related('game').associate(game!)
 
     // Calculate the number of teams needed and create them
@@ -345,13 +359,22 @@ export default class TournamentsController {
     }
   }
 
-  public async show({ params, inertia, auth }: HttpContext) {
+  public async show({ params, inertia, response }: HttpContext) {
     if (!params.id) {
       throw new Error('Tournament ID is required')
     }
 
     // First get the tournament
-    const tournament = await getAllTournamentsWithoutImages().where('id', params.id).firstOrFail()
+    const tournament = await getAllTournamentsWithoutImages()
+      .preload('game', (query) => {
+        query.select('id', 'name')
+      })
+      .where('id', params.id)
+      .firstOrFail()
+
+    if (!tournament.isValidated) {
+      return response.redirect().back()
+    }
 
     // Load creator if creatorId exists
     if (tournament.creatorId) {
@@ -366,13 +389,10 @@ export default class TournamentsController {
       .preload('winner')
       .orderBy('created_at', 'asc')
 
-    return inertia.render('tournaments/show', {
-      tournament,
-      teams,
-      matches,
-      user: auth.user,
-      isAdmin: auth.user?.role === 'admin',
-    })
+    // Fetch all games to display in the dropdown for editing
+    const games = await getAllGamesWithoutImages().orderBy('name', 'asc')
+
+    return inertia.render('tournaments/show', { tournament, teams, matches, games })
   }
 
   public async join({ params, auth, response }: HttpContext) {
@@ -384,17 +404,9 @@ export default class TournamentsController {
     const tournament = await Tournament.query().where('id', params.id).firstOrFail()
 
     // Check if tournament has started
-    let startDate: Date
-    if (tournament.startDate instanceof Date) {
-      startDate = tournament.startDate
-    } else if (typeof tournament.startDate === 'string') {
-      startDate = new Date(tournament.startDate)
-    } else {
-      // Assume it's a Luxon DateTime
-      startDate = tournament.startDate.toJSDate()
-    }
+    const startDate = tournament.startDate
 
-    if (new Date() >= startDate) {
+    if (DateTime.now() >= startDate) {
       return response.badRequest({ error: 'Tournament has already started' })
     }
 
@@ -569,6 +581,31 @@ export default class TournamentsController {
       success: true,
       team: team,
     })
+  }
+
+  public async update({ params, request, i18n, response, auth }: HttpContext) {
+    if (!params.id) {
+      throw new Error('Tournament ID is required')
+    }
+
+    const tournament = await Tournament.query().where('id', params.id).firstOrFail()
+
+    const data = await request.validateUsing(tournamentValidator, {
+      messagesProvider: i18n.createMessagesProvider(),
+    })
+
+    const updateData: Partial<Tournament> = await this.processTournamentData(data, auth)
+
+    // Update the tournament
+    await tournament.merge(updateData).save()
+
+    // Update game association if changed
+    if (data.gameId !== tournament.gameId) {
+      const game = await Game.find(data.gameId)
+      await tournament.related('game').associate(game!)
+    }
+
+    return response.redirect().back()
   }
 
   public async updateMatchScore({ params, auth, request, response }: HttpContext) {

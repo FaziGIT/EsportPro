@@ -6,15 +6,21 @@ import User from '#models/user'
 export default class HomeController {
   public async index({ inertia }: HttpContext) {
     const tournaments = await getAllTournamentsWithoutImages()
+      .preload('game', (query) => {
+        query.select('id', 'name')
+      })
       .where('is_validated', true)
       .orderBy('start_date', 'asc')
       .limit(10)
 
-    const games = await getAllGamesWithoutImages().limit(15)
+    const games = await getAllGamesWithoutImages().preload('favoriteOfUsers').limit(15)
+
+    const allGames = await getAllGamesWithoutImages().orderBy('name', 'asc')
 
     return inertia.render('home/index', {
       tournaments,
       games,
+      allGames,
     })
   }
 

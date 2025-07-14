@@ -8,3 +8,8 @@ export interface GameFormData {
 
   [key: string]: any
 }
+
+export const GameStatus = {
+  NEW: 'new',
+  EDIT: 'edit',
+} as const

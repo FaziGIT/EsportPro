@@ -23,6 +23,10 @@ defineProps({
     type: Array as () => Game[],
     default: () => [],
   },
+  allGames: {
+    type: Array as () => Game[],
+    default: () => [],
+  },
 })
 </script>
 
@@ -51,7 +55,7 @@ defineProps({
           :key="tournament.id"
           class="flex justify-center px-4"
         >
-          <TournamentCard :tournament="tournament" />
+          <TournamentCard :tournament="tournament" :games="allGames" />
         </Slide>
 
         <Slide class="flex justify-center items-center px-4">

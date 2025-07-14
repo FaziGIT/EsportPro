@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import { defineEmits, defineProps, ref } from 'vue'
+import { computed, defineEmits, defineProps, ref, watch, onUnmounted } from 'vue'
 import { useForm } from '@inertiajs/vue3'
-import { useI18n } from '../../../resources/js/composables/useI18n'
+import { useI18n } from '../../resources/js/composables/useI18n'
 import { GamePlatform } from '#enums/game_platform'
-import { GameFormData } from '#types/game'
+import { GameFormData, GameStatus } from '#types/game'
+import Game from '#models/game'
 
 const { t } = useI18n()
 
 // Props
-defineProps<{
+const props = defineProps<{
   isOpen: boolean
+  mode: typeof GameStatus.EDIT | typeof GameStatus.NEW
+  game?: Game 
 }>()
 
 // Emits
@@ -18,12 +21,39 @@ const emit = defineEmits(['close', 'submit'])
 // State
 const activeTab = ref('general')
 const imageInput = ref<HTMLInputElement>()
+const imageLoadError = ref(false)
 
-const form = useForm<GameFormData>({
-  name: '',
-  platform: GamePlatform.PC,
-  image: null,
-  imagePreview: '',
+// Initialize form data based on mode
+const initializeFormData = (): GameFormData => {
+  if (props.mode === GameStatus.EDIT && props.game) {
+    const game = props.game
+    
+    return {
+      name: game.name || '',
+      platform: game.platform || GamePlatform.PC,
+      image: null,
+      imagePreview: game.id ? `/games/${game.id}/image` : '',
+    }
+  } else {
+    return {
+      name: '',
+      platform: GamePlatform.PC,
+      image: null,
+      imagePreview: '',
+    }
+  }
+}
+
+const form = useForm<GameFormData>(initializeFormData())
+
+const modalTitle = computed(() => {
+  return props.mode === GameStatus.EDIT
+    ? t('game.editGame')
+    : t('game.newGame')
+})
+
+const submitButtonText = computed(() => {
+  return props.mode === GameStatus.EDIT ? t('game.update') : t('game.save')
 })
 
 const closeModal = () => {
@@ -36,10 +66,18 @@ const submitForm = () => {
   const imagePreview = form.imagePreview
   form.imagePreview = ''
 
-  form.post('/games/new', {
+  const submitUrl =
+    props.mode === GameStatus.EDIT
+      ? `/games/${props.game?.id}/edit`
+      : '/games/new'
+
+  const method = props.mode === GameStatus.EDIT ? 'put' : 'post'
+
+  form[method](submitUrl, {
     forceFormData: true,
     onSuccess: () => {
       emit('close')
+      window.location.reload()
     },
     onError: () => {
       form.imagePreview = imagePreview
@@ -62,6 +100,7 @@ const handleImageUpload = (event: Event) => {
   const file = target.files[0]
 
   form.image = file
+  imageLoadError.value = false
 
   // Create preview
   const reader = new FileReader()
@@ -75,6 +114,7 @@ const handleImageUpload = (event: Event) => {
 const removeImage = () => {
   form.image = null
   form.imagePreview = ''
+  imageLoadError.value = false
   if (imageInput.value) {
     imageInput.value.value = ''
   }
@@ -98,7 +138,43 @@ const getError = (fieldName: string) => {
 const hasError = (fieldName: string) => {
   return !!(form.errors as any)[fieldName]
 }
+
+watch(
+  () => props.game,
+  () => {
+    if (props.mode === GameStatus.EDIT && props.game) {
+      const newData = initializeFormData()
+      Object.keys(newData).forEach((key) => {
+        ;(form as any)[key] = (newData as any)[key]
+      })
+      imageLoadError.value = false
+    }
+  },
+  { deep: true }
+)
+
+function handleEscapeKey(event: KeyboardEvent) {
+  if (event.key === 'Escape' && props.isOpen) {
+    closeModal()
+  }
+}
+
+watch(
+  () => props.isOpen,
+  (newValue) => {
+    if (newValue) {
+      document.addEventListener('keydown', handleEscapeKey)
+    } else {
+      document.removeEventListener('keydown', handleEscapeKey)
+    }
+  }
+)
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleEscapeKey)
+})
 </script>
+
 <template>
   <!-- Modal only renders when isOpen is true -->
   <div v-if="isOpen">
@@ -107,12 +183,15 @@ const hasError = (fieldName: string) => {
       <div
         class="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
         @click="closeModal"
+        @keydown.enter.stop
       >
         <!-- Modal content with transition -->
         <Transition name="modal-content" appear>
           <div
             class="bg-white rounded-lg shadow-xl w-full max-w-[600px] h-[500px] sm:h-[500px] max-h-[90vh] flex flex-col transform mx-auto"
             @click.stop
+            @keydown.enter="submitForm"
+            tabindex="-1"
           >
             <!-- Modal header -->
             <div
@@ -120,7 +199,7 @@ const hasError = (fieldName: string) => {
             >
               <div class="flex-1"></div>
               <h2 class="text-xl font-semibold text-gray-800 text-center flex-1">
-                {{ t('game.newGame') }}
+                {{ modalTitle }}
               </h2>
               <div class="flex-1 flex justify-end">
                 <button
@@ -278,13 +357,14 @@ const hasError = (fieldName: string) => {
                   >
                     <!-- Selected image preview -->
                     <div
-                      v-if="form.imagePreview"
+                      v-if="form.imagePreview && !imageLoadError"
                       class="relative w-full h-48 rounded-lg overflow-hidden"
                     >
                       <img
                         :src="form.imagePreview"
                         alt="Selected Image"
                         class="w-full h-full object-cover rounded-lg"
+                        @error="imageLoadError = true"
                       />
                       <button
                         @click="removeImage"
@@ -321,7 +401,13 @@ const hasError = (fieldName: string) => {
                           d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                         ></path>
                       </svg>
-                      <p class="text-gray-500 text-sm">{{ t('game.noImageSelected') }}</p>
+                      <p class="text-gray-500 text-sm">
+                        {{
+                          props.mode === GameStatus.EDIT && props.game?.id
+                            ? t('game.currentImage')
+                            : t('game.noImageSelected')
+                        }}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -340,7 +426,7 @@ const hasError = (fieldName: string) => {
                 @click="submitForm"
                 class="ml-3 px-4 py-2 bg-[#5C4741] hover:bg-[#7b5f57] text-white text-sm font-medium rounded-md transition-colors cursor-pointer"
               >
-                {{ t('game.save') }}
+                {{ submitButtonText }}
               </button>
             </div>
           </div>
@@ -427,4 +513,4 @@ const hasError = (fieldName: string) => {
 .modal-overlay-leave-active .backdrop-blur-sm {
   transition: backdrop-filter 0.3s ease;
 }
-</style>
+</style> 

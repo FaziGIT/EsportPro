@@ -8,7 +8,9 @@ import User from '#models/user'
 import { router } from '@inertiajs/vue3'
 import Game from '#models/game'
 import { GamePlatform } from '#enums/game_platform'
-import { getCsrfToken } from '~/utils'
+import GameForm from './GameForm.vue'
+import { GameStatus } from '#types/game'
+import { useFavoriteToggle } from '../../resources/js/composables/useFavoriteToggle'
 
 const { t } = useI18n()
 const { user: userProps } = useAuth()
@@ -29,11 +31,19 @@ const imageSource = computed(() => {
 })
 
 const isHovered = ref(false)
-const isFavorite = ref(
-  props.game?.favoriteOfUsers?.some((user: User) => user.id === String(userProps.value?.id))
+
+// Utiliser le composable pour la gestion des favoris
+const { isFavorite, toggleFavorite: toggleFavoriteBase } = useFavoriteToggle(
+  props.game?.id || '',
+  computed(() => props.game?.favoriteOfUsers as User[]),
+  userProps.value?.id
 )
 
+// Modal state for game editing
+const isEditModalOpen = ref(false)
+
 const handleImageError = (event: Event) => {
+  console.log('handleImageError')
   const target = event.target as HTMLImageElement
   if (target) {
     target.src = <string>imageNotFound
@@ -49,26 +59,27 @@ const goToGame = () => {
 const formatPlatform = (platform: GamePlatform): string => platform.toString()
 
 const toggleFavorite = async () => {
-  try {
-    const response = await fetch(`/games/${props.game.id}/toggle-favorite`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': getCsrfToken(),
-      },
-    })
-
-    if (response.ok) {
-      isFavorite.value = !isFavorite.value
-      playHeartAnimation()
-      router.reload({ only: ['userGames'] })
-    }
-  } catch (error) {
-    console.error('Erreur toggle favorite:', error)
+  const success = await toggleFavoriteBase()
+  if (success) {
+    playHeartAnimation()
   }
 }
 
 const heartRef = ref<HTMLElement>()
+
+const navigateToEdit = (event: Event) => {
+  event.stopPropagation() // Prevent card click
+  if (!props.game?.id) {
+    console.error('Game ID is missing:', props.game)
+    return
+  }
+
+  isEditModalOpen.value = true
+}
+
+const closeEditModal = () => {
+  isEditModalOpen.value = false
+}
 
 const playHeartAnimation = () => {
   if (!heartRef.value) return
@@ -85,9 +96,34 @@ const playHeartAnimation = () => {
 
 <template>
   <div
-    class="flex flex-col w-60 h-60 min-w-40 rounded-xl shadow-md bg-white overflow-hidden border border-gray-200 cursor-pointer hover:shadow-lg transition-shadow duration-200"
+    class="flex flex-col w-60 h-60 min-w-40 rounded-xl shadow-md bg-white overflow-hidden border border-gray-200 cursor-pointer hover:shadow-lg transition-shadow duration-200 relative"
     @click="goToGame"
+    @mouseenter="isHovered = true"
+    @mouseleave="isHovered = false"
   >
+    <!-- Edit button (visible only when user is logged in) -->
+    <button
+      v-if="userProps"
+      @click="navigateToEdit"
+      class="absolute top-2 right-2 z-10 bg-white rounded-full p-2 shadow-md hover:bg-gray-100 transition-colors duration-200 opacity-0 hover:opacity-100 focus:opacity-100"
+      :class="{ 'opacity-100': isHovered }"
+    >
+      <svg
+        class="w-4 h-4 text-gray-600"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+        ></path>
+      </svg>
+    </button>
+
     <div class="bg-gray-100 h-32 flex items-center justify-center flex-shrink-0">
       <img
         :src="imageSource"
@@ -126,6 +162,17 @@ const playHeartAnimation = () => {
         </div>
       </div>
     </div>
+
+    <!-- Game Edit Modal -->
+    <teleport to="body">
+      <GameForm
+        v-if="userProps"
+        :isOpen="isEditModalOpen"
+        :mode="GameStatus.EDIT"
+        :game="props.game as Game"
+        @close="closeEditModal"
+      />
+    </teleport>
   </div>
 </template>
 
