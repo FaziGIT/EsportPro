@@ -6,5 +6,6 @@
   "totalPlayTime": "Temps de jeu total",
   "finishedTournaments": "Tournois terminés",
   "statsByGame": "Statistiques par jeu",
-  "noGameStats": "Aucune statistique de jeu disponible."
+  "noGameStats": "Aucune statistique de jeu disponible.",
+  "noFinishedTournaments": "Aucun tournoi terminé."
 }

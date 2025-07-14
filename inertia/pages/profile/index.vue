@@ -68,13 +68,24 @@ defineProps({
     />
 
     <!-- Section des prochains tournois -->
-    <TournamentsCarousel :listTournaments="tournaments" :noElementMessage="'Aucun tournoi en cours.'" :title="'Mes prochains tournois'" />
+    <TournamentsCarousel
+      :list-tournaments="tournaments"
+      :no-element-message="'Aucun tournoi en cours.'"
+      :title="'Mes prochains tournois'"
+    />
+
+    <!-- Section des tournois terminés -->
+    <TournamentsCarousel v-if="finishedTournaments && finishedTournaments.length > 0"
+      :list-tournaments="finishedTournaments"
+      :no-element-message="t('profile.noFinishedTournaments')"
+      :title="t('profile.finishedTournaments')"
+    />
 
     <!-- Section des tournois créés par l'utilisateur -->
-    <CreatedTournamentsSection v-if="createdTournaments && createdTournaments.length > 0 && user.role ==='user'" :myCreatedTournaments="createdTournaments" />
+    <CreatedTournamentsSection v-if="createdTournaments && createdTournaments.length > 0 && user.role ==='user'" :my-created-tournaments="createdTournaments" />
 
     <!-- Section des jeux favoris -->
-    <GamesCarousel :listGames="favoriteGames" :noElementMessage="'Aucun jeu favori.'" :title="'Mes jeux favoris'" />
+    <GamesCarousel :list-games="favoriteGames" :no-element-message="'Aucun jeu favori.'" :title="'Mes jeux favoris'" />
 
   </Layout>
 </template>

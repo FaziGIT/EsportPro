@@ -6,5 +6,6 @@
   "totalPlayTime": "Total play time",
   "finishedTournaments": "Finished tournaments",
   "statsByGame": "Statistics by game",
-  "noGameStats": "No game statistics available."
+  "noGameStats": "No game statistics available.",
+  "noFinishedTournaments": "No finished tournaments."
 }
