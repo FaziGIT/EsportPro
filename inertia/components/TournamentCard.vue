@@ -11,6 +11,7 @@ import { TournamentStatus } from '#types/tournament'
 
 const { t } = useI18n()
 const { user } = useAuth()
+const isEditModalOpen = ref(false)
 
 const props = defineProps({
   tournament: {
@@ -23,8 +24,10 @@ const props = defineProps({
   },
 })
 
-// Modal state for tournament editing
-const isEditModalOpen = ref(false)
+const canEdit = computed(() => {
+  if (!user.value) return false
+  return user.value.role === 'admin' || user.value.id === props.tournament.creatorId
+})
 
 const imageSource = computed(() => {
   if (props.tournament?.id) {
@@ -58,7 +61,9 @@ const navigateToEdit = (event: Event) => {
     console.error('Tournament ID is missing:', props.tournament)
     return
   }
-
+  if (!canEdit.value) {
+    return
+  }
   isEditModalOpen.value = true
 }
 
@@ -74,9 +79,8 @@ const closeEditModal = () => {
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
   >
-    <!-- Edit button (visible only when user is logged in) -->
     <button
-      v-if="user"
+      v-if="canEdit"
       @click="navigateToEdit"
       class="absolute top-2 right-2 z-10 bg-white rounded-full p-2 shadow-md hover:bg-gray-100 transition-colors duration-200 opacity-0 hover:opacity-100 focus:opacity-100"
       :class="{ 'opacity-100': isHovered }"
@@ -146,7 +150,7 @@ const closeEditModal = () => {
     <!-- Tournament Edit Modal -->
     <teleport to="body">
       <TournamentForm
-        v-if="user"
+        v-if="canEdit"
         :isOpen="isEditModalOpen"
         :mode="TournamentStatus.EDIT"
         :tournament="props.tournament"

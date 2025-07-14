@@ -611,6 +611,18 @@ export default class TournamentsController {
 
     try {
       const tournament = await Tournament.query().where('id', params.id).firstOrFail()
+      const user = auth.user!
+
+      // Vérifier si l'utilisateur est autorisé à modifier le tournoi
+      const isAdmin = user.role === 'admin'
+      const isCreator = tournament.creatorId === user.id
+
+      if (!isAdmin && !isCreator) {
+        return response.status(403).json({
+          error: true,
+          message: 'You are not authorized to update this tournament',
+        })
+      }
 
       const data = await request.validateUsing(tournamentValidator, {
         messagesProvider: i18n.createMessagesProvider(),

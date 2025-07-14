@@ -85,5 +85,6 @@
   "pendingValidation": "The tournament is pending validation",
   "creationError": "An error occurred while creating the tournament. Please try again.",
   "updateSuccess": "The tournament has been updated successfully.",
-  "updateError": "An error occurred while updating the tournament. Please try again."
+  "updateError": "An error occurred while updating the tournament. Please try again.",
+  "unauthorizedUpdate": "You are not authorized to update this tournament. Only an administrator or the creator can do so."
 }
