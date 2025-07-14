@@ -16,7 +16,7 @@ import CreatedTournamentsSection from '~/components/profile/CreatedTournamentsSe
 
 const { t } = useI18n()
 
-const props = defineProps({
+defineProps({
   user: {
     type: Object as () => User,
     required: true,
@@ -83,7 +83,7 @@ const props = defineProps({
     </div>
 
 <!--     Section des tournois créés par l'utilisateur -->
-    <CreatedTournamentsSection v-if="myCreatedTournaments && myCreatedTournaments.length > 0" :my-created-tournaments="myCreatedTournaments" />
+    <CreatedTournamentsSection v-if="myCreatedTournaments && myCreatedTournaments.length > 0 && user.role ==='user'" :my-created-tournaments="myCreatedTournaments" />
 
     <p class="text-2xl font-semibold mt-12">Mes jeux favoris</p>
     <div v-if="!favoriteGames || favoriteGames.length === 0" class="text-center py-8 text-gray-500">
