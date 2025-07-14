@@ -1,17 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from '../../../resources/js/composables/useI18n'
 import Tournament from '#models/tournament'
+import { GameStatistic } from '#types/game_statistics'
+import { Duration } from 'luxon'
 
 const { t } = useI18n()
-
-// Interface pour les statistiques de jeu
-interface GameStat {
-  totalMatches: number
-  wins: number
-  totalHours: number
-  gameName: string
-}
 
 const props = defineProps({
   userId: {
@@ -27,7 +21,7 @@ const props = defineProps({
     default: () => [],
   },
   gameStats: {
-    type: Object as () => Record<string, GameStat>,
+    type: Object as () => Record<string, GameStatistic>,
     default: () => ({}),
   }
 })
@@ -63,17 +57,16 @@ const tournamentWinRate = computed(() => {
 })
 
 const totalPlayTime = computed(() => {
-  // Récupérer les valeurs de totalHours et les additionner
   const total = Object.values(props.gameStats)
-    .reduce((sum, stat) => sum + (Number.isFinite(stat.totalHours) ? stat.totalHours : 0), 0);
+    .reduce((sum, stat) => {
+      return sum + stat.totalMillis;
+    }, 0);
 
-  // Arrondir à une décimale
-  return Math.round(total * 10) / 10;
+  return Duration.fromMillis(total).toFormat("hh:mm")
 })
 
-// Formatter les nombres avec des espaces pour les milliers
-const formatNumber = (num: number) => {
-  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+const formatNumber = (value: string): string => {
+  return value.replace(':', 'h');
 }
 
 </script>
@@ -89,7 +82,7 @@ const formatNumber = (num: number) => {
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div class="bg-gray-50 p-4 rounded-lg">
           <p class="text-sm text-gray-500">{{ t('profile.totalTournaments') }}</p>
-          <p class="text-2xl font-bold text-gray-900">{{ formatNumber(totalTournaments) }}</p>
+          <p class="text-2xl font-bold text-gray-900">{{ totalTournaments }}</p>
         </div>
         <div class="bg-gray-50 p-4 rounded-lg">
           <p class="text-sm text-gray-500">{{ t('profile.tournamentWinRate') }}</p>
@@ -97,11 +90,11 @@ const formatNumber = (num: number) => {
         </div>
         <div class="bg-gray-50 p-4 rounded-lg">
           <p class="text-sm text-gray-500">{{ t('profile.totalPlayTime') }}</p>
-          <p class="text-2xl font-bold text-gray-900">{{ formatNumber(totalPlayTime) }}h</p>
+          <p class="text-2xl font-bold text-gray-900">{{ formatNumber(totalPlayTime) }}</p>
         </div>
         <div class="bg-gray-50 p-4 rounded-lg">
           <p class="text-sm text-gray-500">{{ t('profile.finishedTournaments') }}</p>
-          <p class="text-2xl font-bold text-gray-900">{{ formatNumber(finishedTournamentsCount) }}</p>
+          <p class="text-2xl font-bold text-gray-900">{{ finishedTournamentsCount }}</p>
         </div>
       </div>
 
@@ -117,7 +110,7 @@ const formatNumber = (num: number) => {
           <div class="flex justify-between items-center mb-2">
             <h4 class="text-md font-medium text-gray-800">{{ stats.gameName || 'Jeu inconnu' }}</h4>
             <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
-              {{ (Math.round((stats.totalHours || 0) * 10) / 10).toFixed(1) }}h
+              {{ formatNumber(Duration.fromMillis(stats.totalMillis || 0).toFormat("hh:mm")) }}
             </span>
           </div>
 
