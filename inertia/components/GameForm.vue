@@ -12,7 +12,7 @@ const { t } = useI18n()
 const props = defineProps<{
   isOpen: boolean
   mode: typeof GameStatus.EDIT | typeof GameStatus.NEW
-  game?: Game 
+  game?: Game
 }>()
 
 // Emits
@@ -22,12 +22,16 @@ const emit = defineEmits(['close', 'submit'])
 const activeTab = ref('general')
 const imageInput = ref<HTMLInputElement>()
 const imageLoadError = ref(false)
+const showNotification = ref(false)
+const notificationMessage = ref('')
+const notificationType = ref('success')
+const processingForm = ref(false)
 
 // Initialize form data based on mode
 const initializeFormData = (): GameFormData => {
   if (props.mode === GameStatus.EDIT && props.game) {
     const game = props.game
-    
+
     return {
       name: game.name || '',
       platform: game.platform || GamePlatform.PC,
@@ -62,6 +66,7 @@ const closeModal = () => {
 
 const submitForm = () => {
   form.clearErrors()
+  processingForm.value = true
 
   const imagePreview = form.imagePreview
   form.imagePreview = ''
@@ -75,14 +80,43 @@ const submitForm = () => {
 
   form[method](submitUrl, {
     forceFormData: true,
-    onSuccess: () => {
-      emit('close')
-      window.location.reload()
+    headers: {
+      'Accept': 'application/json',
     },
-    onError: () => {
+    preserveScroll: true,
+    preserveState: true,
+    onSuccess: () => {
+      notificationType.value = 'success'
+      notificationMessage.value = props.mode === GameStatus.EDIT
+        ? t('game.updateSuccess')
+        : t('game.creationSuccess')
+      showNotification.value = true
+
+      setTimeout(() => {
+        emit('close')
+        window.location.reload()
+      }, 3000)
+    },
+    onError: (errors) => {
       form.imagePreview = imagePreview
+      if (errors.status === '403') {
+        notificationType.value = 'error'
+        notificationMessage.value = t('game.unauthorizedUpdate')
+        showNotification.value = true
+      } else {
+        notificationType.value = 'error'
+        notificationMessage.value = props.mode === GameStatus.EDIT
+          ? t('game.updateError')
+          : t('game.creationError')
+        showNotification.value = true
+      }
+
+      setTimeout(() => {
+        showNotification.value = false
+      }, 5000)
     },
     onFinish: () => {
+      processingForm.value = false
       if (!form.imagePreview) {
         form.imagePreview = imagePreview
       }
@@ -178,6 +212,22 @@ onUnmounted(() => {
 <template>
   <!-- Modal only renders when isOpen is true -->
   <div v-if="isOpen">
+    <!-- Notification -->
+    <div v-if="showNotification"
+         class="fixed top-4 right-4 z-[60] px-4 py-3 rounded flex items-center shadow-lg max-w-md"
+         :class="notificationType === 'success' ?
+                'bg-green-100 border border-green-400 text-green-700' :
+                'bg-red-100 border border-red-400 text-red-700'">
+      <span>{{ notificationMessage }}</span>
+      <button
+        @click="showNotification = false"
+        class="ml-auto hover:opacity-70 cursor-pointer"
+        :class="notificationType === 'success' ? 'text-green-500' : 'text-red-500'"
+      >
+        ✕
+      </button>
+    </div>
+
     <!-- Modal overlay with transition -->
     <Transition name="modal-overlay">
       <div
@@ -419,14 +469,22 @@ onUnmounted(() => {
               <button
                 @click="closeModal"
                 class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 text-sm font-medium rounded-md transition-colors cursor-pointer"
+                :disabled="processingForm"
               >
                 {{ t('game.cancel') }}
               </button>
               <button
                 @click="submitForm"
-                class="ml-3 px-4 py-2 bg-[#5C4741] hover:bg-[#7b5f57] text-white text-sm font-medium rounded-md transition-colors cursor-pointer"
+                class="ml-3 px-4 py-2 bg-[#5C4741] hover:bg-[#7b5f57] text-white text-sm font-medium rounded-md transition-colors cursor-pointer relative"
+                :disabled="processingForm"
               >
-                {{ submitButtonText }}
+                <span v-if="processingForm" class="absolute inset-0 flex items-center justify-center">
+                  <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </span>
+                <span :class="{ 'opacity-0': processingForm }">{{ submitButtonText }}</span>
               </button>
             </div>
           </div>
@@ -513,4 +571,4 @@ onUnmounted(() => {
 .modal-overlay-leave-active .backdrop-blur-sm {
   transition: backdrop-filter 0.3s ease;
 }
-</style> 
+</style>
