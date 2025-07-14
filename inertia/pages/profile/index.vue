@@ -11,6 +11,7 @@ import { useI18n } from '../../../resources/js/composables/useI18n'
 import CreatedTournamentsSection from '~/components/profile/CreatedTournamentsSection.vue'
 import GamesCarousel from '~/components/game/GamesCarousel.vue'
 import TournamentsCarousel from '~/components/tournament/TournamentsCarousel.vue'
+import UserStatsSection from '~/components/profile/UserStatsSection.vue'
 
 const { t } = useI18n()
 
@@ -31,18 +32,34 @@ defineProps({
     type: Array as () => Tournament[],
     default: () => [],
   },
-  myCreatedTournaments: {
+  createdTournaments: {
     type: Array as () => Tournament[],
     default: () => [],
   },
+  finishedTournaments: {
+    type: Array as () => Tournament[],
+    default: () => [],
+  },
+  gameStats: {
+    type: Object,
+    default: () => ({}),
+  },
 })
-
 </script>
 
 <template>
   <Layout class="bg-[#fafafa]">
     <p class="text-4xl font-semibold">Mon profil</p>
     <GeneralInfoUser :user="user" />
+
+    <!-- Section de statistiques utilisateur -->
+    <UserStatsSection
+      v-if="user"
+      :user-id="user.id"
+      :user-tournaments="tournaments"
+      :finished-tournaments="finishedTournaments"
+      :game-stats="gameStats"
+    />
 
     <!-- Section Admin: Tournois en attente de validation -->
     <PendingTournaments
@@ -54,7 +71,7 @@ defineProps({
     <TournamentsCarousel :listTournaments="tournaments" :noElementMessage="'Aucun tournoi en cours.'" :title="'Mes prochains tournois'" />
 
     <!-- Section des tournois créés par l'utilisateur -->
-    <CreatedTournamentsSection v-if="myCreatedTournaments && myCreatedTournaments.length > 0 && user.role ==='user'" :myCreatedTournaments="myCreatedTournaments" />
+    <CreatedTournamentsSection v-if="createdTournaments && createdTournaments.length > 0 && user.role ==='user'" :myCreatedTournaments="createdTournaments" />
 
     <!-- Section des jeux favoris -->
     <GamesCarousel :listGames="favoriteGames" :noElementMessage="'Aucun jeu favori.'" :title="'Mes jeux favoris'" />

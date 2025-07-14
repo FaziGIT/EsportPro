@@ -1,96 +1,3 @@
-<template>
-  <div
-    v-if="isOpen"
-    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-    @click="closeModal"
-  >
-    <div
-      class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4 transform transition-all duration-200"
-      @click.stop
-    >
-      <!-- Modal Header -->
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-xl font-semibold text-gray-900">{{ t('tournament.updateMatchScore') }}</h3>
-        <button
-          @click="closeModal"
-          class="text-gray-400 hover:text-gray-600 transition-colors"
-        >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
-      </div>
-
-      <form @submit.prevent="submitScore" v-if="match">
-        <!-- Team 1 Score -->
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            {{ getTeamDisplayName(match.team1, 'team1') }}
-          </label>
-          <input
-            v-model.number="team1Score"
-            type="number"
-            min="0"
-            :max="maxScore"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-            :placeholder="t('tournament.score')"
-            required
-          />
-        </div>
-
-        <!-- Team 2 Score -->
-        <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            {{ getTeamDisplayName(match.team2, 'team2') }}
-          </label>
-          <input
-            v-model.number="team2Score"
-            type="number"
-            min="0"
-            :max="maxScore"
-            :disabled="match.team2 === null"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
-            :placeholder="match.team2 === null ? 'BYE' : t('tournament.score')"
-            :required="match.team2 !== null"
-          />
-        </div>
-
-        <!-- Format Info -->
-        <div class="mb-6 p-3 bg-gray-50 rounded-lg">
-          <p class="text-sm text-gray-600">
-            <span class="font-medium">{{ t('tournament.format') }}:</span> {{ tournament.format }}
-            <br />
-            <span class="font-medium">{{ t('tournament.firstTo') }}:</span> {{ maxScore }} {{ t('tournament.wins') }}
-          </p>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="flex justify-end space-x-3">
-          <button
-            type="button"
-            @click="closeModal"
-            class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
-          >
-            {{ t('tournament.cancel') }}
-          </button>
-          <button
-            type="submit"
-            :disabled="isSubmitting || !isValidScore"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-          >
-            {{ isSubmitting ? t('tournament.updating') : t('tournament.updateScore') }}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useI18n } from '../../resources/js/composables/useI18n'
@@ -159,19 +66,19 @@ const maxScore = computed(() => {
 // Check if the current score is valid
 const isValidScore = computed(() => {
   if (!props.match) return false
-  
+
   // For BYE matches, team1 should automatically win with max score
   if (props.match.team2 === null) {
     return team1Score.value === maxScore.value && team2Score.value === 0
   }
-  
+
   // For normal matches, one team must reach max score and the other must be less
   const hasWinner = team1Score.value === maxScore.value || team2Score.value === maxScore.value
   const scoresAreDifferent = team1Score.value !== team2Score.value
-  const winnerHasMaxScore = 
+  const winnerHasMaxScore =
     (team1Score.value === maxScore.value && team2Score.value < maxScore.value) ||
     (team2Score.value === maxScore.value && team1Score.value < maxScore.value)
-  
+
   return hasWinner && scoresAreDifferent && winnerHasMaxScore
 })
 
@@ -180,7 +87,7 @@ watch(() => props.match, (newMatch) => {
   if (newMatch) {
     team1Score.value = newMatch.scoreTeam1 ?? 0
     team2Score.value = newMatch.scoreTeam2 ?? 0
-    
+
     // For BYE matches, set default scores
     if (newMatch.team2 === null) {
       team1Score.value = maxScore.value
@@ -237,4 +144,96 @@ const submitScore = async () => {
     isSubmitting.value = false
   }
 }
-</script> 
+</script>
+<template>
+  <div
+    v-if="isOpen"
+    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+    @click="closeModal"
+  >
+    <div
+      class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4 transform transition-all duration-200"
+      @click.stop
+    >
+      <!-- Modal Header -->
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-semibold text-gray-900">{{ t('tournament.updateMatchScore') }}</h3>
+        <button
+          @click="closeModal"
+          class="text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <form @submit.prevent="submitScore" v-if="match">
+        <!-- Team 1 Score -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            {{ getTeamDisplayName(match.team1, 'team1') }}
+          </label>
+          <input
+            v-model.number="team1Score"
+            type="number"
+            min="0"
+            :max="maxScore"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#D6B7B0] focus:border-[#D6B7B0] transition-all"
+            :placeholder="t('tournament.score')"
+            required
+          />
+        </div>
+
+        <!-- Team 2 Score -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            {{ getTeamDisplayName(match.team2, 'team2') }}
+          </label>
+          <input
+            v-model.number="team2Score"
+            type="number"
+            min="0"
+            :max="maxScore"
+            :disabled="match.team2 === null"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#D6B7B0] focus:border-[#D6B7B0] transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
+            :placeholder="match.team2 === null ? 'BYE' : t('tournament.score')"
+            :required="match.team2 !== null"
+          />
+        </div>
+
+        <!-- Format Info -->
+        <div class="mb-6 p-3 bg-gray-50 rounded-lg">
+          <p class="text-sm text-gray-600">
+            <span class="font-medium">{{ t('tournament.format') }}:</span> {{ tournament.format }}
+            <br />
+            <span class="font-medium">{{ t('tournament.firstTo') }}:</span> {{ maxScore }} {{ t('tournament.wins') }}
+          </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-end space-x-3">
+          <button
+            type="button"
+            @click="closeModal"
+            class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+          >
+            {{ t('tournament.cancel') }}
+          </button>
+          <button
+            type="submit"
+            :disabled="isSubmitting || !isValidScore"
+            class="px-4 py-2 bg-[#5C4741] text-white rounded-lg hover:bg-[#7B5F57] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+          >
+            {{ isSubmitting ? t('tournament.updating') : t('tournament.updateScore') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</template>

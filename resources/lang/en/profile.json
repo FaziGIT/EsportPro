@@ -1,3 +1,10 @@
 {
-  "createdTournaments": "My created tournaments"
+  "createdTournaments": "My created tournaments",
+  "myStats": "My statistics",
+  "totalTournaments": "Total tournaments",
+  "tournamentWinRate": "Win rate",
+  "totalPlayTime": "Total play time",
+  "finishedTournaments": "Finished tournaments",
+  "statsByGame": "Statistics by game",
+  "noGameStats": "No game statistics available."
 }

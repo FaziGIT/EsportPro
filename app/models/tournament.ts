@@ -66,7 +66,9 @@ export default class Tournament extends BaseModel {
   @column()
   declare winnerId: string | null
 
-  @belongsTo(() => Team)
+  @belongsTo(() => Team, {
+    foreignKey: 'winnerId',
+  })
   declare winner: BelongsTo<typeof Team>
 
   @hasMany(() => Team)

@@ -1,3 +1,10 @@
 {
-  "createdTournaments": "Mes tournois créés"
+  "createdTournaments": "Mes tournois créés",
+  "myStats": "Mes statistiques",
+  "totalTournaments": "Total des tournois",
+  "tournamentWinRate": "Taux de victoire",
+  "totalPlayTime": "Temps de jeu total",
+  "finishedTournaments": "Tournois terminés",
+  "statsByGame": "Statistiques par jeu",
+  "noGameStats": "Aucune statistique de jeu disponible."
 }
