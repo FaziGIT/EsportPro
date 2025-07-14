@@ -81,5 +81,5 @@
   "validateSuccess": "Tournament validated successfully",
   "validateError": "An error occurred while validating the tournament",
   "refuseSuccess": "Tournament refused successfully",
-  "refuseError": "An error occurred while refusing the tournament",
+  "refuseError": "An error occurred while refusing the tournament"
 }
