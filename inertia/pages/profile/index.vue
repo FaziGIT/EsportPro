@@ -2,7 +2,7 @@
 import Layout from '~/components/layouts/layout.vue'
 import GeneralInfoUser from '~/components/profile/GeneralInfoUser.vue'
 import PendingTournaments from '~/components/profile/PendingTournaments.vue'
-import { defineProps } from 'vue'
+import { defineProps, computed } from 'vue'
 import User from '#models/user'
 import TournamentCard from '~/components/TournamentCard.vue'
 import GameCard from '~/components/GameCard.vue'
@@ -11,8 +11,12 @@ import 'vue3-carousel/dist/carousel.css'
 import Tournament from '#models/tournament'
 import Game from '#models/game'
 import { UserRole } from '#enums/user_role'
+import { useI18n } from '../../../resources/js/composables/useI18n'
+import CreatedTournamentsSection from '~/components/profile/CreatedTournamentsSection.vue'
 
-defineProps({
+const { t } = useI18n()
+
+const props = defineProps({
   user: {
     type: Object as () => User,
     required: true,
@@ -26,6 +30,10 @@ defineProps({
     default: () => [],
   },
   pendingTournaments: {
+    type: Array as () => Tournament[],
+    default: () => [],
+  },
+  myCreatedTournaments: {
     type: Array as () => Tournament[],
     default: () => [],
   },
@@ -73,6 +81,9 @@ defineProps({
         </template>
       </Carousel>
     </div>
+
+<!--     Section des tournois créés par l'utilisateur -->
+    <CreatedTournamentsSection v-if="myCreatedTournaments && myCreatedTournaments.length > 0" :my-created-tournaments="myCreatedTournaments" />
 
     <p class="text-2xl font-semibold mt-12">Mes jeux favoris</p>
     <div v-if="!favoriteGames || favoriteGames.length === 0" class="text-center py-8 text-gray-500">

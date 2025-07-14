@@ -82,9 +82,12 @@
   "validateError": "An error occurred while validating the tournament",
   "refuseSuccess": "Tournament refused successfully",
   "refuseError": "An error occurred while refusing the tournament",
-  "pendingValidation": "The tournament is pending validation",
+  "validated": "Validated",
+  "pendingValidation": "Pending validation",
+  "pendingValidationMessage": "This tournament is pending validation and is not yet accessible.",
   "creationError": "An error occurred while creating the tournament. Please try again.",
   "updateSuccess": "The tournament has been updated successfully.",
   "updateError": "An error occurred while updating the tournament. Please try again.",
-  "unauthorizedUpdate": "You are not authorized to update this tournament. Only an administrator or the creator can do so."
+  "unauthorizedUpdate": "You are not authorized to update this tournament. Only an administrator or the creator can do so.",
+  "noCreatedTournaments": "You haven't created any tournaments yet."
 }

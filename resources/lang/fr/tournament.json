@@ -82,9 +82,12 @@
   "validateError": "Une erreur s'est produite lors de la validation du tournoi",
   "refuseSuccess": "Le tournoi a été refusé avec succès",
   "refuseError": "Une erreur s'est produite lors du refus du tournoi",
-  "pendingValidation": "Le tournoi a été créé avec succès et est en attente de validation par un administrateur.",
+  "validated": "Validé",
+  "pendingValidation": "En attente de validation",
+  "pendingValidationMessage": "Ce tournoi est en attente de validation et n'est pas encore accessible.",
   "creationError": "Une erreur est survenue lors de la création du tournoi. Veuillez réessayer.",
   "updateSuccess": "Le tournoi a été mis à jour avec succès.",
   "updateError": "Une erreur est survenue lors de la mise à jour du tournoi. Veuillez réessayer.",
-  "unauthorizedUpdate": "Vous n'êtes pas autorisé à modifier ce tournoi. Seul un administrateur ou le créateur peut le faire."
+  "unauthorizedUpdate": "Vous n'êtes pas autorisé à modifier ce tournoi. Seul un administrateur ou le créateur peut le faire.",
+  "noCreatedTournaments": "Vous n'avez pas encore créé de tournois."
 }

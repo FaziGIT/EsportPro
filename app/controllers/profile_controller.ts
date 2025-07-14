@@ -10,6 +10,7 @@ export default class ProfileController {
     let tournaments: Tournament[] = []
     let favoriteGames: Game[] = []
     let pendingTournaments: Tournament[] = []
+    let myCreatedTournaments: Tournament[] = []
 
     if (user) {
       await user.load('teams', (query) => {
@@ -34,11 +35,18 @@ export default class ProfileController {
           .orderBy('created_at', 'asc')
       }
 
+      // Récupération des tournois créés par l'utilisateur
+      myCreatedTournaments = await Tournament.query()
+        .where('creatorId', user.id)
+        .preload('game')
+        .orderBy('created_at', 'desc')
+
       return inertia.render('profile/index', {
         user: user,
         tournaments: tournaments,
         favoriteGames: favoriteGames,
         pendingTournaments: pendingTournaments,
+        myCreatedTournaments: myCreatedTournaments,
       })
     }
 
@@ -47,6 +55,7 @@ export default class ProfileController {
       tournaments: tournaments,
       favoriteGames: favoriteGames,
       pendingTournaments: [],
+      myCreatedTournaments: [],
     })
   }
 

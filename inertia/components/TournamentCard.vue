@@ -12,6 +12,7 @@ import { TournamentStatus } from '#types/tournament'
 const { t } = useI18n()
 const { user } = useAuth()
 const isEditModalOpen = ref(false)
+const showNotValidatedMessage = ref(false)
 
 const props = defineProps({
   tournament: {
@@ -51,6 +52,13 @@ const navigateToTournament = () => {
     console.error('Tournament ID is missing:', props.tournament)
     return
   }
+  if (!props.tournament.isValidated) {
+    showNotValidatedMessage.value = true
+    setTimeout(() => {
+      showNotValidatedMessage.value = false
+    }, 3000)
+    return
+  }
 
   router.visit(`/tournaments/${props.tournament.id}`)
 }
@@ -79,6 +87,12 @@ const closeEditModal = () => {
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
   >
+    <p
+      v-if="showNotValidatedMessage"
+      class="absolute bottom-2 left-1/2 transform -translate-x-1/2 text-sm bg-yellow-100 text-yellow-800 px-3 py-1 rounded shadow z-20"
+    >
+      {{ t('tournament.pendingValidationMessage') }}
+    </p>
     <button
       v-if="canEdit"
       @click="navigateToEdit"
