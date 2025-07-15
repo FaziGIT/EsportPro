@@ -4,6 +4,7 @@ import { DateTime, Duration } from 'luxon'
 import { UserRole } from '#enums/user_role'
 import Game from '#models/game'
 import { GameStatistic } from '#types/game_statistics'
+import { getAllTournamentsWithoutImages } from '../repository/tournament.js'
 
 export default class ProfileController {
   public async index({ inertia, auth, response }: HttpContext) {
@@ -28,7 +29,7 @@ export default class ProfileController {
       // Récupération de tous les tournois de l'utilisateur
       const allUserTournaments = user.teams
         .map((team) => team.tournament)
-        .filter((tournament) => tournament !== null)
+        .filter((tournament) => tournament !== null) as Tournament[]
 
       // Un tournoi est considéré comme terminé s'il a un winnerId ou si sa date de fin est passée
       finishedTournaments = allUserTournaments.filter((tournament) => {
@@ -73,9 +74,12 @@ export default class ProfileController {
           }
         }
 
-        // Calculer le temps de jeu
+        // Calculer le temps de jeu uniquement pour les tournois terminés
         try {
-          if (tournament.startDate && tournament.endDate) {
+          const isEnded = tournament.endDate < DateTime.now()
+          const hasWinner = !!tournament.winnerId
+
+          if (isEnded && hasWinner && tournament.startDate && tournament.endDate) {
             const durationInMillis = Duration.fromMillis(
               tournament.endDate.valueOf() - tournament.startDate.valueOf()
             )
@@ -98,14 +102,14 @@ export default class ProfileController {
 
       // Récupération des tournois en attente de validation pour les admins
       if (user.role === UserRole.Admin) {
-        pendingTournaments = await Tournament.query()
+        pendingTournaments = await getAllTournamentsWithoutImages()
           .where('isValidated', false)
           .preload('game')
           .orderBy('created_at', 'asc')
       }
 
       // Récupération des tournois créés par l'utilisateur
-      createdTournaments = await Tournament.query()
+      createdTournaments = await getAllTournamentsWithoutImages()
         .where('creatorId', user.id)
         .preload('game')
         .orderBy('created_at', 'desc')
@@ -168,13 +172,7 @@ export default class ProfileController {
     }
 
     try {
-      const tournament = await Tournament.find(params.id)
-      if (!tournament) {
-        return response.status(404).json({
-          error: true,
-          message: 'Tournament not found',
-        })
-      }
+      const tournament = await getAllTournamentsWithoutImages().where('id', params.id).firstOrFail()
 
       tournament.isValidated = true
       await tournament.save()
@@ -202,7 +200,7 @@ export default class ProfileController {
     }
 
     try {
-      const tournament = await Tournament.query()
+      const tournament = await getAllTournamentsWithoutImages()
         .where('id', params.id)
         .preload('teams', (teamsQuery) => {
           teamsQuery.preload('players')
