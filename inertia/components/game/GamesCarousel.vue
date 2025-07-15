@@ -3,6 +3,7 @@ import GameCard from '~/components/GameCard.vue'
 import { Carousel, Navigation, Slide } from 'vue3-carousel'
 import { defineProps } from 'vue'
 import Game from '#models/game'
+import 'vue3-carousel/dist/carousel.css'
 
 defineProps({
   title: {
@@ -43,6 +44,9 @@ defineProps({
       >
         <GameCard :game="game" />
       </Slide>
+
+      <slot name="extra-slide"></slot>
+
       <template #addons>
         <Navigation />
       </template>

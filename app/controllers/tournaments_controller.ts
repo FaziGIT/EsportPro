@@ -11,6 +11,7 @@ import Channel from '#models/channel'
 import { ChannelEntityType } from '#enums/channel_entity_type'
 import { getAllGamesWithoutImages } from '../repository/game.js'
 import path from 'node:path'
+import { UserRole } from '#enums/user_role'
 
 // To get the imageNotFound path in the server
 const imageNotFound = path.join(process.cwd(), 'inertia', 'img', 'Image-not-found.png')
@@ -167,7 +168,7 @@ export default class TournamentsController {
       .firstOrFail()
 
     // Check permissions: only admin or creator can start tournament
-    const isAdmin = user.role === 'admin'
+    const isAdmin = user.role === UserRole.Admin
     const isCreator = tournament.creatorId === user.id
     if (!isAdmin && !isCreator) {
       return response.forbidden({
@@ -614,7 +615,7 @@ export default class TournamentsController {
       const user = auth.user!
 
       // Vérifier si l'utilisateur est autorisé à modifier le tournoi
-      const isAdmin = user.role === 'admin'
+      const isAdmin = user.role === UserRole.Admin
       const isCreator = tournament.creatorId === user.id
 
       if (!isAdmin && !isCreator) {
@@ -690,7 +691,7 @@ export default class TournamentsController {
       .firstOrFail()
 
     // Check permissions: only admin or tournament creator can update scores
-    const isAdmin = user.role === 'admin'
+    const isAdmin = user.role === UserRole.Admin
     const isCreator = tournament.creatorId === user.id
     if (!isAdmin && !isCreator) {
       return response.forbidden({

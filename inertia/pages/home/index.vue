@@ -7,6 +7,8 @@ import { useI18n } from '../../../resources/js/composables/useI18n'
 import Button from '~/components/Button.vue'
 import GamesCarousel from '~/components/game/GamesCarousel.vue'
 import TournamentsCarousel from '~/components/tournament/TournamentsCarousel.vue'
+import 'vue3-carousel/dist/carousel.css'
+import { Slide } from 'vue3-carousel'
 
 const { t } = useI18n()
 
@@ -30,19 +32,33 @@ defineProps({
 
 <template>
   <Layout class="bg-[#fafafa]">
-        <TournamentsCarousel
+    <TournamentsCarousel
       :list-tournaments="tournaments"
       :games="allGames"
       :no-element-message="t('home.unvaliableCurrentlyTournament')"
       :title="t('home.currentTournament')"
-    />
-    <Button class="ml-6" :value="t('home.showAllTournaments')" color="#D6B7B0" redirection-path="/tournaments" />
+    >
+      <template #extra-slide>
+        <Slide class="flex justify-center items-center px-4">
+          <Button
+            :value="t('home.showAllTournaments')"
+            color="#D6B7B0"
+            redirection-path="/tournaments"
+          />
+        </Slide>
+      </template>
+    </TournamentsCarousel>
 
     <GamesCarousel
       :list-games="games"
       :no-element-message="t('game.noGames')"
       :title="t('home.ourGames')"
-    />
-    <Button class="ml-6" :value="t('home.showAllGames')" color="#D6B7B0" redirection-path="/games" />
+    >
+      <template #extra-slide>
+        <Slide class="flex justify-center items-center px-4">
+          <Button :value="t('home.showAllGames')" color="#D6B7B0" redirection-path="/games" />
+        </Slide>
+      </template>
+    </GamesCarousel>
   </Layout>
 </template>

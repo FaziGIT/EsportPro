@@ -4,6 +4,7 @@ import { defineProps } from 'vue'
 import Game from '#models/game'
 import TournamentCard from '~/components/TournamentCard.vue'
 import Tournament from '#models/tournament'
+import 'vue3-carousel/dist/carousel.css'
 
 defineProps({
   title: {
@@ -48,6 +49,9 @@ defineProps({
       >
         <TournamentCard :tournament="tournament" :games="games" />
       </Slide>
+
+      <slot name="extra-slide"></slot>
+
       <template #addons>
         <Navigation />
       </template>
