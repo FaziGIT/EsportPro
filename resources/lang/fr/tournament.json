@@ -90,5 +90,14 @@
   "updateError": "Une erreur est survenue lors de la mise à jour du tournoi. Veuillez réessayer.",
   "unauthorizedUpdate": "Vous n'êtes pas autorisé à modifier ce tournoi. Seul un administrateur ou le créateur peut le faire.",
   "noCreatedTournaments": "Vous n'avez pas encore créé de tournois.",
-  "finished": "Terminé"
+  "finished": "Terminé",
+  "noPendingTournaments": "Pas de tournois en attente de validation.",
+  "name": "Nom",
+  "game": "Jeu",
+  "participants": "Participants",
+  "validate": "Valider",
+  "refuse": "Refuser",
+  "confirmRefuse": "Confirmer le refus",
+  "confirmRefuseMessage": "Vous etes-vous sûr de vouloir refuser ce tournoi ? Cette action est irréversible.",
+  "noCurrentTournaments": "Aucun tournoi en cours"
 }

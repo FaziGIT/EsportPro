@@ -98,5 +98,6 @@
   "validate": "Validate",
   "refuse": "Refuse",
   "confirmRefuse": "Confirm refusal",
-  "confirmRefuseMessage": "Are you sure you want to refuse this tournament? This action is irreversible."
+  "confirmRefuseMessage": "Are you sure you want to refuse this tournament? This action is irreversible.",
+  "noCurrentTournaments": "No current tournaments"
 }
