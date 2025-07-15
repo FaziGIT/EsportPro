@@ -181,7 +181,7 @@ export default class ProfileController {
 
       return response.json({
         success: true,
-        message: i18n?.t('profile.updateSuccess', {}, 'fr') || 'Profil mis à jour avec succès',
+        message: 'Profile updated successfully',
       })
     } catch (error) {
       return response.status(422).json({

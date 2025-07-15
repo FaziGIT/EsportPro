@@ -279,86 +279,6 @@ onUnmounted(() => {
   document.removeEventListener('keydown', handleEscapeKey)
 })
 </script>
-
-<style scoped>
-/* Modal overlay transitions - smooth backdrop fade */
-.modal-overlay-enter-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.modal-overlay-leave-active {
-  transition: all 0.25s cubic-bezier(0.4, 0, 1, 1);
-}
-
-.modal-overlay-enter-from,
-.modal-overlay-leave-to {
-  opacity: 0;
-  backdrop-filter: blur(0px);
-}
-
-.modal-overlay-enter-to,
-.modal-overlay-leave-from {
-  opacity: 1;
-  backdrop-filter: blur(4px);
-}
-
-/* Modal content transitions - smooth scale and fade with bounce */
-.modal-content-enter-active {
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.modal-content-leave-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 1, 1);
-}
-
-.modal-content-enter-from {
-  opacity: 0;
-  transform: scale(0.85) translateY(-20px);
-}
-
-.modal-content-leave-to {
-  opacity: 0;
-  transform: scale(0.95) translateY(-10px);
-}
-
-.modal-content-enter-to,
-.modal-content-leave-from {
-  opacity: 1;
-  transform: scale(1) translateY(0);
-}
-
-/* Tab content transitions - smooth slide and fade */
-.tab-content-enter-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.tab-content-leave-active {
-  transition: all 0.2s cubic-bezier(0.4, 0, 1, 1);
-}
-
-.tab-content-enter-from {
-  opacity: 0;
-  transform: translateX(16px);
-}
-
-.tab-content-leave-to {
-  opacity: 0;
-  transform: translateX(-16px);
-}
-
-.tab-content-enter-to,
-.tab-content-leave-from {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-/* Ensure smooth backdrop blur transition */
-.modal-overlay-enter-active .backdrop-blur-sm,
-.modal-overlay-leave-active .backdrop-blur-sm {
-  transition: backdrop-filter 0.3s ease;
-}
-</style>
-
 <template>
   <!-- Modal only renders when isOpen is true -->
   <div v-if="isOpen">
@@ -1046,3 +966,81 @@ onUnmounted(() => {
     </button>
   </div>
 </template>
+<style scoped>
+/* Modal overlay transitions - smooth backdrop fade */
+.modal-overlay-enter-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-overlay-leave-active {
+  transition: all 0.25s cubic-bezier(0.4, 0, 1, 1);
+}
+
+.modal-overlay-enter-from,
+.modal-overlay-leave-to {
+  opacity: 0;
+  backdrop-filter: blur(0px);
+}
+
+.modal-overlay-enter-to,
+.modal-overlay-leave-from {
+  opacity: 1;
+  backdrop-filter: blur(4px);
+}
+
+/* Modal content transitions - smooth scale and fade with bounce */
+.modal-content-enter-active {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-content-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 1, 1);
+}
+
+.modal-content-enter-from {
+  opacity: 0;
+  transform: scale(0.85) translateY(-20px);
+}
+
+.modal-content-leave-to {
+  opacity: 0;
+  transform: scale(0.95) translateY(-10px);
+}
+
+.modal-content-enter-to,
+.modal-content-leave-from {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+/* Tab content transitions - smooth slide and fade */
+.tab-content-enter-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tab-content-leave-active {
+  transition: all 0.2s cubic-bezier(0.4, 0, 1, 1);
+}
+
+.tab-content-enter-from {
+  opacity: 0;
+  transform: translateX(16px);
+}
+
+.tab-content-leave-to {
+  opacity: 0;
+  transform: translateX(-16px);
+}
+
+.tab-content-enter-to,
+.tab-content-leave-from {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Ensure smooth backdrop blur transition */
+.modal-overlay-enter-active .backdrop-blur-sm,
+.modal-overlay-leave-active .backdrop-blur-sm {
+  transition: backdrop-filter 0.3s ease;
+}
+</style>
