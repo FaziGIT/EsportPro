@@ -11,20 +11,15 @@ import { GamePlatform } from '#enums/game_platform'
 import GameForm from './GameForm.vue'
 import { GameStatus } from '#types/game'
 import { useFavoriteToggle } from '../../resources/js/composables/useFavoriteToggle'
-import { UserRole } from '#enums/user_role'
 
 const { t } = useI18n()
-const { user: userProps } = useAuth()
+const { user: userProps, isAdmin } = useAuth()
 
 const props = defineProps({
   game: {
     type: Object as () => Partial<Game>,
     required: true,
   },
-})
-
-const isAdmin = computed(() => {
-  return userProps.value?.role === UserRole.Admin
 })
 
 const imageSource = computed(() => {

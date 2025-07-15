@@ -10,15 +10,10 @@ import { useAuth } from '../../../resources/js/composables/useAuth'
 import GameForm from '~/components/GameForm.vue'
 import { GameStatus } from '#types/game'
 import { useFavoriteToggle } from '../../../resources/js/composables/useFavoriteToggle'
-import { UserRole } from '#enums/user_role'
 
 const { t } = useI18n()
-const { user } = useAuth()
+const { user, isAdmin } = useAuth()
 const { game, tournaments } = useGameData()
-
-const isAdmin = computed(() => {
-  return user.value?.role === UserRole.Admin
-})
 
 // Gestion des favoris
 const { isFavorite, toggleFavorite } = useFavoriteToggle(

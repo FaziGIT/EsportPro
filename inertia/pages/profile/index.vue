@@ -76,6 +76,7 @@ defineProps({
       :list-tournaments="tournaments"
       :no-element-message="'Aucun tournoi en cours.'"
       :title="'Mes prochains tournois'"
+      :games="games"
     />
 
     <!-- Section des tournois terminés -->
@@ -83,6 +84,7 @@ defineProps({
       :list-tournaments="finishedTournaments"
       :no-element-message="t('profile.noFinishedTournaments')"
       :title="t('profile.finishedTournaments')"
+      :games="games"
     />
 
     <!-- Section des tournois créés par l'utilisateur -->

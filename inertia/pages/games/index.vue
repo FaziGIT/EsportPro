@@ -10,10 +10,9 @@ import Game from '#models/game'
 import GameCard from '~/components/GameCard.vue'
 import GameForm from '~/components/GameForm.vue'
 import { GameStatus } from '#types/game'
-import { UserRole } from '#enums/user_role'
 
 const { t } = useI18n()
-const { user } = useAuth()
+const { user, isAdmin } = useAuth()
 
 const games = ref<Game[]>([])
 const page = ref(1)
@@ -23,9 +22,6 @@ const allLoaded = ref(false)
 const selectedFilter = ref('closest')
 const selectedLabel = ref(t('menu.ascendingName'))
 
-const isAdmin = computed(() => {
-  return user.value?.role === UserRole.Admin
-})
 
 // Modal state
 const isModalOpen = ref(false)
