@@ -48,10 +48,6 @@ defineProps({
       >
         <TournamentCard :tournament="tournament" :games="games" />
       </Slide>
-
-      <!-- Slot pour permettre l'ajout d'éléments personnalisés -->
-      <slot name="extra-slide"></slot>
-
       <template #addons>
         <Navigation />
       </template>
