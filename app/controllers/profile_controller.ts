@@ -6,6 +6,7 @@ import Game from '#models/game'
 import { GameStatistic } from '#types/game_statistics'
 import { getAllTournamentsWithoutImages } from '../repository/tournament.js'
 import { getAllGamesWithoutImages } from '../repository/game.js'
+import { userProfileValidator } from '#validators/user_validator'
 
 export default class ProfileController {
   public async index({ inertia, auth, response }: HttpContext) {
@@ -130,7 +131,7 @@ export default class ProfileController {
         createdTournaments: createdTournaments,
         finishedTournaments: finishedTournaments,
         gameStats: gameStats,
-        games: games
+        games: games,
       })
     }
 
@@ -142,7 +143,7 @@ export default class ProfileController {
       createdTournaments: [],
       finishedTournaments: [],
       gameStats: {},
-      games: games
+      games: games,
     })
   }
 
@@ -158,18 +159,36 @@ export default class ProfileController {
     return response.redirect().back()
   }
 
-  public async updateName({ request, auth, response }: HttpContext) {
+  public async updateName({ request, auth, response, i18n }: HttpContext) {
     const user = auth.user
-    const firstName = request.input('firstName')
-    const lastName = request.input('lastName')
-
-    if (user) {
-      user.firstName = firstName
-      user.lastName = lastName
-      await user.save()
+    if (!user) {
+      return response.status(401).json({
+        error: true,
+        message: 'Unauthorized access',
+      })
     }
 
-    return response.redirect().back()
+    try {
+      // Valider les données avec le validateur personnalisé
+      const data = await request.validateUsing(userProfileValidator, {
+        messagesProvider: i18n.createMessagesProvider(),
+      })
+
+      // Mettre à jour les données de l'utilisateur
+      user.firstName = data.firstName
+      user.lastName = data.lastName
+      await user.save()
+
+      return response.json({
+        success: true,
+        message: i18n?.t('profile.updateSuccess', {}, 'fr') || 'Profil mis à jour avec succès',
+      })
+    } catch (error) {
+      return response.status(422).json({
+        error: true,
+        message: 'An error occurred while updating the profile',
+      })
+    }
   }
 
   public async validateTournament({ params, response, auth }: HttpContext) {

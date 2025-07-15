@@ -5,6 +5,7 @@ const props = defineProps<{
   label: string
   value: string | null
   isEditable?: boolean
+  error?: string
 }>()
 
 const emit = defineEmits(['update:value'])
@@ -28,17 +29,19 @@ const updateValue = () => {
 </script>
 
 <template>
-  <div class="flex flex-wrap items-center gap-2 w-full">
-    <span class="font-medium whitespace-nowrap">{{ label }} :</span>
-
-    <template v-if="isEditable">
+  <div class="flex flex-col">
+    <span class="text-sm text-gray-600">{{ label }}</span>
+    <div v-if="isEditable" class="w-full">
       <input
         v-model="inputValue"
         class="border border-[#5C4741] rounded p-1 bg-[#F5F5F5] w-full sm:w-64 min-w-[40px]"
         type="text"
         @change="updateValue"
+        :class="{ 'border-red-500': error }"
+        placeholder="Lettres, chiffres, tirets uniquement"
       />
-    </template>
+      <p v-if="error" class="text-red-500 text-xs mt-1">{{ error }}</p>
+    </div>
 
     <template v-else>
       <div

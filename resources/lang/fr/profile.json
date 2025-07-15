@@ -7,5 +7,11 @@
   "finishedTournaments": "Tournois terminés",
   "statsByGame": "Statistiques par jeu",
   "noGameStats": "Aucune statistique de jeu disponible.",
-  "noFinishedTournaments": "Aucun tournoi terminé."
+  "noFinishedTournaments": "Aucun tournoi terminé.",
+  "updateSuccess": "Profil mis à jour avec succès",
+  "updateInvalidData": "La valeur doit être une chaîne de caractères",
+  "updateError": "Une erreur est survenue lors de la mise à jour du profil",
+  "updateStatusSuccess": "Statut mis à jour avec succès",
+  "updateStatusError": "Une erreur est survenue lors de la mise à jour du statut",
+  "generalInfo": "Mes informations générales",
 }

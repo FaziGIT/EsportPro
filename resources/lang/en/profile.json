@@ -7,5 +7,11 @@
   "finishedTournaments": "Finished tournaments",
   "statsByGame": "Statistics by game",
   "noGameStats": "No game statistics available.",
-  "noFinishedTournaments": "No finished tournaments."
+  "noFinishedTournaments": "No finished tournaments.",
+  "updateSuccess": "Profile updated successfully",
+  "updateInvalidData": "Value must be a string",
+  "updateError": "An error occurred while updating the profile",
+  "updateStatusSuccess": "Status updated successfully",
+  "updateStatusError": "An error occurred while updating the status",
+  "generalInfo": "My general information"
 }
