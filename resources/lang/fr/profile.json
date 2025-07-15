@@ -14,4 +14,16 @@
   "updateStatusSuccess": "Statut mis à jour avec succès",
   "updateStatusError": "Une erreur est survenue lors de la mise à jour du statut",
   "generalInfo": "Mes informations générales",
+  "myProfile": "Mon profil",
+  "firstName": "Prénom",
+  "lastName": "Nom",
+  "username": "Mon pseudo",
+  "email": "Mon Email",
+  "isPublic": "Mon compte est public ?",
+  "confirmMakePublic": "Voulez-vous vraiment rendre votre compte public ?",
+  "confirmMakePrivate": "Voulez-vous vraiment passer votre compte en privé ?",
+  "nextTournaments": "Mes prochains tournois",
+  "favoriteGames": "Mes jeux favoris",
+  "noFavoriteGames": "Aucun jeu favori.",
+  "validCharactersOnly": "Lettres, chiffres, tirets uniquement"
 }

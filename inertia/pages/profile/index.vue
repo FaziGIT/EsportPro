@@ -53,7 +53,7 @@ defineProps({
 
 <template>
   <Layout class="bg-[#fafafa]">
-    <p class="text-4xl font-semibold">Mon profil</p>
+    <p class="text-4xl font-semibold">{{ t('profile.myProfile') }}</p>
     <GeneralInfoUser :user="user" />
 
     <!-- Section de statistiques utilisateur -->
@@ -74,8 +74,8 @@ defineProps({
     <!-- Section des prochains tournois -->
     <TournamentsCarousel
       :list-tournaments="tournaments"
-      :no-element-message="'Aucun tournoi en cours.'"
-      :title="'Mes prochains tournois'"
+      :no-element-message="t('tournament.noCurrentTournaments')"
+      :title="t('profile.nextTournaments')"
       :games="games"
     />
 
@@ -89,13 +89,16 @@ defineProps({
 
     <!-- Section des tournois créés par l'utilisateur -->
     <CreatedTournamentsSection
-      v-if="createdTournaments && createdTournaments.length > 0 && user.role ==='user'"
+      v-if="createdTournaments && createdTournaments.length > 0 && user.role === 'user'"
       :my-created-tournaments="createdTournaments"
       :games="games"
     />
 
     <!-- Section des jeux favoris -->
-    <GamesCarousel :list-games="favoriteGames" :no-element-message="'Aucun jeu favori.'" :title="'Mes jeux favoris'" />
-
+    <GamesCarousel
+      :list-games="favoriteGames"
+      :no-element-message="t('profile.noFavoriteGames')"
+      :title="t('profile.favoriteGames')"
+    />
   </Layout>
 </template>

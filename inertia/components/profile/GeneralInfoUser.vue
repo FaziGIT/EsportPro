@@ -185,14 +185,14 @@ watch(
     <div class="p-8 flex flex-col gap-3 w-full md:w-1/3">
       <UserInfoField
         class="pb-2"
-        label="Nom"
+        :label="t('profile.lastName')"
         :value="form.firstName"
         :isEditable="editing"
         :error="form.errors.firstName"
         @update:value="form.firstName = $event"
       />
       <UserInfoField
-        label="Prénom"
+        :label="t('profile.firstName')"
         :value="form.lastName"
         :isEditable="editing"
         :error="form.errors.lastName"
@@ -200,12 +200,12 @@ watch(
       />
     </div>
     <div class="p-8 flex flex-col gap-3 w-full md:w-1/3">
-      <UserInfoField class="pb-2" label="Mon pseudo" :value="user?.pseudo" />
-      <UserInfoField label="Mon Email" :value="user?.email" />
+      <UserInfoField class="pb-2" :label="t('profile.username')" :value="user?.pseudo" />
+      <UserInfoField :label="t('profile.email')" :value="user?.email" />
     </div>
     <div class="p-8 w-full md:w-1/3">
       <div class="flex flex-wrap">
-        <p class="pr-4">Mon compte est public ?</p>
+        <p class="pr-4">{{ t('profile.isPublic') }}</p>
         <button
           :class="[
             'relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none cursor-pointer border',
@@ -229,24 +229,23 @@ watch(
       @click="updateData"
       :use-redirection="false"
       :loading="form.processing"
-      value="Sauvegarder"
+      :value="t('common.save')"
     />
     <Button
       @click="cancelEdit"
       :use-redirection="false"
       color="#D6B7B0"
       text-color="#000000"
-      value="Annuler"
+      :value="t('common.cancel')"
     />
   </div>
 
   <!-- Popup de confirmation -->
   <div v-if="showConfirm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
     <div class="bg-white rounded-lg p-6 shadow-lg max-w-sm w-full">
-      <p class="text-lg font-semibold mb-4">Confirmer le changement</p>
+      <p class="text-lg font-semibold mb-4">{{ t('common.confirmChange') }}</p>
       <p class="mb-6">
-        Voulez-vous vraiment
-        {{ pendingValue ? 'rendre votre compte public' : 'passer votre compte en privé' }} ?
+        {{ t(pendingValue ? 'profile.confirmMakePublic' : 'profile.confirmMakePrivate') }}
       </p>
       <div class="flex justify-end gap-2">
         <Button
@@ -254,9 +253,9 @@ watch(
           :use-redirection="false"
           color="#CBD3CD"
           text-color="#000000"
-          value="Annuler"
+          :value="t('common.cancel')"
         />
-        <Button @click="confirmChange" :use-redirection="false" value="Confirmer" />
+        <Button @click="confirmChange" :use-redirection="false" :value="t('common.confirm')" />
       </div>
     </div>
   </div>

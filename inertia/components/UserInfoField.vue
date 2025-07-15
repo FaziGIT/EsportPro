@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useI18n } from '../../resources/js/composables/useI18n'
 
+const { t } = useI18n()
 const props = defineProps<{
   label: string
   value: string | null
@@ -38,7 +40,7 @@ const updateValue = () => {
         type="text"
         @change="updateValue"
         :class="{ 'border-red-500': error }"
-        placeholder="Lettres, chiffres, tirets uniquement"
+        :placeholder="t('profile.validCharactersOnly')"
       />
       <p v-if="error" class="text-red-500 text-xs mt-1">{{ error }}</p>
     </div>

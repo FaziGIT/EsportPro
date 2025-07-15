@@ -148,10 +148,10 @@ function cancelRefuse() {
       </button>
     </div>
 
-    <p class="text-2xl font-semibold mb-4">Tournois en attente de validation</p>
+    <p class="text-2xl font-semibold mb-4">{{ t('tournament.pendingValidation') }}</p>
 
     <div v-if="pendingTournaments.length === 0" class="text-center py-8 text-gray-500">
-      Aucun tournoi en attente de validation.
+      {{ t('tournament.noPendingTournaments') }}
     </div>
 
     <div v-else class="border border-gray-300 rounded-lg shadow-sm overflow-hidden">
@@ -160,15 +160,15 @@ function cancelRefuse() {
           <table class="min-w-[1300px] w-full table-fixed">
             <thead class="bg-gray-100">
             <tr>
-              <th class="sticky top-0 bg-gray-100 z-10 px-4 py-3 text-left text-sm font-semibold w-[180px]">Nom</th>
-              <th class="sticky top-0 bg-gray-100 z-10 px-4 py-3 text-left text-sm font-semibold w-[140px]">Jeu</th>
-              <th class="sticky top-0 bg-gray-100 z-10 px-4 py-3 text-left text-sm font-semibold w-[100px]">Format</th>
-              <th class="sticky top-0 bg-gray-100 z-10 px-4 py-3 text-left text-sm font-semibold w-[120px]">Niveau</th>
-              <th class="sticky top-0 bg-gray-100 z-10 px-4 py-3 text-left text-sm font-semibold w-[100px]">Prix</th>
-              <th class="sticky top-0 bg-gray-100 z-10 px-4 py-3 text-left text-sm font-semibold w-[150px]">Participants</th>
-              <th class="sticky top-0 bg-gray-100 z-10 px-4 py-3 text-left text-sm font-semibold w-[160px]">Lieu</th>
-              <th class="sticky top-0 bg-gray-100 z-10 px-4 py-3 text-left text-sm font-semibold w-[180px]">Dates</th>
-              <th class="sticky top-0 bg-gray-100 z-10 px-4 py-3 text-left text-sm font-semibold w-[160px]">Actions</th>
+              <th class="sticky top-0 bg-gray-100 z-10 px-4 py-3 text-left text-sm font-semibold w-[180px]">{{ t('tournament.name') }}</th>
+              <th class="sticky top-0 bg-gray-100 z-10 px-4 py-3 text-left text-sm font-semibold w-[140px]">{{ t('tournament.game') }}</th>
+              <th class="sticky top-0 bg-gray-100 z-10 px-4 py-3 text-left text-sm font-semibold w-[100px]">{{ t('tournament.format') }}</th>
+              <th class="sticky top-0 bg-gray-100 z-10 px-4 py-3 text-left text-sm font-semibold w-[120px]">{{ t('tournament.level') }}</th>
+              <th class="sticky top-0 bg-gray-100 z-10 px-4 py-3 text-left text-sm font-semibold w-[100px]">{{ t('tournament.price') }}</th>
+              <th class="sticky top-0 bg-gray-100 z-10 px-4 py-3 text-left text-sm font-semibold w-[150px]">{{ t('tournament.participants') }}</th>
+              <th class="sticky top-0 bg-gray-100 z-10 px-4 py-3 text-left text-sm font-semibold w-[160px]">{{ t('tournament.location') }}</th>
+              <th class="sticky top-0 bg-gray-100 z-10 px-4 py-3 text-left text-sm font-semibold w-[180px]">{{ t('tournament.dates') }}</th>
+              <th class="sticky top-0 bg-gray-100 z-10 px-4 py-3 text-left text-sm font-semibold w-[160px]">{{ t('common.actions') }}</th>
             </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 bg-white">
@@ -180,7 +180,7 @@ function cancelRefuse() {
               <td class="px-4 py-3 text-sm text-gray-700 truncate">{{ tournament.price }} €</td>
               <td class="px-4 py-3 text-sm text-gray-700 truncate">{{ tournament.numberParticipants }}</td>
               <td class="px-4 py-3 text-sm text-gray-700 truncate">
-                {{ tournament.city ?? 'En ligne' }}{{ tournament.country ? ', ' + tournament.country : '' }}
+                {{ tournament.city ?? t('tournament.online') }}{{ tournament.country ? ', ' + tournament.country : '' }}
               </td>
               <td class="px-4 py-3 text-sm text-gray-700 truncate">
                 {{ DateTime.fromISO(tournament.startDate.toString()).toFormat('dd/MM/yyyy') }} - {{ DateTime.fromISO(tournament.endDate.toString()).toFormat('dd/MM/yyyy') }}
@@ -192,14 +192,14 @@ function cancelRefuse() {
                     :disabled="isProcessing"
                     class="cursor-pointer px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Valider
+                    {{ t('tournament.validate') }}
                   </button>
                   <button
                     @click="openRefuseConfirmation(tournament.id)"
                     :disabled="isProcessing"
                     class="cursor-pointer px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Refuser
+                    {{ t('tournament.refuse') }}
                   </button>
                 </div>
               </td>
@@ -214,15 +214,15 @@ function cancelRefuse() {
     <div v-if="showConfirmRefuse" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg p-6 shadow-lg max-w-sm w-full">
         <p class="text-lg font-semibold mb-4">
-          Confirmer le refus
+          {{ t('tournament.confirmRefuse') }}
         </p>
         <p class="mb-6">
-          Êtes-vous sûr de vouloir refuser ce tournoi ? Cette action est irréversible.
+          {{ t('tournament.confirmRefuseMessage') }}
         </p>
 
         <div class="flex justify-end gap-2">
-          <Button @click="refuseTournament" :use-redirection="false" color="#E74C3C" value="Refuser"/>
-          <Button @click="cancelRefuse" :use-redirection="false" color="#CBD3CD" text-color="#000000" value="Annuler"/>
+          <Button @click="refuseTournament" :use-redirection="false" color="#E74C3C" :value="t('tournament.refuse')"/>
+          <Button @click="cancelRefuse" :use-redirection="false" color="#CBD3CD" text-color="#000000" :value="t('common.cancel')"/>
         </div>
       </div>
     </div>

@@ -13,5 +13,17 @@
   "updateError": "An error occurred while updating the profile",
   "updateStatusSuccess": "Status updated successfully",
   "updateStatusError": "An error occurred while updating the status",
-  "generalInfo": "My general information"
+  "generalInfo": "My general information",
+  "myProfile": "My profile",
+  "firstName": "First name",
+  "lastName": "Last name",
+  "username": "My username",
+  "email": "My Email",
+  "isPublic": "Is my account public?",
+  "confirmMakePublic": "Do you really want to make your account public?",
+  "confirmMakePrivate": "Do you really want to make your account private?",
+  "nextTournaments": "My upcoming tournaments",
+  "favoriteGames": "My favorite games",
+  "noFavoriteGames": "No favorite games.",
+  "validCharactersOnly": "Letters, numbers, hyphens only"
 }
