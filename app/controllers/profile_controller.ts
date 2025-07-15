@@ -5,6 +5,7 @@ import { UserRole } from '#enums/user_role'
 import Game from '#models/game'
 import { GameStatistic } from '#types/game_statistics'
 import { getAllTournamentsWithoutImages } from '../repository/tournament.js'
+import { getAllGamesWithoutImages } from '../repository/game.js'
 
 export default class ProfileController {
   public async index({ inertia, auth, response }: HttpContext) {
@@ -15,21 +16,28 @@ export default class ProfileController {
     let createdTournaments: Tournament[] = []
     let finishedTournaments: Tournament[] = []
     let gameStats: Record<string, GameStatistic> = {}
+    let games: Game[] = []
+
+    // Récupérer tous les jeux disponibles pour le formulaire d'édition
+    games = await getAllGamesWithoutImages().orderBy('name', 'asc')
 
     if (user) {
-      await user.load('teams', (query) => {
-        query.preload('tournament', (tournamentQuery) => {
-          tournamentQuery.preload('game').preload('teams', (teamsQuery) => {
-            teamsQuery.preload('players')
-          })
-        })
-      })
+      // Charger les équipes de l'utilisateur
+      await user.load('teams')
       await user.load('favoriteGames')
 
-      // Récupération de tous les tournois de l'utilisateur
-      const allUserTournaments = user.teams
-        .map((team) => team.tournament)
-        .filter((tournament) => tournament !== null) as Tournament[]
+      // Récupérer les IDs des tournois de l'utilisateur
+      const tournamentIds = user.teams.map((team) => team.tournamentId).filter((id) => id !== null)
+
+      let allUserTournaments: Tournament[] = []
+      if (tournamentIds.length > 0) {
+        allUserTournaments = await getAllTournamentsWithoutImages()
+          .whereIn('id', tournamentIds)
+          .preload('game')
+          .preload('teams', (teamsQuery) => {
+            teamsQuery.preload('players')
+          })
+      }
 
       // Un tournoi est considéré comme terminé s'il a un winnerId ou si sa date de fin est passée
       finishedTournaments = allUserTournaments.filter((tournament) => {
@@ -122,6 +130,7 @@ export default class ProfileController {
         createdTournaments: createdTournaments,
         finishedTournaments: finishedTournaments,
         gameStats: gameStats,
+        games: games
       })
     }
 
@@ -133,6 +142,7 @@ export default class ProfileController {
       createdTournaments: [],
       finishedTournaments: [],
       gameStats: {},
+      games: games
     })
   }
 

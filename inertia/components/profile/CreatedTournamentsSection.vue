@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import TournamentCard from '../TournamentCard.vue'
 import Tournament from '#models/tournament'
+import Game from '#models/game'
 import { Carousel, Navigation, Slide } from 'vue3-carousel'
 import 'vue3-carousel/dist/carousel.css'
 import { useI18n } from '../../../resources/js/composables/useI18n'
 import { DateTime } from 'luxon'
+import { defineProps } from 'vue'
 
 const { t } = useI18n()
 
@@ -12,6 +14,10 @@ defineProps({
   myCreatedTournaments: {
     type: Array as () => Tournament[],
     required: true,
+  },
+  games: {
+    type: Array as () => Game[],
+    default: () => [],
   },
 })
 
@@ -67,7 +73,10 @@ const getTournamentStyleTags = (isValidated: boolean, isFinished: boolean) => {
               {{ getTagsStatusText(tournament.isValidated, isTournamentFinished(tournament)) }}
             </div>
 
-            <TournamentCard :tournament="tournament" />
+            <TournamentCard
+              :tournament="tournament"
+              :games="games"
+            />
           </div>
         </Slide>
         <template #addons>

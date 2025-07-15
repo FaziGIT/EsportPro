@@ -610,7 +610,7 @@ export default class TournamentsController {
     }
 
     try {
-      const tournament = await Tournament.query().where('id', params.id).firstOrFail()
+      const tournament = await Tournament.findOrFail(params.id)
       const user = auth.user!
 
       // Vérifier si l'utilisateur est autorisé à modifier le tournoi
@@ -636,7 +636,9 @@ export default class TournamentsController {
       // Update game association if changed
       if (data.gameId !== tournament.gameId) {
         const game = await Game.find(data.gameId)
-        await tournament.related('game').associate(game!)
+        if (game) {
+          await tournament.related('game').associate(game)
+        }
       }
 
       if (request.accepts(['html', 'json']) === 'json') {
@@ -654,12 +656,14 @@ export default class TournamentsController {
         return response.status(500).json({
           error: true,
           message: 'An error occurred while updating the tournament',
+          details: error instanceof Error ? error.message : 'Unknown error',
         })
       }
 
       return response.status(500).json({
         error: true,
         message: 'An error occurred while updating the tournament',
+        details: error instanceof Error ? error.message : 'Unknown error',
       })
     }
   }

@@ -44,6 +44,10 @@ defineProps({
     type: Object,
     default: () => ({}),
   },
+  games: {
+    type: Array as () => Game[],
+    default: () => [],
+  },
 })
 </script>
 
@@ -82,7 +86,11 @@ defineProps({
     />
 
     <!-- Section des tournois créés par l'utilisateur -->
-    <CreatedTournamentsSection v-if="createdTournaments && createdTournaments.length > 0 && user.role ==='user'" :my-created-tournaments="createdTournaments" />
+    <CreatedTournamentsSection
+      v-if="createdTournaments && createdTournaments.length > 0 && user.role ==='user'"
+      :my-created-tournaments="createdTournaments"
+      :games="games"
+    />
 
     <!-- Section des jeux favoris -->
     <GamesCarousel :list-games="favoriteGames" :no-element-message="'Aucun jeu favori.'" :title="'Mes jeux favoris'" />

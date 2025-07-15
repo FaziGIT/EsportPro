@@ -32,9 +32,9 @@ defineProps({
 <template>
   <Layout class="bg-[#fafafa]">
     <TournamentsCarousel
-      :listTournaments="tournaments"
+      :list-tournaments="tournaments"
       :games="allGames"
-      :noElementMessage="t('home.unvaliableCurrentlyTournament')"
+      :no-element-message="t('home.unvaliableCurrentlyTournament')"
       :title="t('home.currentTournament')"
     >
       <template #extra-slide>
@@ -49,8 +49,8 @@ defineProps({
     </TournamentsCarousel>
 
     <GamesCarousel
-      :listGames="games"
-      :noElementMessage="t('game.noGames')"
+      :list-games="games"
+      :no-element-message="t('game.noGames')"
       :title="t('home.ourGames')"
     >
       <template #extra-slide>
