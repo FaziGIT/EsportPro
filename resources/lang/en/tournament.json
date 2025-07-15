@@ -99,5 +99,7 @@
   "refuse": "Refuse",
   "confirmRefuse": "Confirm refusal",
   "confirmRefuseMessage": "Are you sure you want to refuse this tournament? This action is irreversible.",
+  "winnerTeam": "Winner Team",
+  "tournamentFinished": "Tournament finished",
   "noCurrentTournaments": "No current tournaments"
 }

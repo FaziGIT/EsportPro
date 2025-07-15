@@ -13,6 +13,8 @@ import { useTournamentData } from '../../../resources/js/composables/usePageProp
 import { useChatStore } from '~/store/chat_store'
 import Team from '#models/team'
 import User from '#models/user'
+import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
+import { TrashIcon } from '~/components/icons'
 
 const { t } = useI18n()
 const { user, isAdmin } = useAuth()
@@ -26,7 +28,12 @@ const props = defineProps<{
   }>
 }>()
 
+// Modals
 const isEditModalOpen = ref(false)
+const isDeleteModalOpen = ref(false)
+const isDeletingTournament = ref(false)
+const deleteError = ref('')
+const deleteSuccess = ref('')
 
 // Team editing state
 const editingTeamId = ref<string | null>(null)
@@ -161,6 +168,16 @@ const canStartTournament = computed(() => {
   }
 })
 
+const canEdit = computed(() => {
+  if (!user.value) return false
+  return isAdmin.value || tournament.value.creatorId === user.value.id
+})
+
+const canDelete = computed(() => {
+  if (!user.value) return false
+  return isAdmin.value || tournament.value.creatorId === user.value.id
+})
+
 const joinTournament = async () => {
   if (!user.value) {
     redirectToLogin()
@@ -205,17 +222,63 @@ const joinTournament = async () => {
   }
 }
 
-const canEdit = computed(() => {
-  if (!user.value) return false
-  return isAdmin.value || tournament.value.creatorId === user.value.id
-})
-
 const navigateToEdit = () => {
   if (!canEdit.value) {
     return
   }
 
   isEditModalOpen.value = true
+}
+
+const openDeleteModal = () => {
+  if (!canDelete.value) {
+    return
+  }
+  isDeleteModalOpen.value = true
+}
+
+const closeDeleteModal = () => {
+  isDeleteModalOpen.value = false
+  deleteError.value = ''
+  deleteSuccess.value = ''
+}
+
+const deleteTournament = async () => {
+  if (!tournament.value.id || isDeletingTournament.value) return
+
+  isDeletingTournament.value = true
+  deleteError.value = ''
+
+  try {
+    const token = getCsrfToken()
+    const response = await fetch(`/tournaments/${tournament.value.id}/delete`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': token || '',
+      },
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+        throw new Error(result.message || 'An error occurred while deleting the tournament')
+    }
+
+    // Suppression réussie
+    deleteSuccess.value = result.message || 'Tournament deleted successfully'
+
+    // Rediriger vers la page des tournois après 2 secondes
+    setTimeout(() => {
+      router.visit('/tournaments')
+    }, 2000)
+
+  } catch (error) {
+    deleteError.value = error instanceof Error ? error.message : 'An error occurred while deleting the tournament'
+  } finally {
+    isDeletingTournament.value = false
+  }
 }
 
 const closeEditModal = () => {
@@ -327,7 +390,7 @@ const handleImageError = (event: Event) => {
   }
 }
 
-const handleMatchUpdated = (data: any) => {
+const handleMatchUpdated = () => {
   // Show success message
   showSuccessMessage.value = true
   setTimeout(() => {
@@ -336,6 +399,24 @@ const handleMatchUpdated = (data: any) => {
 
   router.reload({ only: ['tournament', 'matches'] })
 }
+
+const tournamentFinished = computed(() => {
+  // Un tournoi est terminé s'il a un gagnant ou si la date de fin est passée
+  if (tournament.value.winnerId) return true
+
+  try {
+    let endDate: DateTime = DateTime.fromISO(String(tournament.value.endDate))
+    return DateTime.now() >= endDate
+  } catch (error) {
+    console.error('Error checking tournament end date:', error)
+    return false
+  }
+})
+
+const winningTeam = computed(() => {
+  if (!tournament.value.winnerId) return null
+  return teams.value.find(team => team.id === tournament.value.winnerId)
+})
 </script>
 <template>
   <Layout>
@@ -371,29 +452,41 @@ const handleMatchUpdated = (data: any) => {
           {{ tournament.name }}
         </h1>
         <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
-          <!-- Edit button (visible only when user can edit) -->
-          <button
-            v-if="canEdit"
-            @click="navigateToEdit"
-            class="font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition bg-gray-600 text-white hover:bg-gray-700 flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer"
-          >
-            <svg
-              class="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
+          <!-- Edit and Delete buttons -->
+          <div class="flex gap-2">
+            <button
+              v-if="canEdit"
+              @click="navigateToEdit"
+              class="font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition bg-gray-600 text-white hover:bg-gray-700 flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-              ></path>
-            </svg>
-            <span class="hidden sm:inline">{{ t('tournament.editTournament') }}</span>
-            <span class="sm:hidden">{{ t('tournament.editTournament') }}</span>
-          </button>
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                ></path>
+              </svg>
+              <span class="hidden sm:inline">{{ t('tournament.editTournament') }}</span>
+              <span class="sm:hidden">{{ t('tournament.editTournament') }}</span>
+            </button>
+
+            <button
+              v-if="canDelete"
+              @click="openDeleteModal"
+              class="font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition bg-orange-600 text-white hover:bg-orange-700 flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer"
+            >
+              <TrashIcon class="w-4 h-4" color="#FFFF" />
+              <span class="hidden sm:inline">{{ t('tournament.deleteTournament') }}</span>
+              <span class="sm:hidden">{{ t('tournament.deleteTournament') }}</span>
+            </button>
+          </div>
 
           <!-- Start Tournament Button (Admin or Creator only, after start date) -->
           <button
@@ -412,7 +505,8 @@ const handleMatchUpdated = (data: any) => {
               !tournamentStarted &&
               user &&
               !tournament.isStarted &&
-              !isTournamentFull
+              !isTournamentFull &&
+              !tournamentFinished
             "
             @click="joinTournament"
             :disabled="isJoining"
@@ -463,8 +557,14 @@ const handleMatchUpdated = (data: any) => {
             {{ t('tournament.alreadyJoined') }}
           </div>
           <div
+            v-else-if="tournamentFinished"
+            class="font-semibold px-6 py-3 rounded-lg bg-purple-100 text-purple-700 cursor-default"
+          >
+            {{ t('tournament.finished') }}
+          </div>
+          <div
             v-else-if="tournament.isStarted"
-            class="font-semibold px-6 py-3 rounded-lg bg-blue-100 text-blue-700"
+            class="font-semibold px-6 py-3 rounded-lg bg-blue-100 text-blue-700 cursor-default"
           >
             {{ t('tournament.started') }}
           </div>
@@ -484,6 +584,28 @@ const handleMatchUpdated = (data: any) => {
       <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
         <!-- Main content -->
         <div class="xl:col-span-3">
+          <!-- Affichage du gagnant si le tournoi est terminé et a un gagnant -->
+          <div v-if="tournamentFinished && winningTeam" class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-semibold text-gray-900 mb-4 cursor-default">{{ t('tournament.winnerTeam') }}</h2>
+            <div class="flex items-center justify-center p-4 bg-purple-50 rounded-lg">
+              <div class="flex flex-col items-center">
+                <h3 class="text-xl font-bold text-purple-800">{{ winningTeam.name }}</h3>
+                <div class="mt-4 flex flex-wrap gap-3 justify-center">
+                  <div v-for="player in winningTeam.players" :key="player.id" class="flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-full bg-white border-2 border-yellow-500 flex items-center justify-center mb-1">
+                      <span class="text-sm font-medium text-gray-700">
+                        {{ player.pseudo?.charAt(0)}}
+                      </span>
+                    </div>
+                    <span class="text-xs text-center max-w-[60px] truncate text-gray-700">
+                      {{ player.pseudo }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 class="text-2xl font-semibold text-gray-900 mb-4">{{ t('tournament.rules') }}</h2>
             <p class="text-gray-700 leading-relaxed">{{ tournament.rules }}</p>
@@ -629,6 +751,10 @@ const handleMatchUpdated = (data: any) => {
             <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ t('tournament.details') }}</h2>
 
             <div class="space-y-4">
+              <div v-if="tournamentFinished" class="py-2 px-3 bg-purple-100 text-purple-800 rounded-lg text-sm font-medium mb-4 cursor-default">
+                {{ t('tournament.tournamentFinished') }}
+              </div>
+
               <div class="flex justify-between items-center">
                 <span class="text-gray-600">{{ t('game.gameName') }}:</span>
                 <span class="font-medium text-gray-900">{{ tournament.game.name }}</span>
@@ -689,6 +815,7 @@ const handleMatchUpdated = (data: any) => {
       </div>
     </div>
 
+    <!-- Tournament Edit Modal -->
     <TournamentForm
       v-if="canEdit"
       :isOpen="isEditModalOpen"
@@ -697,6 +824,77 @@ const handleMatchUpdated = (data: any) => {
       :games="props.games"
       @close="closeEditModal"
     />
+
+    <!-- Delete Confirmation Modal -->
+    <TransitionRoot appear :show="isDeleteModalOpen" as="template">
+      <Dialog as="div" @close="closeDeleteModal" class="relative z-50">
+        <TransitionChild
+          as="template"
+          enter="duration-300 ease-out"
+          enter-from="opacity-0"
+          enter-to="opacity-100"
+          leave="duration-200 ease-in"
+          leave-from="opacity-100"
+          leave-to="opacity-0"
+        >
+          <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" />
+        </TransitionChild>
+
+        <div class="fixed inset-0 overflow-y-auto">
+          <div class="flex min-h-full items-center justify-center p-4 text-center">
+            <TransitionChild
+              as="template"
+              enter="duration-300 ease-out"
+              enter-from="opacity-0 scale-95"
+              enter-to="opacity-100 scale-100"
+              leave="duration-200 ease-in"
+              leave-from="opacity-100 scale-100"
+              leave-to="opacity-0 scale-95"
+            >
+              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900">
+                  {{ t('tournament.confirmDeleteTitle') }}
+                </DialogTitle>
+                <div class="mt-2">
+                  <p class="text-sm text-gray-500">
+                    {{ t('tournament.confirmDeleteMessage') }}
+                  </p>
+                  <p class="mt-2 font-medium">{{ tournament?.name }}</p>
+
+                  <div v-if="deleteError" class="mt-3 p-2 bg-red-50 border border-red-200 text-red-700 rounded text-sm">
+                    {{ deleteError }}
+                  </div>
+
+                  <div v-if="deleteSuccess" class="mt-3 p-2 bg-green-50 border border-green-200 text-green-700 rounded text-sm">
+                    {{ deleteSuccess }}
+                  </div>
+                </div>
+
+                <div class="mt-4 flex justify-end gap-3">
+                  <button
+                    type="button"
+                    class="inline-flex justify-center rounded-md border border-transparent bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300 focus:outline-none"
+                    @click="closeDeleteModal"
+                    :disabled="isDeletingTournament"
+                  >
+                    {{ t('tournament.cancel') }}
+                  </button>
+                  <button
+                    type="button"
+                    class="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none"
+                    @click="deleteTournament"
+                    :disabled="isDeletingTournament"
+                  >
+                    <span v-if="isDeletingTournament" class="inline-block animate-spin mr-2">↻</span>
+                    {{ t('tournament.delete') }}
+                  </button>
+                </div>
+              </DialogPanel>
+            </TransitionChild>
+          </div>
+        </div>
+      </Dialog>
+    </TransitionRoot>
   </Layout>
 </template>
 

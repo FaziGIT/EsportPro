@@ -839,4 +839,59 @@ export default class TournamentsController {
       await this.advanceWinnerToNextMatch(match, winnerId, tournamentFormat)
     }
   }
+
+  public async deleteTournament({ params, auth, response }: HttpContext) {
+    const user = auth.user
+    if (!user) {
+      return response.status(401).json({
+        error: true,
+        message: 'Unauthorized access',
+      })
+    }
+
+    try {
+      // Récupérer le tournoi avec ses équipes et les joueurs de chaque équipe
+      const tournament = await Tournament.query()
+        .where('id', params.id)
+        .preload('teams', (teamsQuery) => {
+          teamsQuery.preload('players')
+        })
+        .firstOrFail()
+
+      // Vérifier si l'utilisateur est autorisé à supprimer le tournoi
+      const isAdmin = user.role === UserRole.Admin
+      const isCreator = tournament.creatorId === user.id
+
+      if (!isAdmin && !isCreator) {
+        return response.status(403).json({
+          error: true,
+          message: 'You are not authorized to delete this tournament',
+        })
+      }
+
+      // Pour chaque équipe, détacher tous les joueurs avant de supprimer l'équipe
+      for (const team of tournament.teams) {
+        if (team.players && team.players.length > 0) {
+          const playerIds = team.players.map((player) => player.id)
+          await team.related('players').detach(playerIds)
+        }
+      }
+
+      await tournament.related('teams').query().delete()
+      await Match.query().where('tournament_id', tournament.id).delete()
+      await Channel.query().where('tournament_id', tournament.id).delete()
+
+      await tournament.delete()
+
+      return response.json({
+        success: true,
+        message: 'Tournament successfully deleted',
+      })
+    } catch (error) {
+      return response.status(500).json({
+        error: true,
+        message: 'An error occurred while deleting the tournament',
+      })
+    }
+  }
 }

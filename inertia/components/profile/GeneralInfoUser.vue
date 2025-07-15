@@ -7,6 +7,7 @@ import { router, useForm } from '@inertiajs/vue3'
 import UserInfoField from '~/components/UserInfoField.vue'
 import { getCsrfToken } from '~/utils'
 import { useI18n } from '../../../resources/js/composables/useI18n'
+import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 
 const { t } = useI18n()
 const props = defineProps({
@@ -23,6 +24,7 @@ const editing = ref(false)
 const showNotification = ref(false)
 const notificationMessage = ref('')
 const notificationType = ref('success')
+const isProcessing = ref(false)
 
 const form = useForm({
   firstName: props.user.firstName || '',
@@ -37,38 +39,43 @@ const onSwitchClick = () => {
   showConfirm.value = true
 }
 
-const confirmChange = () => {
-  isPublic.value = pendingValue.value
-  showConfirm.value = false
+const confirmChange = async () => {
+  isProcessing.value = true
 
-  router.post(
-    '/profile/privacy',
-    {
-      isPrivate: !isPublic.value,
-    },
-    {
-      preserveScroll: true,
-      onSuccess: () => {
-        notificationType.value = 'success'
-        notificationMessage.value = t('profile.updateStatusSuccess')
-        showNotification.value = true
-        setTimeout(() => {
-          showNotification.value = false
-        }, 3000)
+  try {
+    await router.post(
+      '/profile/privacy',
+      {
+        isPrivate: !pendingValue.value,
       },
-      onError: () => {
-        notificationType.value = 'error'
-        notificationMessage.value = t('profile.updateStatusError')
-        showNotification.value = true
-        setTimeout(() => {
-          showNotification.value = false
-        }, 3000)
-      },
-    }
-  )
+      {
+        preserveScroll: true,
+        onSuccess: () => {
+          isPublic.value = pendingValue.value
+          showConfirm.value = false
+          notificationType.value = 'success'
+          notificationMessage.value = t('profile.updateStatusSuccess')
+          showNotification.value = true
+          setTimeout(() => {
+            showNotification.value = false
+          }, 3000)
+        },
+        onError: () => {
+          notificationType.value = 'error'
+          notificationMessage.value = t('profile.updateStatusError')
+          showNotification.value = true
+          setTimeout(() => {
+            showNotification.value = false
+          }, 3000)
+        },
+      }
+    )
+  } finally {
+    isProcessing.value = false
+  }
 }
 
-const cancelChange = () => {
+const closeConfirmModal = () => {
   showConfirm.value = false
 }
 
@@ -240,23 +247,67 @@ watch(
     />
   </div>
 
-  <!-- Popup de confirmation -->
-  <div v-if="showConfirm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-6 shadow-lg max-w-sm w-full">
-      <p class="text-lg font-semibold mb-4">{{ t('common.confirmChange') }}</p>
-      <p class="mb-6">
-        {{ t(pendingValue ? 'profile.confirmMakePublic' : 'profile.confirmMakePrivate') }}
-      </p>
-      <div class="flex justify-end gap-2">
-        <Button
-          @click="cancelChange"
-          :use-redirection="false"
-          color="#CBD3CD"
-          text-color="#000000"
-          :value="t('common.cancel')"
-        />
-        <Button @click="confirmChange" :use-redirection="false" :value="t('common.confirm')" />
-      </div>
-    </div>
-  </div>
+  <!-- Popup de confirmation avec le nouveau style -->
+  <teleport to="body">
+    <TransitionRoot appear :show="showConfirm" as="template">
+      <Dialog as="div" @close="closeConfirmModal" class="relative z-50">
+        <TransitionChild
+          as="template"
+          enter="duration-300 ease-out"
+          enter-from="opacity-0"
+          enter-to="opacity-100"
+          leave="duration-200 ease-in"
+          leave-from="opacity-100"
+          leave-to="opacity-0"
+        >
+          <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" />
+        </TransitionChild>
+
+        <div class="fixed inset-0 overflow-y-auto">
+          <div class="flex min-h-full items-center justify-center p-4 text-center">
+            <TransitionChild
+              as="template"
+              enter="duration-300 ease-out"
+              enter-from="opacity-0 scale-95"
+              enter-to="opacity-100 scale-100"
+              leave="duration-200 ease-in"
+              leave-from="opacity-100 scale-100"
+              leave-to="opacity-0 scale-95"
+            >
+              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900">
+                  {{ t('common.confirmChange') }}
+                </DialogTitle>
+                <div class="mt-2">
+                  <p class="text-sm text-gray-500">
+                    {{ t(pendingValue ? 'profile.confirmMakePublic' : 'profile.confirmMakePrivate') }}
+                  </p>
+                </div>
+
+                <div class="mt-4 flex justify-end gap-3">
+                  <button
+                    type="button"
+                    class="inline-flex justify-center rounded-md border border-transparent bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300 focus:outline-none"
+                    @click="closeConfirmModal"
+                    :disabled="isProcessing"
+                  >
+                    {{ t('common.cancel') }}
+                  </button>
+                  <button
+                    type="button"
+                    class="inline-flex justify-center rounded-md border border-transparent bg-[#5C4741] px-4 py-2 text-sm font-medium text-white hover:bg-[#7b5f57] focus:outline-none"
+                    @click="confirmChange"
+                    :disabled="isProcessing"
+                  >
+                    <span v-if="isProcessing" class="inline-block animate-spin mr-2">↻</span>
+                    {{ t('common.confirm') }}
+                  </button>
+                </div>
+              </DialogPanel>
+            </TransitionChild>
+          </div>
+        </div>
+      </Dialog>
+    </TransitionRoot>
+  </teleport>
 </template>

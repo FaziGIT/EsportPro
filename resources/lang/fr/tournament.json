@@ -91,6 +91,8 @@
   "unauthorizedUpdate": "Vous n'êtes pas autorisé à modifier ce tournoi. Seul un administrateur ou le créateur peut le faire.",
   "noCreatedTournaments": "Vous n'avez pas encore créé de tournois.",
   "finished": "Terminé",
+  "winnerTeam": "Équipe gagnante",
+  "tournamentFinished": "Tournoi terminé",
   "noPendingTournaments": "Pas de tournois en attente de validation.",
   "name": "Nom",
   "game": "Jeu",

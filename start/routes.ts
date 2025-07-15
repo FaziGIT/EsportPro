@@ -57,6 +57,9 @@ router.post('/tournaments/:id/launch', [TournamentsController, 'launch']).use(mi
 router
   .put('/tournaments/:id/matches/:matchId/score', [TournamentsController, 'updateMatchScore'])
   .use(middleware.auth())
+router
+  .delete('/tournaments/:id/delete', [TournamentsController, 'deleteTournament'])
+  .use(middleware.auth())
 
 // Team routes
 router.put('/teams/:id', [TournamentsController, 'updateTeam']).use(middleware.auth())
