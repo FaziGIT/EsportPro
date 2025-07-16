@@ -556,6 +556,9 @@ export default class TournamentsController {
       const defaultName = `Team ${teamIndex + 1}`
 
       await userTeam.merge({ name: defaultName }).save()
+
+      // Delete the channel of the team
+      await userTeam.related('channel').query().delete()
     }
 
     // Return updated data for dynamic refresh
@@ -567,6 +570,11 @@ export default class TournamentsController {
       .preload('team2')
       .preload('winner')
       .orderBy('created_at', 'asc')
+
+    // If all the teams are empty, delete the channel of the tournament
+    if (updatedTeams.every((team) => team.players.length === 0)) {
+      await Channel.query().where('tournament_id', params.id).delete()
+    }
 
     // Return JSON response with updated data
     return response.json({

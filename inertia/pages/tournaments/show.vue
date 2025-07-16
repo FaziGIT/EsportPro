@@ -275,9 +275,9 @@ const deleteTournament = async () => {
     setTimeout(() => {
       router.visit('/tournaments')
     }, 2000)
-
   } catch (error) {
-    deleteError.value = error instanceof Error ? error.message : 'An error occurred while deleting the tournament'
+    deleteError.value =
+      error instanceof Error ? error.message : 'An error occurred while deleting the tournament'
   } finally {
     isDeletingTournament.value = false
   }
@@ -320,6 +320,7 @@ const leaveTournament = async () => {
       }, 5000)
 
       router.reload({ only: ['teams', 'matches', 'userTournaments'] })
+      chatStore.triggerChannelRefresh()
     } else {
       const errorData = await response.json()
       console.error('Error leaving tournament:', errorData.error)
@@ -417,7 +418,7 @@ const tournamentFinished = computed(() => {
 
 const winningTeam = computed(() => {
   if (!tournament.value.winnerId) return null
-  return teams.value.find(team => team.id === tournament.value.winnerId)
+  return teams.value.find((team) => team.id === tournament.value.winnerId)
 })
 </script>
 <template>
@@ -459,7 +460,7 @@ const winningTeam = computed(() => {
             <button
               v-if="canDelete"
               @click="openDeleteModal"
-              class="font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition bg-orange-600  hover:bg-orange-700 flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer"
+              class="font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition bg-orange-600 hover:bg-orange-700 flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer"
             >
               <TrashIcon class="w-4 h-4" color="#FFFF" />
             </button>
@@ -585,16 +586,27 @@ const winningTeam = computed(() => {
         <!-- Main content -->
         <div class="xl:col-span-3">
           <!-- Affichage du gagnant si le tournoi est terminé et a un gagnant -->
-          <div v-if="tournamentFinished && winningTeam" class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 class="text-2xl font-semibold text-gray-900 mb-4 cursor-default">{{ t('tournament.winnerTeam') }}</h2>
+          <div
+            v-if="tournamentFinished && winningTeam"
+            class="bg-white rounded-lg shadow-md p-6 mb-6"
+          >
+            <h2 class="text-2xl font-semibold text-gray-900 mb-4 cursor-default">
+              {{ t('tournament.winnerTeam') }}
+            </h2>
             <div class="flex items-center justify-center p-4 bg-purple-50 rounded-lg">
               <div class="flex flex-col items-center">
                 <h3 class="text-xl font-bold text-purple-800">{{ winningTeam.name }}</h3>
                 <div class="mt-4 flex flex-wrap gap-3 justify-center">
-                  <div v-for="player in winningTeam.players" :key="player.id" class="flex flex-col items-center">
-                    <div class="w-12 h-12 rounded-full bg-white border-2 border-yellow-500 flex items-center justify-center mb-1">
+                  <div
+                    v-for="player in winningTeam.players"
+                    :key="player.id"
+                    class="flex flex-col items-center"
+                  >
+                    <div
+                      class="w-12 h-12 rounded-full bg-white border-2 border-yellow-500 flex items-center justify-center mb-1"
+                    >
                       <span class="text-sm font-medium text-gray-700">
-                        {{ player.pseudo?.charAt(0)}}
+                        {{ player.pseudo?.charAt(0) }}
                       </span>
                     </div>
                     <span class="text-xs text-center max-w-[60px] truncate text-gray-700">
@@ -751,7 +763,10 @@ const winningTeam = computed(() => {
             <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ t('tournament.details') }}</h2>
 
             <div class="space-y-4">
-              <div v-if="tournamentFinished" class="py-2 px-3 bg-purple-100 text-purple-800 rounded-lg text-sm font-medium mb-4 cursor-default">
+              <div
+                v-if="tournamentFinished"
+                class="py-2 px-3 bg-purple-100 text-purple-800 rounded-lg text-sm font-medium mb-4 cursor-default"
+              >
                 {{ t('tournament.tournamentFinished') }}
               </div>
 
