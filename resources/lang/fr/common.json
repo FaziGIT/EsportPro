@@ -3,5 +3,7 @@
   "cancel": "Annuler",
   "confirm": "Confirmer",
   "confirmChange": "Confirmer le changement",
-  "actions": "Actions"
+  "actions": "Actions",
+  "delete": "Supprimer",
+  "confirmDelete": "Confirmer la suppression"
 }

@@ -272,7 +272,7 @@ const closeEditModal = () => {
               >
                 <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                   <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900">
-                    {{ t('tournament.confirmDeleteTitle') }}
+                    {{ t('common.confirmDelete') }}
                   </DialogTitle>
                   <div class="mt-2">
                     <p class="text-sm text-gray-500">
@@ -296,7 +296,7 @@ const closeEditModal = () => {
                       @click="closeDeleteModal"
                       :disabled="isDeletingTournament"
                     >
-                      {{ t('tournament.cancel') }}
+                      {{ t('common.cancel') }}
                     </button>
                     <button
                       type="button"
@@ -305,7 +305,7 @@ const closeEditModal = () => {
                       :disabled="isDeletingTournament"
                     >
                       <span v-if="isDeletingTournament" class="inline-block animate-spin mr-2">↻</span>
-                      {{ t('tournament.delete') }}
+                      {{ t('common.delete') }}
                     </button>
                   </div>
                 </DialogPanel>

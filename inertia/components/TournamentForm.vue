@@ -935,7 +935,7 @@ onUnmounted(() => {
                 @click="closeModal"
                 class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 text-sm font-medium rounded-md transition-colors cursor-pointer"
               >
-                {{ t('tournament.cancel') }}
+                {{ t('common.cancel') }}
               </button>
               <button
                 @click="submitForm"

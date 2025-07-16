@@ -6,6 +6,7 @@ import { getAllTournamentsWithoutImages } from '../repository/tournament.js'
 import { gameUpdateValidator, gameValidator } from '#validators/game'
 import User from '#models/user'
 import { UserRole } from '#enums/user_role'
+import TournamentService from '#services/tournament_service'
 
 export default class GamesController {
   public async index({ inertia }: HttpContext) {
@@ -178,6 +179,51 @@ export default class GamesController {
       })
     } catch (error) {
       return response.status(500).json({ error: 'Internal server error' })
+    }
+  }
+
+  public async deleteGame({ params, auth, response }: HttpContext) {
+    const user = auth.user
+    if (!user || user.role !== UserRole.Admin) {
+      return response.status(403).json({
+        error: true,
+        message: 'Unauthorized access',
+      })
+    }
+
+    try {
+      const game = await getAllGamesWithoutImages()
+        .where('id', params.id)
+        .preload('favoriteOfUsers')
+        .firstOrFail()
+
+      // Récupérer les tournois associés au jeu
+      const tournaments = await getAllTournamentsWithoutImages()
+        .where('game_id', params.id)
+        .select('id')
+
+      for (const tournament of tournaments) {
+        await TournamentService.deleteTournamentById(tournament.id, user)
+      }
+
+      // Détacher le jeu des utilisateurs qui l'ont mis en favori
+      if (game.favoriteOfUsers && game.favoriteOfUsers.length > 0) {
+        const userIds = game.favoriteOfUsers.map((u) => u.id)
+        await game.related('favoriteOfUsers').detach(userIds)
+      }
+
+      // Supprimer le jeu
+      await game.delete()
+
+      return response.json({
+        success: true,
+        message: 'Game successfully deleted with all related tournaments',
+      })
+    } catch (error) {
+      return response.status(500).json({
+        error: true,
+        message: 'An error occurred while deleting the game',
+      })
     }
   }
 }

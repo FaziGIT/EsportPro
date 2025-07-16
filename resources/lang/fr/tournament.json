@@ -31,7 +31,6 @@
   "import": "Importer",
   "noImageSelected": "Aucune image sélectionnée",
   "currentImage": "Image actuelle",
-  "cancel": "Annuler",
   "createTournament": "Créer le tournoi",
   "update": "Mettre à jour",
   "startDate": "Date de début",
@@ -101,5 +100,6 @@
   "refuse": "Refuser",
   "confirmRefuse": "Confirmer le refus",
   "confirmRefuseMessage": "Vous etes-vous sûr de vouloir refuser ce tournoi ? Cette action est irréversible.",
-  "noCurrentTournaments": "Aucun tournoi en cours"
+  "noCurrentTournaments": "Aucun tournoi en cours",
+  "confirmDeleteMessage": "Êtes-vous sûr de vouloir supprimer ce tournoi ?"
 }

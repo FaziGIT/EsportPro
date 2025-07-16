@@ -31,7 +31,6 @@
   "import": "Import",
   "noImageSelected": "No image selected",
   "currentImage": "Current image",
-  "cancel": "Cancel",
   "createTournament": "Create tournament",
   "update": "Update",
   "startDate": "Start date",
@@ -91,6 +90,7 @@
   "unauthorizedUpdate": "You are not authorized to update this tournament. Only an administrator or the creator can do so.",
   "noCreatedTournaments": "You haven't created any tournaments yet.",
   "finished": "Finished",
+  "winnerTeam": "Winner Team",
   "noPendingTournaments": "No tournaments pending validation.",
   "name": "Name",
   "game": "Game",
@@ -99,7 +99,7 @@
   "refuse": "Refuse",
   "confirmRefuse": "Confirm refusal",
   "confirmRefuseMessage": "Are you sure you want to refuse this tournament? This action is irreversible.",
-  "winnerTeam": "Winner Team",
   "tournamentFinished": "Tournament finished",
-  "noCurrentTournaments": "No current tournaments"
+  "noCurrentTournaments": "No current tournaments",
+  "confirmDeleteMessage": "Are you sure you want to delete this tournament? This action is irreversible."
 }

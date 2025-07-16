@@ -12,7 +12,6 @@
   "addGameImage": "Ajouter une image du jeu",
   "import": "Importer",
   "noImageSelected": "Aucune image sélectionnée",
-  "cancel": "Annuler",
   "save": "Sauvegarder",
   "tournaments": "Tournois",
   "tournamentsFound": "tournois trouvés",
@@ -36,5 +35,7 @@
   "updateError": "Une erreur est survenue lors de la mise à jour du jeu",
   "creationSuccess": "Le jeu a été créé avec succès",
   "creationError": "Une erreur est survenue lors de la création du jeu",
-  "unauthorizedUpdate": "Vous n'êtes pas autorisé à modifier ce jeu. Seuls les administrateurs peuvent le faire."
+  "unauthorizedUpdate": "Vous n'êtes pas autorisé à modifier ce jeu. Seuls les administrateurs peuvent le faire.",
+  "confirmDeleteMessage": "Êtes-vous sûr de vouloir supprimer ce jeu ?",
+  "deleteWarning": "Attention : Cette action supprimera également tous les tournois associés à ce jeu."
 }

@@ -12,6 +12,7 @@ import { ChannelEntityType } from '#enums/channel_entity_type'
 import { getAllGamesWithoutImages } from '../repository/game.js'
 import path from 'node:path'
 import { UserRole } from '#enums/user_role'
+import TournamentService from '#services/tournament_service'
 
 // To get the imageNotFound path in the server
 const imageNotFound = path.join(process.cwd(), 'inertia', 'img', 'Image-not-found.png')
@@ -850,38 +851,7 @@ export default class TournamentsController {
     }
 
     try {
-      // Récupérer le tournoi avec ses équipes et les joueurs de chaque équipe
-      const tournament = await Tournament.query()
-        .where('id', params.id)
-        .preload('teams', (teamsQuery) => {
-          teamsQuery.preload('players')
-        })
-        .firstOrFail()
-
-      // Vérifier si l'utilisateur est autorisé à supprimer le tournoi
-      const isAdmin = user.role === UserRole.Admin
-      const isCreator = tournament.creatorId === user.id
-
-      if (!isAdmin && !isCreator) {
-        return response.status(403).json({
-          error: true,
-          message: 'You are not authorized to delete this tournament',
-        })
-      }
-
-      // Pour chaque équipe, détacher tous les joueurs avant de supprimer l'équipe
-      for (const team of tournament.teams) {
-        if (team.players && team.players.length > 0) {
-          const playerIds = team.players.map((player) => player.id)
-          await team.related('players').detach(playerIds)
-        }
-      }
-
-      await tournament.related('teams').query().delete()
-      await Match.query().where('tournament_id', tournament.id).delete()
-      await Channel.query().where('tournament_id', tournament.id).delete()
-
-      await tournament.delete()
+      await TournamentService.deleteTournamentById(params.id, user)
 
       return response.json({
         success: true,

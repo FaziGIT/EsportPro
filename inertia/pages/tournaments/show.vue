@@ -455,6 +455,14 @@ const winningTeam = computed(() => {
           <!-- Edit and Delete buttons -->
           <div class="flex gap-2">
             <button
+              v-if="canDelete"
+              @click="openDeleteModal"
+              class="font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition bg-orange-600  hover:bg-orange-700 flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer"
+            >
+              <TrashIcon class="w-4 h-4" color="#FFFF" />
+            </button>
+
+            <button
               v-if="canEdit"
               @click="navigateToEdit"
               class="font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition bg-gray-600 text-white hover:bg-gray-700 flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer"
@@ -475,16 +483,6 @@ const winningTeam = computed(() => {
               </svg>
               <span class="hidden sm:inline">{{ t('tournament.editTournament') }}</span>
               <span class="sm:hidden">{{ t('tournament.editTournament') }}</span>
-            </button>
-
-            <button
-              v-if="canDelete"
-              @click="openDeleteModal"
-              class="font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition bg-orange-600 text-white hover:bg-orange-700 flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer"
-            >
-              <TrashIcon class="w-4 h-4" color="#FFFF" />
-              <span class="hidden sm:inline">{{ t('tournament.deleteTournament') }}</span>
-              <span class="sm:hidden">{{ t('tournament.deleteTournament') }}</span>
             </button>
           </div>
 
@@ -853,7 +851,7 @@ const winningTeam = computed(() => {
             >
               <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                 <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900">
-                  {{ t('tournament.confirmDeleteTitle') }}
+                  {{ t('common.confirmDelete') }}
                 </DialogTitle>
                 <div class="mt-2">
                   <p class="text-sm text-gray-500">
@@ -877,7 +875,7 @@ const winningTeam = computed(() => {
                     @click="closeDeleteModal"
                     :disabled="isDeletingTournament"
                   >
-                    {{ t('tournament.cancel') }}
+                    {{ t('common.cancel') }}
                   </button>
                   <button
                     type="button"
@@ -886,7 +884,7 @@ const winningTeam = computed(() => {
                     :disabled="isDeletingTournament"
                   >
                     <span v-if="isDeletingTournament" class="inline-block animate-spin mr-2">↻</span>
-                    {{ t('tournament.delete') }}
+                    {{ t('common.delete') }}
                   </button>
                 </div>
               </DialogPanel>

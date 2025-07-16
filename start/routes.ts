@@ -74,6 +74,7 @@ router.put('/games/:id/edit', [GamesController, 'update']).use(middleware.auth()
 router
   .post('/games/:id/toggle-favorite', [GamesController, 'toggleFavorite'])
   .use(middleware.auth())
+router.delete('/games/:id/delete', [GamesController, 'deleteGame']).use(middleware.auth())
 
 // Profile routes
 router
