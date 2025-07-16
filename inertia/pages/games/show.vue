@@ -12,7 +12,7 @@ import { GameStatus } from '#types/game'
 import { useFavoriteToggle } from '../../../resources/js/composables/useFavoriteToggle'
 import { TrashIcon } from '~/components/icons'
 import { getCsrfToken } from '~/utils'
-import DeleteConfirmationModal from '~/components/DeleteConfirmationModal.vue'
+import ConfirmationModal from '~/components/ConfirmationModal.vue'
 
 const { t } = useI18n()
 const { user, isAdmin } = useAuth()
@@ -450,13 +450,13 @@ const deleteGame = async () => {
     />
 
     <!-- Delete Confirmation Modal -->
-    <DeleteConfirmationModal
+    <ConfirmationModal
       :isOpen="isDeleteModalOpen"
       :title="t('common.confirmDelete')"
       :confirmMessage="t('game.confirmDeleteMessage')"
       :itemName="game?.name || ''"
       :warningMessage="t('game.deleteWarning')"
-      :isDeleting="isDeletingGame"
+      :isProcessing="isDeletingGame"
       :error="deleteError"
       :success="deleteSuccess"
       @close="closeDeleteModal"

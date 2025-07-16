@@ -7,8 +7,8 @@ import { Link, router, useForm } from '@inertiajs/vue3'
 import UserInfoField from '~/components/UserInfoField.vue'
 import { getCsrfToken } from '~/utils'
 import { useI18n } from '../../../resources/js/composables/useI18n'
-import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import { TrashIcon } from '~/components/icons'
+import ConfirmationModal from '~/components/ConfirmationModal.vue'
 
 const { t } = useI18n()
 const props = defineProps({
@@ -287,136 +287,27 @@ watch(
     />
   </div>
 
-  <!-- Popup de confirmation avec le nouveau style -->
-  <teleport to="body">
-    <TransitionRoot appear :show="showConfirm" as="template">
-      <Dialog as="div" @close="closeConfirmModal" class="relative z-50">
-        <TransitionChild
-          as="template"
-          enter="duration-300 ease-out"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="duration-200 ease-in"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
-        >
-          <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" />
-        </TransitionChild>
-
-        <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4 text-center">
-            <TransitionChild
-              as="template"
-              enter="duration-300 ease-out"
-              enter-from="opacity-0 scale-95"
-              enter-to="opacity-100 scale-100"
-              leave="duration-200 ease-in"
-              leave-from="opacity-100 scale-100"
-              leave-to="opacity-0 scale-95"
-            >
-              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900">
-                  {{ t('common.confirmChange') }}
-                </DialogTitle>
-                <div class="mt-2">
-                  <p class="text-sm text-gray-500">
-                    {{ t(pendingValue ? 'profile.confirmMakePublic' : 'profile.confirmMakePrivate') }}
-                  </p>
-                </div>
-
-                <div class="mt-4 flex justify-end gap-3">
-                  <button
-                    type="button"
-                    class="inline-flex justify-center rounded-md border border-transparent bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300 focus:outline-none"
-                    @click="closeConfirmModal"
-                    :disabled="isProcessing"
-                  >
-                    {{ t('common.cancel') }}
-                  </button>
-                  <button
-                    type="button"
-                    class="inline-flex justify-center rounded-md border border-transparent bg-[#5C4741] px-4 py-2 text-sm font-medium text-white hover:bg-[#7b5f57] focus:outline-none"
-                    @click="confirmChange"
-                    :disabled="isProcessing"
-                  >
-                    <span v-if="isProcessing" class="inline-block animate-spin mr-2">↻</span>
-                    {{ t('common.confirm') }}
-                  </button>
-                </div>
-              </DialogPanel>
-            </TransitionChild>
-          </div>
-        </div>
-      </Dialog>
-    </TransitionRoot>
-  </teleport>
+  <!-- Modal de confirmation pour le changement de statut public/privé -->
+  <ConfirmationModal
+    :isOpen="showConfirm"
+    :title="t('common.confirmChange')"
+    :confirmMessage="t(pendingValue ? 'profile.confirmMakePublic' : 'profile.confirmMakePrivate')"
+    :isProcessing="isProcessing"
+    :confirmButtonText="t('common.confirm')"
+    :confirmButtonColor="'bg-[#5C4741] hover:bg-[#7b5f57]'"
+    @close="closeConfirmModal"
+    @confirm="confirmChange"
+  />
 
   <!-- Modal de confirmation pour la suppression de compte -->
-  <teleport to="body">
-    <TransitionRoot appear :show="showDeleteAccountModal" as="template">
-      <Dialog as="div" @close="closeDeleteModal" class="relative z-50">
-        <TransitionChild
-          as="template"
-          enter="duration-300 ease-out"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="duration-200 ease-in"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
-        >
-          <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" />
-        </TransitionChild>
-
-        <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4 text-center">
-            <TransitionChild
-              as="template"
-              enter="duration-300 ease-out"
-              enter-from="opacity-0 scale-95"
-              enter-to="opacity-100 scale-100"
-              leave="duration-200 ease-in"
-              leave-from="opacity-100 scale-100"
-              leave-to="opacity-0 scale-95"
-            >
-              <DialogPanel
-                class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
-              >
-                <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900">
-                  {{ t('profile.confirmDeleteAccount') }}
-                </DialogTitle>
-                <div class="mt-2">
-                  <p class="text-sm text-gray-500">
-                    {{ t('profile.deleteAccountWarning') }}
-                  </p>
-                  <p class="text-sm text-red-600 mt-2 font-semibold">
-                    {{ t('profile.deleteAccountIrreversible') }}
-                  </p>
-                </div>
-
-                <div class="mt-4 flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    class="inline-flex justify-center rounded-md border border-transparent bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300 focus:outline-none"
-                    @click="closeDeleteModal"
-                    :disabled="isProcessingDelete"
-                  >
-                    {{ t('common.cancel') }}
-                  </button>
-                  <button
-                    type="button"
-                    class="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none"
-                    @click="deleteAccount"
-                    :disabled="isProcessingDelete"
-                  >
-                    <span v-if="isProcessingDelete" class="inline-block animate-spin mr-2">↻</span>
-                    {{ t('profile.confirmDelete') }}
-                  </button>
-                </div>
-              </DialogPanel>
-            </TransitionChild>
-          </div>
-        </div>
-      </Dialog>
-    </TransitionRoot>
-  </teleport>
+  <ConfirmationModal
+    :isOpen="showDeleteAccountModal"
+    :title="t('profile.confirmDeleteAccount')"
+    :confirmMessage="t('profile.deleteAccountWarning')"
+    :warningMessage="t('profile.deleteAccountIrreversible')"
+    :isProcessing="isProcessingDelete"
+    :confirmButtonText="t('profile.confirmDelete')"
+    @close="closeDeleteModal"
+    @confirm="deleteAccount"
+  />
 </template>

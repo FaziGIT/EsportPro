@@ -11,7 +11,7 @@ import { TournamentStatus } from '#types/tournament'
 import { getCsrfToken } from '~/utils'
 import { TrashIcon } from '~/components/icons'
 import EditSVG from '~/components/icons/EditSVG.vue'
-import DeleteConfirmationModal from '~/components/DeleteConfirmationModal.vue'
+import ConfirmationModal from '~/components/ConfirmationModal.vue'
 
 const { t } = useI18n()
 const { user, isAdmin } = useAuth()
@@ -250,19 +250,17 @@ const closeEditModal = () => {
     </teleport>
 
     <!-- Delete Confirmation Modal -->
-    <teleport to="body">
-      <DeleteConfirmationModal
-        :isOpen="isDeleteModalOpen"
-        :title="t('common.confirmDelete')"
-        :confirmMessage="t('tournament.confirmDeleteMessage')"
-        :itemName="tournament?.name || ''"
-        :isDeleting="isDeletingTournament"
-        :error="deleteError"
-        :success="deleteSuccess"
-        :need-reload="needReload"
-        @close="closeDeleteModal"
-        @confirm="deleteTournament"
-      />
-    </teleport>
+    <ConfirmationModal
+      :isOpen="isDeleteModalOpen"
+      :title="t('common.confirmDelete')"
+      :confirmMessage="t('tournament.confirmDeleteMessage')"
+      :itemName="tournament?.name || ''"
+      :isProcessing="isDeletingTournament"
+      :error="deleteError"
+      :success="deleteSuccess"
+      :needReload="needReload"
+      @close="closeDeleteModal"
+      @confirm="deleteTournament"
+    />
   </div>
 </template>

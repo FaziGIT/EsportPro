@@ -6,12 +6,11 @@ import { UserRole, UserRoleValues } from '#enums/user_role'
 import { useI18n } from '../../../resources/js/composables/useI18n'
 import { router } from '@inertiajs/vue3'
 import { getCsrfToken } from '~/utils'
-import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
-import Button from "~/components/Button.vue";
+import ConfirmationModal from '~/components/ConfirmationModal.vue'
 
 const { t } = useI18n()
 
-const props = defineProps<{
+defineProps<{
   users: {
     id: string
     firstName: string
@@ -320,140 +319,32 @@ async function confirmUnban() {
   </div>
 
   <!-- Modal de confirmation pour le bannissement -->
-  <teleport to="body">
-    <TransitionRoot appear :show="showConfirm" as="template">
-      <Dialog as="div" @close="closeConfirmModal" class="relative z-50">
-        <TransitionChild
-          as="template"
-          enter="duration-300 ease-out"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="duration-200 ease-in"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
-        >
-          <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" />
-        </TransitionChild>
-
-        <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4 text-center">
-            <TransitionChild
-              as="template"
-              enter="duration-300 ease-out"
-              enter-from="opacity-0 scale-95"
-              enter-to="opacity-100 scale-100"
-              leave="duration-200 ease-in"
-              leave-from="opacity-100 scale-100"
-              leave-to="opacity-0 scale-95"
-            >
-              <DialogPanel
-                class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
-              >
-                <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900">
-                  Confirmer le bannissement
-                </DialogTitle>
-                <div class="mt-2">
-                  <p class="text-sm text-gray-500">
-                    Êtes-vous sûr de vouloir bannir l'utilisateur
-                    <span class="font-semibold">{{ userToBanName }}</span> ? Cette action empêchera
-                    l'utilisateur d'accéder à la plateforme.
-                  </p>
-                </div>
-
-                <div class="mt-4 flex justify-end gap-3">
-                  <button
-                    type="button"
-                    class="inline-flex justify-center rounded-md border border-transparent bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300 focus:outline-none"
-                    @click="closeConfirmModal"
-                    :disabled="isProcessing"
-                  >
-                    {{ t('common.cancel') }}
-                  </button>
-                  <button
-                    type="button"
-                    class="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none"
-                    @click="confirmBan"
-                    :disabled="isProcessing"
-                  >
-                    <span v-if="isProcessing" class="inline-block animate-spin mr-2">↻</span>
-                    {{ t('common.ban') }}
-                  </button>
-                </div>
-              </DialogPanel>
-            </TransitionChild>
-          </div>
-        </div>
-      </Dialog>
-    </TransitionRoot>
-  </teleport>
+  <ConfirmationModal
+    :isOpen="showConfirm"
+    :title="'Confirmer le bannissement'"
+    :confirmMessage="'Êtes-vous sûr de vouloir bannir l\'utilisateur'"
+    :itemName="userToBanName"
+    :warningMessage="'Cette action empêchera l\'utilisateur d\'accéder à la plateforme.'"
+    :isProcessing="isProcessing"
+    :confirmButtonText="t('common.ban')"
+    :confirmButtonColor="'bg-red-600 hover:bg-red-700'"
+    @close="closeConfirmModal"
+    @confirm="confirmBan"
+  />
 
   <!-- Modal de confirmation pour le débannissement -->
-  <teleport to="body">
-    <TransitionRoot appear :show="showUnbanConfirm" as="template">
-      <Dialog as="div" @close="closeUnbanConfirmModal" class="relative z-50">
-        <TransitionChild
-          as="template"
-          enter="duration-300 ease-out"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="duration-200 ease-in"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
-        >
-          <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" />
-        </TransitionChild>
-
-        <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4 text-center">
-            <TransitionChild
-              as="template"
-              enter="duration-300 ease-out"
-              enter-from="opacity-0 scale-95"
-              enter-to="opacity-100 scale-100"
-              leave="duration-200 ease-in"
-              leave-from="opacity-100 scale-100"
-              leave-to="opacity-0 scale-95"
-            >
-              <DialogPanel
-                class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
-              >
-                <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900">
-                  Confirmer le débannissement
-                </DialogTitle>
-                <div class="mt-2">
-                  <p class="text-sm text-gray-500">
-                    Êtes-vous sûr de vouloir débannir l'utilisateur
-                    <span class="font-semibold">{{ userToUnbanName }}</span> ?
-                    Cette action permettra à l'utilisateur d'accéder à nouveau à la plateforme.
-                  </p>
-                </div>
-
-                <div class="mt-4 flex justify-end gap-3">
-                  <button
-                    type="button"
-                    class="inline-flex justify-center rounded-md border border-transparent bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300 focus:outline-none"
-                    @click="closeUnbanConfirmModal"
-                    :disabled="isProcessing"
-                  >
-                    {{ t('common.cancel') }}
-                  </button>
-                  <button
-                    type="button"
-                    class="inline-flex justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 focus:outline-none"
-                    @click="confirmUnban"
-                    :disabled="isProcessing"
-                  >
-                    <span v-if="isProcessing" class="inline-block animate-spin mr-2">↻</span>
-                    Débannir
-                  </button>
-                </div>
-              </DialogPanel>
-            </TransitionChild>
-          </div>
-        </div>
-      </Dialog>
-    </TransitionRoot>
-  </teleport>
+  <ConfirmationModal
+    :isOpen="showUnbanConfirm"
+    :title="'Confirmer le débannissement'"
+    :confirmMessage="'Êtes-vous sûr de vouloir débannir l\'utilisateur'"
+    :itemName="userToUnbanName"
+    :warningMessage="'Cette action permettra à l\'utilisateur d\'accéder à nouveau à la plateforme.'"
+    :isProcessing="isProcessing"
+    :confirmButtonText="'Débannir'"
+    :confirmButtonColor="'bg-green-600 hover:bg-green-700'"
+    @close="closeUnbanConfirmModal"
+    @confirm="confirmUnban"
+  />
 </template>
 
 <style scoped>

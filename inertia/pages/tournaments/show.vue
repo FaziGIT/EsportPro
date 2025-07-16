@@ -14,7 +14,7 @@ import { useChatStore } from '~/store/chat_store'
 import Team from '#models/team'
 import User from '#models/user'
 import { TrashIcon } from '~/components/icons'
-import DeleteConfirmationModal from '~/components/DeleteConfirmationModal.vue'
+import ConfirmationModal from '~/components/ConfirmationModal.vue'
 import { TournamentStatus } from '#types/tournament'
 
 const { t } = useI18n()
@@ -827,12 +827,12 @@ const winningTeam = computed(() => {
     />
 
     <!-- Delete Confirmation Modal -->
-    <DeleteConfirmationModal
+    <ConfirmationModal
       :isOpen="isDeleteModalOpen"
       :title="t('common.confirmDelete')"
       :confirmMessage="t('tournament.confirmDeleteMessage')"
       :itemName="tournament?.name || ''"
-      :isDeleting="isDeletingTournament"
+      :isProcessing="isDeletingTournament"
       :error="deleteError"
       :success="deleteSuccess"
       @close="closeDeleteModal"

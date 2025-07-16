@@ -20,13 +20,13 @@ const props = defineProps({
   },
   itemName: {
     type: String,
-    required: true,
+    default: '',
   },
   warningMessage: {
     type: String,
     default: '',
   },
-  isDeleting: {
+  isProcessing: {
     type: Boolean,
     default: false,
   },
@@ -42,15 +42,23 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  confirmButtonText: {
+    type: String,
+    default: '',
+  },
+  confirmButtonColor: {
+    type: String,
+    default: 'bg-red-600 hover:bg-red-700',
+  }
 })
 
 const emit = defineEmits(['close', 'confirm'])
 
 const shouldDisableCancel = ref(false)
 
-// Désactiver le bouton d'annulation pendant la suppression
-watch(() => props.isDeleting, (isDeleting) => {
-  shouldDisableCancel.value = isDeleting
+// Désactiver le bouton d'annulation pendant le traitement
+watch(() => props.isProcessing, (isProcessing) => {
+  shouldDisableCancel.value = isProcessing
 })
 
 // Surveiller le succès pour fermer automatiquement et recharger la page
@@ -74,7 +82,7 @@ const handleConfirm = () => {
 }
 
 const handleClose = () => {
-  if (!props.isDeleting && !props.success) {
+  if (!props.isProcessing && !props.success) {
     emit('close')
   }
 }
@@ -116,7 +124,7 @@ const handleClose = () => {
                 <p class="text-sm text-gray-500">
                   {{ confirmMessage }}
                 </p>
-                <p class="mt-2 font-medium">{{ itemName }}</p>
+                <p v-if="itemName" class="mt-2 font-medium">{{ itemName }}</p>
                 <p v-if="warningMessage" class="mt-2 text-sm text-red-600 font-medium">
                   {{ warningMessage }}
                 </p>
@@ -147,12 +155,12 @@ const handleClose = () => {
                 </button>
                 <button
                   type="button"
-                  class="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  :class="`inline-flex justify-center rounded-md border border-transparent ${confirmButtonColor} px-4 py-2 text-sm font-medium text-white focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed`"
                   @click="handleConfirm"
-                  :disabled="isDeleting"
+                  :disabled="isProcessing"
                 >
-                  <span v-if="isDeleting" class="inline-block animate-spin mr-2">↻</span>
-                  {{ t('common.delete') }}
+                  <span v-if="isProcessing" class="inline-block animate-spin mr-2">↻</span>
+                  {{ confirmButtonText || t('common.delete') }}
                 </button>
               </div>
             </DialogPanel>
