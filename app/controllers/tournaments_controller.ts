@@ -12,6 +12,7 @@ import { ChannelEntityType } from '#enums/channel_entity_type'
 import { getAllGamesWithoutImages } from '../repository/game.js'
 import path from 'node:path'
 import { UserRole } from '#enums/user_role'
+import TournamentService from '#services/tournament_service'
 
 // To get the imageNotFound path in the server
 const imageNotFound = path.join(process.cwd(), 'inertia', 'img', 'Image-not-found.png')
@@ -837,6 +838,30 @@ export default class TournamentsController {
 
       // Continue advancing if there's a next match
       await this.advanceWinnerToNextMatch(match, winnerId, tournamentFormat)
+    }
+  }
+
+  public async deleteTournament({ params, auth, response }: HttpContext) {
+    const user = auth.user
+    if (!user) {
+      return response.status(401).json({
+        error: true,
+        message: 'Unauthorized access',
+      })
+    }
+
+    try {
+      await TournamentService.deleteTournamentById(params.id, user)
+
+      return response.json({
+        success: true,
+        message: 'Tournament successfully deleted',
+      })
+    } catch (error) {
+      return response.status(500).json({
+        error: true,
+        message: 'An error occurred while deleting the tournament',
+      })
     }
   }
 }

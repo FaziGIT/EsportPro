@@ -25,5 +25,12 @@
   "nextTournaments": "Mes prochains tournois",
   "favoriteGames": "Mes jeux favoris",
   "noFavoriteGames": "Aucun jeu favori.",
-  "validCharactersOnly": "Lettres, chiffres, tirets uniquement"
+  "validCharactersOnly": "Lettres, chiffres, tirets uniquement",
+  "banUser": "Banni l'utilisateur",
+  "accountInfo": "Informations du compte",
+  "deleteAccount": "Supprimer mon compte",
+  "confirmDeleteAccount": "Confirmer la suppression du compte",
+  "deleteAccountWarning": "Cette action supprimera définitivement votre compte ainsi que toutes vos données. Tous les tournois que vous avez créés seront également supprimés.",
+  "deleteAccountIrreversible": "Cette action est irréversible.",
+  "confirmDelete": "Supprimer mon compte"
 }

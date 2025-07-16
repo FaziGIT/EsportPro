@@ -31,7 +31,6 @@
   "import": "Importer",
   "noImageSelected": "Aucune image sélectionnée",
   "currentImage": "Image actuelle",
-  "cancel": "Annuler",
   "createTournament": "Créer le tournoi",
   "update": "Mettre à jour",
   "startDate": "Date de début",
@@ -91,6 +90,8 @@
   "unauthorizedUpdate": "Vous n'êtes pas autorisé à modifier ce tournoi. Seul un administrateur ou le créateur peut le faire.",
   "noCreatedTournaments": "Vous n'avez pas encore créé de tournois.",
   "finished": "Terminé",
+  "winnerTeam": "Équipe gagnante",
+  "tournamentFinished": "Tournoi terminé",
   "noPendingTournaments": "Pas de tournois en attente de validation.",
   "name": "Nom",
   "game": "Jeu",
@@ -99,5 +100,6 @@
   "refuse": "Refuser",
   "confirmRefuse": "Confirmer le refus",
   "confirmRefuseMessage": "Vous etes-vous sûr de vouloir refuser ce tournoi ? Cette action est irréversible.",
-  "noCurrentTournaments": "Aucun tournoi en cours"
+  "noCurrentTournaments": "Aucun tournoi en cours",
+  "confirmDeleteMessage": "Êtes-vous sûr de vouloir supprimer ce tournoi ?"
 }

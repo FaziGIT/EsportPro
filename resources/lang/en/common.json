@@ -3,5 +3,10 @@
   "cancel": "Cancel",
   "confirm": "Confirm",
   "confirmChange": "Confirm Change",
-  "actions": "Actions"
+  "actions": "Actions",
+  "delete": "Delete",
+  "confirmDelete": "Confirm Delete",
+  "unauthorized": "Unauthorized Access",
+  "youAreBanned": "Your account has been banned.",
+  "ban": "Ban"
 }

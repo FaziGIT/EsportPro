@@ -21,6 +21,8 @@ const TournamentsController = () => import('#controllers/tournaments_controller'
 const GamesController = () => import('#controllers/games_controller')
 const ProfileController = () => import('#controllers/profile_controller')
 
+const ErrorsController = () => import('#controllers/errors_controller')
+
 transmit.registerRoutes()
 
 // Public routes
@@ -57,6 +59,9 @@ router.post('/tournaments/:id/launch', [TournamentsController, 'launch']).use(mi
 router
   .put('/tournaments/:id/matches/:matchId/score', [TournamentsController, 'updateMatchScore'])
   .use(middleware.auth())
+router
+  .delete('/tournaments/:id/delete', [TournamentsController, 'deleteTournament'])
+  .use(middleware.auth())
 
 // Team routes
 router.put('/teams/:id', [TournamentsController, 'updateTeam']).use(middleware.auth())
@@ -71,6 +76,7 @@ router.put('/games/:id/edit', [GamesController, 'update']).use(middleware.auth()
 router
   .post('/games/:id/toggle-favorite', [GamesController, 'toggleFavorite'])
   .use(middleware.auth())
+router.delete('/games/:id/delete', [GamesController, 'deleteGame']).use(middleware.auth())
 
 // Profile routes
 router
@@ -80,5 +86,12 @@ router
     router.post('/profile/update-data', [ProfileController, 'updateName'])
     router.post('/profile/tournaments/:id/validate', [ProfileController, 'validateTournament'])
     router.post('/profile/tournaments/:id/refuse', [ProfileController, 'refuseTournament'])
+    router.post('/profile/update-user-role/:id/:role', [ProfileController, 'updateUserRole'])
+    router.post('/profile/ban-user/:id/ban', [ProfileController, 'banUser'])
+    router.post('/profile/unban-user/:id/unban', [ProfileController, 'unbanUser'])
+    router.delete('/profile/delete-account', [ProfileController, 'deleteAccount'])
   })
   .use(middleware.auth())
+
+// Error routes
+router.get('/unauthorized', [ErrorsController, 'unauthorized'])

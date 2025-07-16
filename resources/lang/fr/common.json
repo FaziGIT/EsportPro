@@ -3,5 +3,10 @@
   "cancel": "Annuler",
   "confirm": "Confirmer",
   "confirmChange": "Confirmer le changement",
-  "actions": "Actions"
+  "actions": "Actions",
+  "delete": "Supprimer",
+  "confirmDelete": "Confirmer la suppression",
+  "unauthorized": "Accès interdit",
+  "youAreBanned": "Votre compte a été banni.",
+  "ban": "Bannir"
 }

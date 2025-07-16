@@ -155,6 +155,7 @@ const closeModal = () => {
           :tournament="tournament as Tournament"
           :user="user"
           :games="props.games || []"
+          :need-reload="true"
         />
       </div>
 
@@ -172,6 +173,7 @@ const closeModal = () => {
       :isOpen="isModalOpen"
       :mode="TournamentStatus.NEW"
       :games="props.games!"
+      :need-reload="true"
       @close="closeModal"
     />
   </Layout>

@@ -12,7 +12,6 @@
   "addGameImage": "Add game image",
   "import": "Import",
   "noImageSelected": "No image selected",
-  "cancel": "Cancel",
   "save": "Save",
   "tournaments": "Tournaments",
   "tournamentsFound": "tournaments found",
@@ -36,5 +35,7 @@
   "updateError": "An error occurred while updating the game",
   "creationSuccess": "Game created successfully",
   "creationError": "An error occurred while creating the game",
-  "unauthorizedUpdate": "You are not authorized to update this game. Only administrators can modify games."
+  "unauthorizedUpdate": "You are not authorized to update this game. Only administrators can modify games.",
+  "confirmDeleteMessage": "Are you sure you want to delete this game?",
+  "deleteWarning": "Warning: This action will also delete all tournaments associated with this game"
 }

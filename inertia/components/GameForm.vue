@@ -5,15 +5,27 @@ import { useI18n } from '../../resources/js/composables/useI18n'
 import { GamePlatform } from '#enums/game_platform'
 import { GameFormData, GameStatus } from '#types/game'
 import Game from '#models/game'
+import { TournamentStatus } from '#types/tournament'
 
 const { t } = useI18n()
 
 // Props
-const props = defineProps<{
-  isOpen: boolean
-  mode: typeof GameStatus.EDIT | typeof GameStatus.NEW
-  game?: Game
-}>()
+const props = defineProps({
+  isOpen: {
+    type: Boolean,
+  },
+  mode: {
+    type: String as () => typeof TournamentStatus.EDIT | typeof TournamentStatus.NEW,
+  },
+  game: {
+    type: Object as () => Game | null,
+    default: null,
+  },
+  needReload: {
+    type: Boolean,
+    default: false
+  }
+})
 
 // Emits
 const emit = defineEmits(['close', 'submit'])
@@ -51,9 +63,7 @@ const initializeFormData = (): GameFormData => {
 const form = useForm<GameFormData>(initializeFormData())
 
 const modalTitle = computed(() => {
-  return props.mode === GameStatus.EDIT
-    ? t('game.editGame')
-    : t('game.newGame')
+  return props.mode === GameStatus.EDIT ? t('game.editGame') : t('game.newGame')
 })
 
 const submitButtonText = computed(() => {
@@ -71,30 +81,28 @@ const submitForm = () => {
   const imagePreview = form.imagePreview
   form.imagePreview = ''
 
-  const submitUrl =
-    props.mode === GameStatus.EDIT
-      ? `/games/${props.game?.id}/edit`
-      : '/games/new'
+  const submitUrl = props.mode === GameStatus.EDIT ? `/games/${props.game?.id}/edit` : '/games/new'
 
   const method = props.mode === GameStatus.EDIT ? 'put' : 'post'
 
   form[method](submitUrl, {
     forceFormData: true,
     headers: {
-      'Accept': 'application/json',
+      Accept: 'application/json',
     },
     preserveScroll: true,
     preserveState: true,
     onSuccess: () => {
       notificationType.value = 'success'
-      notificationMessage.value = props.mode === GameStatus.EDIT
-        ? t('game.updateSuccess')
-        : t('game.creationSuccess')
+      notificationMessage.value =
+        props.mode === GameStatus.EDIT ? t('game.updateSuccess') : t('game.creationSuccess')
       showNotification.value = true
 
       setTimeout(() => {
         emit('close')
-        window.location.reload()
+        if (props.mode === TournamentStatus.EDIT && props.needReload) {
+          window.location.reload()
+        }
       }, 3000)
     },
     onError: (errors) => {
@@ -105,9 +113,8 @@ const submitForm = () => {
         showNotification.value = true
       } else {
         notificationType.value = 'error'
-        notificationMessage.value = props.mode === GameStatus.EDIT
-          ? t('game.updateError')
-          : t('game.creationError')
+        notificationMessage.value =
+          props.mode === GameStatus.EDIT ? t('game.updateError') : t('game.creationError')
         showNotification.value = true
       }
 
@@ -213,11 +220,15 @@ onUnmounted(() => {
   <!-- Modal only renders when isOpen is true -->
   <div v-if="isOpen">
     <!-- Notification -->
-    <div v-if="showNotification"
-         class="fixed top-4 right-4 z-[60] px-4 py-3 rounded flex items-center shadow-lg max-w-md"
-         :class="notificationType === 'success' ?
-                'bg-green-100 border border-green-400 text-green-700' :
-                'bg-red-100 border border-red-400 text-red-700'">
+    <div
+      v-if="showNotification"
+      class="fixed top-4 right-4 z-[60] px-4 py-3 rounded flex items-center shadow-lg max-w-md"
+      :class="
+        notificationType === 'success'
+          ? 'bg-green-100 border border-green-400 text-green-700'
+          : 'bg-red-100 border border-red-400 text-red-700'
+      "
+    >
       <span>{{ notificationMessage }}</span>
       <button
         @click="showNotification = false"
@@ -471,17 +482,36 @@ onUnmounted(() => {
                 class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 text-sm font-medium rounded-md transition-colors cursor-pointer"
                 :disabled="processingForm"
               >
-                {{ t('game.cancel') }}
+                {{ t('common.cancel') }}
               </button>
               <button
                 @click="submitForm"
                 class="ml-3 px-4 py-2 bg-[#5C4741] hover:bg-[#7b5f57] text-white text-sm font-medium rounded-md transition-colors cursor-pointer relative"
                 :disabled="processingForm"
               >
-                <span v-if="processingForm" class="absolute inset-0 flex items-center justify-center">
-                  <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <span
+                  v-if="processingForm"
+                  class="absolute inset-0 flex items-center justify-center"
+                >
+                  <svg
+                    class="animate-spin h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
                   </svg>
                 </span>
                 <span :class="{ 'opacity-0': processingForm }">{{ submitButtonText }}</span>

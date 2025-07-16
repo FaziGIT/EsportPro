@@ -47,7 +47,9 @@ async function validateTournament(id: string) {
         showNotification.value = false
       }, 5000)
 
-      router.reload({ only: ['pendingTournaments'] })
+      router.reload({
+        only: ['pendingTournaments', 'createdTournaments'],
+      })
     } else {
       showNotification.value = true
       notificationMessage.value = t('tournament.validateError')
@@ -103,7 +105,7 @@ async function refuseTournament() {
         showNotification.value = false
       }, 5000)
 
-      router.reload({ only: ['pendingTournaments'] })
+      router.reload({only: ['pendingTournaments', 'createdTournaments']})
     } else {
       showNotification.value = true
       notificationMessage.value = t('tournament.refuseError')

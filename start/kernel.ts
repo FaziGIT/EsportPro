@@ -41,6 +41,7 @@ router.use([
   () => import('@adonisjs/auth/initialize_auth_middleware'),
   () => import('#middleware/detect_user_locale_middleware'),
   () => import('#middleware/silent_auth_middleware'),
+  () => import('#middleware/check_user_ban_middleware'),
 ])
 
 /**
@@ -50,4 +51,5 @@ router.use([
 export const middleware = router.named({
   guest: () => import('#middleware/guest_middleware'),
   auth: () => import('#middleware/auth_middleware'),
+  checkBan: () => import('#middleware/check_user_ban_middleware'),
 })

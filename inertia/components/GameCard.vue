@@ -11,6 +11,9 @@ import { GamePlatform } from '#enums/game_platform'
 import GameForm from './GameForm.vue'
 import { GameStatus } from '#types/game'
 import { useFavoriteToggle } from '../../resources/js/composables/useFavoriteToggle'
+import { TrashIcon } from '~/components/icons'
+import { getCsrfToken } from '~/utils'
+import ConfirmationModal from '~/components/ConfirmationModal.vue'
 
 const { t } = useI18n()
 const { user: userProps, isAdmin } = useAuth()
@@ -19,6 +22,10 @@ const props = defineProps({
   game: {
     type: Object as () => Partial<Game>,
     required: true,
+  },
+  needReload: {
+    type: Boolean,
+    default: false,
   },
 })
 
@@ -41,6 +48,10 @@ const { isFavorite, toggleFavorite: toggleFavoriteBase } = useFavoriteToggle(
 
 // Modal state for game editing
 const isEditModalOpen = ref(false)
+const isDeleteModalOpen = ref(false)
+const isDeletingGame = ref(false)
+const deleteError = ref('')
+const deleteSuccess = ref('')
 
 const handleImageError = (event: Event) => {
   console.log('handleImageError')
@@ -80,6 +91,63 @@ const navigateToEdit = (event: Event) => {
   isEditModalOpen.value = true
 }
 
+const openDeleteModal = (event: Event) => {
+  event.stopPropagation()
+  if (!props.game?.id) {
+    console.error('Game ID is missing:', props.game)
+    return
+  }
+  if (!isAdmin.value) {
+    return
+  }
+  isDeleteModalOpen.value = true
+}
+
+const closeDeleteModal = () => {
+  isDeleteModalOpen.value = false
+  deleteError.value = ''
+  deleteSuccess.value = ''
+}
+
+const deleteGame = async () => {
+  if (!props.game?.id || isDeletingGame.value) return
+
+  isDeletingGame.value = true
+  deleteError.value = ''
+
+  try {
+    const token = getCsrfToken()
+    const response = await fetch(`/games/${props.game.id}/delete`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': token || '',
+      },
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      deleteError.value = result.message || 'Erreur lors de la suppression du jeu'
+      return
+    }
+
+    // Suppression réussie
+    deleteSuccess.value = result.message || 'Jeu supprimé avec succès'
+
+    // Recharger la page après 2 secondes
+    setTimeout(() => {
+      router.reload()
+    }, 2000)
+
+  } catch (error) {
+    deleteError.value = error instanceof Error ? error.message : 'Une erreur est survenue'
+  } finally {
+    isDeletingGame.value = false
+  }
+}
+
 const closeEditModal = () => {
   isEditModalOpen.value = false
 }
@@ -104,27 +172,36 @@ const playHeartAnimation = () => {
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
   >
-    <button
-      v-if="isAdmin"
-      @click="navigateToEdit"
-      class="absolute top-2 right-2 z-10 bg-white rounded-full p-2 shadow-md hover:bg-gray-100 transition-colors duration-200 opacity-0 hover:opacity-100 focus:opacity-100"
-      :class="{ 'opacity-100': isHovered }"
-    >
-      <svg
-        class="w-4 h-4 text-gray-600"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
+    <div v-if="isAdmin" class="absolute top-2 right-2 z-10 flex gap-2">
+      <button
+        @click="navigateToEdit"
+        class="bg-white rounded-full p-2 shadow-md hover:bg-gray-100 transition-colors duration-200 opacity-0 hover:opacity-100 focus:opacity-100"
+        :class="{ 'opacity-100': isHovered }"
       >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-        ></path>
-      </svg>
-    </button>
+        <svg
+          class="w-4 h-4 text-gray-600"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+          ></path>
+        </svg>
+      </button>
+
+      <button
+        @click="openDeleteModal"
+        class="bg-white rounded-full p-2 shadow-md hover:bg-red-100 transition-colors duration-200 opacity-0 hover:opacity-100 focus:opacity-100"
+        :class="{ 'opacity-100': isHovered }"
+      >
+        <TrashIcon class="w-4 h-4 text-gray-600 hover:text-red-600" />
+      </button>
+    </div>
 
     <div class="bg-gray-100 h-32 flex items-center justify-center flex-shrink-0">
       <img
@@ -172,9 +249,25 @@ const playHeartAnimation = () => {
         :isOpen="isEditModalOpen"
         :mode="GameStatus.EDIT"
         :game="props.game as Game"
+        :need-reload="needReload"
         @close="closeEditModal"
       />
     </teleport>
+
+    <!-- Delete Confirmation Modal -->
+    <ConfirmationModal
+      :isOpen="isDeleteModalOpen"
+      :title="t('common.confirmDelete')"
+      :confirmMessage="t('game.confirmDeleteMessage')"
+      :itemName="game?.name || ''"
+      :warningMessage="t('game.deleteWarning')"
+      :isProcessing="isDeletingGame"
+      :error="deleteError"
+      :success="deleteSuccess"
+      :needReload="needReload"
+      @close="closeDeleteModal"
+      @confirm="deleteGame"
+    />
   </div>
 </template>
 

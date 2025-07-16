@@ -10,6 +10,9 @@ import { useAuth } from '../../../resources/js/composables/useAuth'
 import GameForm from '~/components/GameForm.vue'
 import { GameStatus } from '#types/game'
 import { useFavoriteToggle } from '../../../resources/js/composables/useFavoriteToggle'
+import { TrashIcon } from '~/components/icons'
+import { getCsrfToken } from '~/utils'
+import ConfirmationModal from '~/components/ConfirmationModal.vue'
 
 const { t } = useI18n()
 const { user, isAdmin } = useAuth()
@@ -22,8 +25,12 @@ const { isFavorite, toggleFavorite } = useFavoriteToggle(
   user.value?.id
 )
 
-// Modal state
+// Modal states
 const isEditModalOpen = ref(false)
+const isDeleteModalOpen = ref(false)
+const isDeletingGame = ref(false)
+const deleteError = ref('')
+const deleteSuccess = ref('')
 
 interface Tournament {
   id: string
@@ -125,6 +132,58 @@ const navigateToEdit = () => {
 const closeEditModal = () => {
   isEditModalOpen.value = false
 }
+
+const openDeleteModal = () => {
+  if (!isAdmin.value) {
+    return
+  }
+  isDeleteModalOpen.value = true
+}
+
+const closeDeleteModal = () => {
+  isDeleteModalOpen.value = false
+  deleteError.value = ''
+  deleteSuccess.value = ''
+}
+
+const deleteGame = async () => {
+  if (!game.value.id || isDeletingGame.value) return
+
+  isDeletingGame.value = true
+  deleteError.value = ''
+
+  try {
+    const token = getCsrfToken()
+    const response = await fetch(`/games/${game.value.id}/delete`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': token || '',
+      },
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      deleteError.value = result.message || 'Erreur lors de la suppression du jeu'
+      return
+    }
+
+    // Suppression réussie
+    deleteSuccess.value = result.message || 'Jeu supprimé avec succès'
+
+    // Rediriger vers la page des jeux après 2 secondes
+    setTimeout(() => {
+      router.visit('/games')
+    }, 2000)
+
+  } catch (error) {
+    deleteError.value = error instanceof Error ? error.message : 'Une erreur est survenue'
+  } finally {
+    isDeletingGame.value = false
+  }
+}
 </script>
 <template>
   <Layout>
@@ -135,6 +194,40 @@ const closeEditModal = () => {
           {{ game.name }}
         </h1>
         <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 items-center w-full sm:w-auto">
+          <!-- Edit and Delete buttons -->
+          <div class="flex gap-2">
+            <button
+              v-if="isAdmin"
+              @click="openDeleteModal"
+              class="font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition bg-orange-600  hover:bg-orange-700 flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer"
+            >
+              <TrashIcon class="w-4 h-4" color="#FFFF" />
+            </button>
+
+            <button
+              v-if="isAdmin"
+              @click="navigateToEdit"
+              class="font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition bg-gray-600 text-white hover:bg-gray-700 flex items-center justify-center gap-2 text-sm sm:text-base w-full sm:w-auto cursor-pointer"
+            >
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                ></path>
+              </svg>
+              <span class="hidden sm:inline">{{ t('game.editGame') }}</span>
+              <span class="sm:hidden">{{ t('game.editGame') }}</span>
+            </button>
+          </div>
+
           <!-- Favorite button (visible only when user is logged in) -->
           <button
             v-if="user"
@@ -163,29 +256,6 @@ const closeEditModal = () => {
             <span class="hidden sm:inline">{{
               isFavorite ? t('game.removeFromFavorites') : t('game.addToFavorites')
             }}</span>
-          </button>
-
-          <button
-            v-if="isAdmin"
-            @click="navigateToEdit"
-            class="font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition bg-gray-600 text-white hover:bg-gray-700 flex items-center justify-center gap-2 text-sm sm:text-base w-full sm:w-auto cursor-pointer"
-          >
-            <svg
-              class="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-              ></path>
-            </svg>
-            <span class="hidden sm:inline">{{ t('game.editGame') }}</span>
-            <span class="sm:hidden">{{ t('game.editGame') }}</span>
           </button>
         </div>
       </div>
@@ -375,7 +445,22 @@ const closeEditModal = () => {
       :isOpen="isEditModalOpen"
       :mode="GameStatus.EDIT"
       :game="game as any"
+      :need-reload="true"
       @close="closeEditModal"
+    />
+
+    <!-- Delete Confirmation Modal -->
+    <ConfirmationModal
+      :isOpen="isDeleteModalOpen"
+      :title="t('common.confirmDelete')"
+      :confirmMessage="t('game.confirmDeleteMessage')"
+      :itemName="game?.name || ''"
+      :warningMessage="t('game.deleteWarning')"
+      :isProcessing="isDeletingGame"
+      :error="deleteError"
+      :success="deleteSuccess"
+      @close="closeDeleteModal"
+      @confirm="deleteGame"
     />
   </Layout>
 </template>

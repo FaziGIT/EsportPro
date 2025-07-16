@@ -3,10 +3,12 @@ import EditSVG from '~/components/icons/EditSVG.vue'
 import Button from '~/components/Button.vue'
 import User from '#models/user'
 import { defineProps, ref, watch } from 'vue'
-import { router, useForm } from '@inertiajs/vue3'
+import { Link, router, useForm } from '@inertiajs/vue3'
 import UserInfoField from '~/components/UserInfoField.vue'
 import { getCsrfToken } from '~/utils'
 import { useI18n } from '../../../resources/js/composables/useI18n'
+import { TrashIcon } from '~/components/icons'
+import ConfirmationModal from '~/components/ConfirmationModal.vue'
 
 const { t } = useI18n()
 const props = defineProps({
@@ -23,6 +25,9 @@ const editing = ref(false)
 const showNotification = ref(false)
 const notificationMessage = ref('')
 const notificationType = ref('success')
+const isProcessing = ref(false)
+const showDeleteAccountModal = ref(false)
+const isProcessingDelete = ref(false)
 
 const form = useForm({
   firstName: props.user.firstName || '',
@@ -37,38 +42,43 @@ const onSwitchClick = () => {
   showConfirm.value = true
 }
 
-const confirmChange = () => {
-  isPublic.value = pendingValue.value
-  showConfirm.value = false
+const confirmChange = async () => {
+  isProcessing.value = true
 
-  router.post(
-    '/profile/privacy',
-    {
-      isPrivate: !isPublic.value,
-    },
-    {
-      preserveScroll: true,
-      onSuccess: () => {
-        notificationType.value = 'success'
-        notificationMessage.value = t('profile.updateStatusSuccess')
-        showNotification.value = true
-        setTimeout(() => {
-          showNotification.value = false
-        }, 3000)
+  try {
+    await router.post(
+      '/profile/privacy',
+      {
+        isPrivate: !pendingValue.value,
       },
-      onError: () => {
-        notificationType.value = 'error'
-        notificationMessage.value = t('profile.updateStatusError')
-        showNotification.value = true
-        setTimeout(() => {
-          showNotification.value = false
-        }, 3000)
-      },
-    }
-  )
+      {
+        preserveScroll: true,
+        onSuccess: () => {
+          isPublic.value = pendingValue.value
+          showConfirm.value = false
+          notificationType.value = 'success'
+          notificationMessage.value = t('profile.updateStatusSuccess')
+          showNotification.value = true
+          setTimeout(() => {
+            showNotification.value = false
+          }, 3000)
+        },
+        onError: () => {
+          notificationType.value = 'error'
+          notificationMessage.value = t('profile.updateStatusError')
+          showNotification.value = true
+          setTimeout(() => {
+            showNotification.value = false
+          }, 3000)
+        },
+      }
+    )
+  } finally {
+    isProcessing.value = false
+  }
 }
 
-const cancelChange = () => {
+const closeConfirmModal = () => {
   showConfirm.value = false
 }
 
@@ -139,6 +149,26 @@ const cancelEdit = () => {
   editing.value = false
 }
 
+const openDeleteModal = () => {
+  showDeleteAccountModal.value = true
+}
+
+const closeDeleteModal = () => {
+  showDeleteAccountModal.value = false
+}
+
+const deleteAccount = () => {
+  isProcessingDelete.value = true
+  router.delete('/profile/delete-account', {
+    onSuccess: () => {
+    },
+    onError: () => {
+      isProcessingDelete.value = false
+      closeDeleteModal()
+    }
+  })
+}
+
 watch(
   () => props.user,
   (newUser) => {
@@ -203,7 +233,7 @@ watch(
       <UserInfoField class="pb-2" :label="t('profile.username')" :value="user?.pseudo" />
       <UserInfoField :label="t('profile.email')" :value="user?.email" />
     </div>
-    <div class="p-8 w-full md:w-1/3">
+    <div class="p-8 flex flex-col gap-3 w-full md:w-1/3">
       <div class="flex flex-wrap">
         <p class="pr-4">{{ t('profile.isPublic') }}</p>
         <button
@@ -221,6 +251,23 @@ watch(
           />
         </button>
       </div>
+        <Link
+        href="/logout"
+        method="post"
+        :title="t('auth.logout')"
+        class="px-9 py-2 mt-2 text-white bg-[#5C4741] text-base font-bold rounded-md cursor-pointer max-w-fit"
+      >
+        {{ t('auth.logout') }}
+      </Link>
+      <button
+        @click="openDeleteModal"
+        :title="t('profile.deleteAccount')"
+        class="text-red-600 hover:underline font-medium flex items-center cursor-pointer mt-2"
+        type="button"
+      >
+        {{ t('profile.deleteAccount') }}
+        <TrashIcon class="w-5 h-5 ml-1" />
+      </button>
     </div>
   </div>
 
@@ -240,23 +287,27 @@ watch(
     />
   </div>
 
-  <!-- Popup de confirmation -->
-  <div v-if="showConfirm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-6 shadow-lg max-w-sm w-full">
-      <p class="text-lg font-semibold mb-4">{{ t('common.confirmChange') }}</p>
-      <p class="mb-6">
-        {{ t(pendingValue ? 'profile.confirmMakePublic' : 'profile.confirmMakePrivate') }}
-      </p>
-      <div class="flex justify-end gap-2">
-        <Button
-          @click="cancelChange"
-          :use-redirection="false"
-          color="#CBD3CD"
-          text-color="#000000"
-          :value="t('common.cancel')"
-        />
-        <Button @click="confirmChange" :use-redirection="false" :value="t('common.confirm')" />
-      </div>
-    </div>
-  </div>
+  <!-- Modal de confirmation pour le changement de statut public/privé -->
+  <ConfirmationModal
+    :isOpen="showConfirm"
+    :title="t('common.confirmChange')"
+    :confirmMessage="t(pendingValue ? 'profile.confirmMakePublic' : 'profile.confirmMakePrivate')"
+    :isProcessing="isProcessing"
+    :confirmButtonText="t('common.confirm')"
+    :confirmButtonColor="'bg-[#5C4741] hover:bg-[#7b5f57]'"
+    @close="closeConfirmModal"
+    @confirm="confirmChange"
+  />
+
+  <!-- Modal de confirmation pour la suppression de compte -->
+  <ConfirmationModal
+    :isOpen="showDeleteAccountModal"
+    :title="t('profile.confirmDeleteAccount')"
+    :confirmMessage="t('profile.deleteAccountWarning')"
+    :warningMessage="t('profile.deleteAccountIrreversible')"
+    :isProcessing="isProcessingDelete"
+    :confirmButtonText="t('profile.confirmDelete')"
+    @close="closeDeleteModal"
+    @confirm="deleteAccount"
+  />
 </template>

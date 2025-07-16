@@ -141,7 +141,7 @@ const closeModal = () => {
     <!-- InfiniteScroll container -->
     <div ref="container" class="h-[calc(100vh-200px)] overflow-y-auto px-4 sm:px-6">
       <div class="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 justify-items-center">
-        <GameCard class="my-6 w-full max-w-xs" v-for="game in games as Game[]" :key="game.id" :game="game" />
+        <GameCard class="my-6 w-full max-w-xs" v-for="game in games as Game[]" :key="game.id" :game="game" :need-reload="true" />
       </div>
 
       <div v-if="loading" class="text-center py-6 text-gray-500">

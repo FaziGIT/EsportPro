@@ -12,9 +12,12 @@ export function useAuth() {
 
   const isAdmin = computed(() => user.value?.role === UserRole.Admin)
 
+  const isBanned = computed(() => user.value?.role === UserRole.Banned)
+
   return {
     user,
     isAuthenticated,
     isAdmin,
+    isBanned
   }
 }
