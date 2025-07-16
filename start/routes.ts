@@ -89,6 +89,7 @@ router
     router.post('/profile/update-user-role/:id/:role', [ProfileController, 'updateUserRole'])
     router.post('/profile/ban-user/:id/ban', [ProfileController, 'banUser'])
     router.post('/profile/unban-user/:id/unban', [ProfileController, 'unbanUser'])
+    router.delete('/profile/delete-account', [ProfileController, 'deleteAccount'])
   })
   .use(middleware.auth())
 

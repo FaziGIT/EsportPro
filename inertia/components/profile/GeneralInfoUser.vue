@@ -3,11 +3,12 @@ import EditSVG from '~/components/icons/EditSVG.vue'
 import Button from '~/components/Button.vue'
 import User from '#models/user'
 import { defineProps, ref, watch } from 'vue'
-import { router, useForm } from '@inertiajs/vue3'
+import { Link, router, useForm } from '@inertiajs/vue3'
 import UserInfoField from '~/components/UserInfoField.vue'
 import { getCsrfToken } from '~/utils'
 import { useI18n } from '../../../resources/js/composables/useI18n'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
+import { TrashIcon } from '~/components/icons'
 
 const { t } = useI18n()
 const props = defineProps({
@@ -25,6 +26,8 @@ const showNotification = ref(false)
 const notificationMessage = ref('')
 const notificationType = ref('success')
 const isProcessing = ref(false)
+const showDeleteAccountModal = ref(false)
+const isProcessingDelete = ref(false)
 
 const form = useForm({
   firstName: props.user.firstName || '',
@@ -146,6 +149,26 @@ const cancelEdit = () => {
   editing.value = false
 }
 
+const openDeleteModal = () => {
+  showDeleteAccountModal.value = true
+}
+
+const closeDeleteModal = () => {
+  showDeleteAccountModal.value = false
+}
+
+const deleteAccount = () => {
+  isProcessingDelete.value = true
+  router.delete('/profile/delete-account', {
+    onSuccess: () => {
+    },
+    onError: () => {
+      isProcessingDelete.value = false
+      closeDeleteModal()
+    }
+  })
+}
+
 watch(
   () => props.user,
   (newUser) => {
@@ -210,7 +233,7 @@ watch(
       <UserInfoField class="pb-2" :label="t('profile.username')" :value="user?.pseudo" />
       <UserInfoField :label="t('profile.email')" :value="user?.email" />
     </div>
-    <div class="p-8 w-full md:w-1/3">
+    <div class="p-8 flex flex-col gap-3 w-full md:w-1/3">
       <div class="flex flex-wrap">
         <p class="pr-4">{{ t('profile.isPublic') }}</p>
         <button
@@ -228,6 +251,23 @@ watch(
           />
         </button>
       </div>
+        <Link
+        href="/logout"
+        method="post"
+        :title="t('auth.logout')"
+        class="px-9 py-2 mt-2 text-white bg-[#5C4741] text-base font-bold rounded-md cursor-pointer max-w-fit"
+      >
+        {{ t('auth.logout') }}
+      </Link>
+      <button
+        @click="openDeleteModal"
+        :title="t('profile.deleteAccount')"
+        class="text-red-600 hover:underline font-medium flex items-center cursor-pointer mt-2"
+        type="button"
+      >
+        {{ t('profile.deleteAccount') }}
+        <TrashIcon class="w-5 h-5 ml-1" />
+      </button>
     </div>
   </div>
 
@@ -301,6 +341,75 @@ watch(
                   >
                     <span v-if="isProcessing" class="inline-block animate-spin mr-2">↻</span>
                     {{ t('common.confirm') }}
+                  </button>
+                </div>
+              </DialogPanel>
+            </TransitionChild>
+          </div>
+        </div>
+      </Dialog>
+    </TransitionRoot>
+  </teleport>
+
+  <!-- Modal de confirmation pour la suppression de compte -->
+  <teleport to="body">
+    <TransitionRoot appear :show="showDeleteAccountModal" as="template">
+      <Dialog as="div" @close="closeDeleteModal" class="relative z-50">
+        <TransitionChild
+          as="template"
+          enter="duration-300 ease-out"
+          enter-from="opacity-0"
+          enter-to="opacity-100"
+          leave="duration-200 ease-in"
+          leave-from="opacity-100"
+          leave-to="opacity-0"
+        >
+          <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" />
+        </TransitionChild>
+
+        <div class="fixed inset-0 overflow-y-auto">
+          <div class="flex min-h-full items-center justify-center p-4 text-center">
+            <TransitionChild
+              as="template"
+              enter="duration-300 ease-out"
+              enter-from="opacity-0 scale-95"
+              enter-to="opacity-100 scale-100"
+              leave="duration-200 ease-in"
+              leave-from="opacity-100 scale-100"
+              leave-to="opacity-0 scale-95"
+            >
+              <DialogPanel
+                class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+              >
+                <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900">
+                  {{ t('profile.confirmDeleteAccount') }}
+                </DialogTitle>
+                <div class="mt-2">
+                  <p class="text-sm text-gray-500">
+                    {{ t('profile.deleteAccountWarning') }}
+                  </p>
+                  <p class="text-sm text-red-600 mt-2 font-semibold">
+                    {{ t('profile.deleteAccountIrreversible') }}
+                  </p>
+                </div>
+
+                <div class="mt-4 flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    class="inline-flex justify-center rounded-md border border-transparent bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300 focus:outline-none"
+                    @click="closeDeleteModal"
+                    :disabled="isProcessingDelete"
+                  >
+                    {{ t('common.cancel') }}
+                  </button>
+                  <button
+                    type="button"
+                    class="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none"
+                    @click="deleteAccount"
+                    :disabled="isProcessingDelete"
+                  >
+                    <span v-if="isProcessingDelete" class="inline-block animate-spin mr-2">↻</span>
+                    {{ t('profile.confirmDelete') }}
                   </button>
                 </div>
               </DialogPanel>

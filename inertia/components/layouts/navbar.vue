@@ -399,13 +399,6 @@ const { user } = useAuth()
           <Profile />
           <span class="text-[#5C4741] font-semibold pl-1">{{ user.pseudo }}</span>
         </Link>
-        <Link
-          href="/logout"
-          method="post"
-          class="px-9 py-2 text-white bg-[#D6B7B0] text-base font-bold rounded-md cursor-pointer"
-        >
-          {{ t('auth.logout') }}
-        </Link>
       </div>
     </div>
 
@@ -454,7 +447,7 @@ const { user } = useAuth()
                   v-if="isLoading"
                   class="animate-spin rounded-full h-5 w-5 border-b-2 border-[#D6B7B0]"
                 ></div>
-                
+
                 <!-- Search Icon -->
                 <svg
                   v-else

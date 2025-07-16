@@ -26,5 +26,11 @@
   "favoriteGames": "My favorite games",
   "noFavoriteGames": "No favorite games.",
   "validCharactersOnly": "Letters, numbers, hyphens only",
-  "banUser": "Banned the user"
+  "banUser": "Banned the user",
+  "accountInfo": "Account Information",
+  "deleteAccount": "Delete my account",
+  "confirmDeleteAccount": "Confirm account deletion",
+  "deleteAccountWarning": "This action will permanently delete your account and all your data. All tournaments you have created will also be deleted.",
+  "deleteAccountIrreversible": "This action is irreversible.",
+  "confirmDelete": "Delete my account"
 }

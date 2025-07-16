@@ -8,6 +8,7 @@ import { GameStatistic } from '#types/game_statistics'
 import { getAllTournamentsWithoutImages } from '../repository/tournament.js'
 import { getAllGamesWithoutImages } from '../repository/game.js'
 import { userProfileValidator } from '#validators/user_validator'
+import TournamentService from '../services/tournament_service.js'
 
 export default class ProfileController {
   public async index({ inertia, auth, response }: HttpContext) {
@@ -353,5 +354,45 @@ export default class ProfileController {
     await user.save()
 
     return response.ok({ success: true, message: 'User unbanned successfully' })
+  }
+
+  public async deleteAccount({ auth, response, session }: HttpContext) {
+    const user = auth.user
+    if (!user) {
+      return response.unauthorized({ error: 'Unauthorized access' })
+    }
+
+    try {
+      // Récupération des tournois créés par l'utilisateur
+      const createdTournaments = await Tournament.query().where('creatorId', user.id)
+
+      // Suppression des tournois créés par l'utilisateur
+      for (const tournament of createdTournaments) {
+        await TournamentService.deleteTournamentById(tournament.id, user)
+      }
+
+      await user.load('teams')
+
+      // Retirer l'utilisateur de toutes ses équipes
+      for (const team of user.teams) {
+        await team.related('players').detach([user.id])
+      }
+
+      await user.related('favoriteGames').detach()
+
+      // Déconnecter l'utilisateur avant suppression
+      await auth.use().logout()
+      session.forget('auth_user')
+
+      await user.delete()
+
+      return response.redirect().toPath('/')
+    } catch (error) {
+      console.error('Error during account deletion:', error)
+      return response.status(500).json({
+        error: true,
+        message: 'Une erreur est survenue lors de la suppression du compte',
+      })
+    }
   }
 }
