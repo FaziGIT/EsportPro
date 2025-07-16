@@ -11,6 +11,7 @@ import Channel from '#models/channel'
 import { ChannelEntityType } from '#enums/channel_entity_type'
 import { getAllGamesWithoutImages } from '../repository/game.js'
 import path from 'node:path'
+import { UserRole } from '#enums/user_role'
 
 // To get the imageNotFound path in the server
 const imageNotFound = path.join(process.cwd(), 'inertia', 'img', 'Image-not-found.png')
@@ -97,41 +98,62 @@ export default class TournamentsController {
       messagesProvider: i18n.createMessagesProvider(),
     })
 
-    const tournamentModel: Partial<Tournament> = await this.processTournamentData(data, auth)
+    try {
+      const tournamentModel: Partial<Tournament> = await this.processTournamentData(data, auth)
 
-    const tournament = await Tournament.create(tournamentModel)
+      const tournament = await Tournament.create(tournamentModel)
 
-    // Associate with game
-    const game = await Game.find(data.gameId)
-    await tournament.related('game').associate(game!)
+      // Associate with game
+      const game = await Game.find(data.gameId)
+      await tournament.related('game').associate(game!)
 
-    // Calculate the number of teams needed and create them
-    let numberOfTeams: number
-    let playersPerTeam: number
+      // Calculate the number of teams needed and create them
+      let numberOfTeams: number
+      let playersPerTeam: number
 
-    if (data.teamMode && data.numberPlayersPerTeam) {
-      // Team-based tournament: create teams with multiple players
-      playersPerTeam = data.numberPlayersPerTeam
-      numberOfTeams = Math.ceil(data.numberParticipants / playersPerTeam)
-    } else {
-      // Individual tournament: create "teams" with 1 player each
-      playersPerTeam = 1
-      numberOfTeams = data.numberParticipants
-    }
+      if (data.teamMode && data.numberPlayersPerTeam) {
+        // Team-based tournament: create teams with multiple players
+        playersPerTeam = data.numberPlayersPerTeam
+        numberOfTeams = Math.ceil(data.numberParticipants / playersPerTeam)
+      } else {
+        // Individual tournament: create "teams" with 1 player each
+        playersPerTeam = 1
+        numberOfTeams = data.numberParticipants
+      }
 
-    // Create all teams for the tournament
-    const teamsToCreate = []
-    for (let i = 1; i <= numberOfTeams; i++) {
-      teamsToCreate.push({
-        name: `Team ${i}`,
-        tournamentId: tournament.id,
-        isWinner: false,
+      // Create all teams for the tournament
+      const teamsToCreate = []
+      for (let i = 1; i <= numberOfTeams; i++) {
+        teamsToCreate.push({
+          name: `Team ${i}`,
+          tournamentId: tournament.id,
+          isWinner: false,
+        })
+      }
+
+      await Team.createMany(teamsToCreate)
+
+      if (request.accepts(['html', 'json']) === 'json') {
+        return response.json({
+          success: true,
+          message: 'Tournament created successfully and pending validation',
+        })
+      }
+      return response.redirect().back()
+    } catch (error) {
+      console.error('Error creating tournament:', error)
+      if (request.accepts(['html', 'json']) === 'json') {
+        return response.status(500).json({
+          error: true,
+          message: 'An error occurred while creating the tournament',
+        })
+      }
+
+      return response.status(500).json({
+        error: true,
+        message: 'An error occurred while creating the tournament',
       })
     }
-
-    await Team.createMany(teamsToCreate)
-
-    return response.redirect().toRoute('/')
   }
 
   public async launch({ params, auth, response }: HttpContext) {
@@ -146,7 +168,7 @@ export default class TournamentsController {
       .firstOrFail()
 
     // Check permissions: only admin or creator can start tournament
-    const isAdmin = user.role === 'admin'
+    const isAdmin = user.role === UserRole.Admin
     const isCreator = tournament.creatorId === user.id
     if (!isAdmin && !isCreator) {
       return response.forbidden({
@@ -588,24 +610,63 @@ export default class TournamentsController {
       throw new Error('Tournament ID is required')
     }
 
-    const tournament = await Tournament.query().where('id', params.id).firstOrFail()
+    try {
+      const tournament = await Tournament.findOrFail(params.id)
+      const user = auth.user!
 
-    const data = await request.validateUsing(tournamentValidator, {
-      messagesProvider: i18n.createMessagesProvider(),
-    })
+      // Vérifier si l'utilisateur est autorisé à modifier le tournoi
+      const isAdmin = user.role === UserRole.Admin
+      const isCreator = tournament.creatorId === user.id
 
-    const updateData: Partial<Tournament> = await this.processTournamentData(data, auth)
+      if (!isAdmin && !isCreator) {
+        return response.status(403).json({
+          error: true,
+          message: 'You are not authorized to update this tournament',
+        })
+      }
 
-    // Update the tournament
-    await tournament.merge(updateData).save()
+      const data = await request.validateUsing(tournamentValidator, {
+        messagesProvider: i18n.createMessagesProvider(),
+      })
 
-    // Update game association if changed
-    if (data.gameId !== tournament.gameId) {
-      const game = await Game.find(data.gameId)
-      await tournament.related('game').associate(game!)
+      const updateData: Partial<Tournament> = await this.processTournamentData(data, auth)
+
+      // Update the tournament
+      await tournament.merge(updateData).save()
+
+      // Update game association if changed
+      if (data.gameId !== tournament.gameId) {
+        const game = await Game.find(data.gameId)
+        if (game) {
+          await tournament.related('game').associate(game)
+        }
+      }
+
+      if (request.accepts(['html', 'json']) === 'json') {
+        return response.json({
+          success: true,
+          message: 'Tournament updated successfully',
+        })
+      }
+
+      return response.redirect().back()
+    } catch (error) {
+      console.error('Error updating tournament:', error)
+
+      if (request.accepts(['html', 'json']) === 'json') {
+        return response.status(500).json({
+          error: true,
+          message: 'An error occurred while updating the tournament',
+          details: error instanceof Error ? error.message : 'Unknown error',
+        })
+      }
+
+      return response.status(500).json({
+        error: true,
+        message: 'An error occurred while updating the tournament',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      })
     }
-
-    return response.redirect().back()
   }
 
   public async updateMatchScore({ params, auth, request, response }: HttpContext) {
@@ -630,7 +691,7 @@ export default class TournamentsController {
       .firstOrFail()
 
     // Check permissions: only admin or tournament creator can update scores
-    const isAdmin = user.role === 'admin'
+    const isAdmin = user.role === UserRole.Admin
     const isCreator = tournament.creatorId === user.id
     if (!isAdmin && !isCreator) {
       return response.forbidden({

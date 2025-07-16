@@ -31,5 +31,10 @@
   "update": "Update",
   "currentImage": "Current image",
   "addToFavorites": "Add to Favorites",
-  "removeFromFavorites": "Remove from Favorites"
+  "removeFromFavorites": "Remove from Favorites",
+  "updateSuccess": "Game updated successfully",
+  "updateError": "An error occurred while updating the game",
+  "creationSuccess": "Game created successfully",
+  "creationError": "An error occurred while creating the game",
+  "unauthorizedUpdate": "You are not authorized to update this game. Only administrators can modify games."
 }

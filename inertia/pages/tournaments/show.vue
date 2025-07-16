@@ -205,7 +205,16 @@ const joinTournament = async () => {
   }
 }
 
+const canEdit = computed(() => {
+  if (!user.value) return false
+  return isAdmin.value || tournament.value.creatorId === user.value.id
+})
+
 const navigateToEdit = () => {
+  if (!canEdit.value) {
+    return
+  }
+
   isEditModalOpen.value = true
 }
 
@@ -362,9 +371,9 @@ const handleMatchUpdated = (data: any) => {
           {{ tournament.name }}
         </h1>
         <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
-          <!-- Edit button (visible only when user is logged in) -->
+          <!-- Edit button (visible only when user can edit) -->
           <button
-            v-if="user"
+            v-if="canEdit"
             @click="navigateToEdit"
             class="font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition bg-gray-600 text-white hover:bg-gray-700 flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer"
           >
@@ -681,7 +690,7 @@ const handleMatchUpdated = (data: any) => {
     </div>
 
     <TournamentForm
-      v-if="user"
+      v-if="canEdit"
       :isOpen="isEditModalOpen"
       mode="edit"
       :tournament="tournament as any"

@@ -19,6 +19,7 @@ const LogoutController = () => import('#controllers/logout_controller')
 const ChatController = () => import('#controllers/chat_controller')
 const TournamentsController = () => import('#controllers/tournaments_controller')
 const GamesController = () => import('#controllers/games_controller')
+const ProfileController = () => import('#controllers/profile_controller')
 
 transmit.registerRoutes()
 
@@ -69,4 +70,15 @@ router.post('/games/new', [GamesController, 'store']).use(middleware.auth())
 router.put('/games/:id/edit', [GamesController, 'update']).use(middleware.auth())
 router
   .post('/games/:id/toggle-favorite', [GamesController, 'toggleFavorite'])
+  .use(middleware.auth())
+
+// Profile routes
+router
+  .group(() => {
+    router.get('/profile', [ProfileController, 'index'])
+    router.post('/profile/privacy', [ProfileController, 'updatePrivacy'])
+    router.post('/profile/update-data', [ProfileController, 'updateName'])
+    router.post('/profile/tournaments/:id/validate', [ProfileController, 'validateTournament'])
+    router.post('/profile/tournaments/:id/refuse', [ProfileController, 'refuseTournament'])
+  })
   .use(middleware.auth())

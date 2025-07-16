@@ -13,7 +13,7 @@ import { GameStatus } from '#types/game'
 import { useFavoriteToggle } from '../../resources/js/composables/useFavoriteToggle'
 
 const { t } = useI18n()
-const { user: userProps } = useAuth()
+const { user: userProps, isAdmin } = useAuth()
 
 const props = defineProps({
   game: {
@@ -73,6 +73,9 @@ const navigateToEdit = (event: Event) => {
     console.error('Game ID is missing:', props.game)
     return
   }
+  if (!isAdmin.value) {
+    return
+  }
 
   isEditModalOpen.value = true
 }
@@ -101,9 +104,8 @@ const playHeartAnimation = () => {
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
   >
-    <!-- Edit button (visible only when user is logged in) -->
     <button
-      v-if="userProps"
+      v-if="isAdmin"
       @click="navigateToEdit"
       class="absolute top-2 right-2 z-10 bg-white rounded-full p-2 shadow-md hover:bg-gray-100 transition-colors duration-200 opacity-0 hover:opacity-100 focus:opacity-100"
       :class="{ 'opacity-100': isHovered }"
@@ -166,7 +168,7 @@ const playHeartAnimation = () => {
     <!-- Game Edit Modal -->
     <teleport to="body">
       <GameForm
-        v-if="userProps"
+        v-if="isAdmin"
         :isOpen="isEditModalOpen"
         :mode="GameStatus.EDIT"
         :game="props.game as Game"

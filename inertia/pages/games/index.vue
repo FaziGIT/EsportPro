@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Layout from '~/components/layouts/layout.vue'
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { useInfiniteScroll } from '@vueuse/core'
 import { useI18n } from '../../../resources/js/composables/useI18n'
@@ -12,7 +12,7 @@ import GameForm from '~/components/GameForm.vue'
 import { GameStatus } from '#types/game'
 
 const { t } = useI18n()
-const { user } = useAuth()
+const { user, isAdmin } = useAuth()
 
 const games = ref<Game[]>([])
 const page = ref(1)
@@ -21,6 +21,7 @@ const allLoaded = ref(false)
 
 const selectedFilter = ref('closest')
 const selectedLabel = ref(t('menu.ascendingName'))
+
 
 // Modal state
 const isModalOpen = ref(false)
@@ -129,7 +130,7 @@ const closeModal = () => {
       </Menu>
 
       <button
-        v-if="user"
+        v-if="isAdmin"
         @click="openModal"
         class="font-semibold px-4 sm:px-6 py-2 sm:py-3 rounded-lg transition bg-[#5C4741] hover:bg-[#7b5f57] text-white cursor-pointer text-sm sm:text-base w-full sm:w-auto"
       >
@@ -150,7 +151,7 @@ const closeModal = () => {
         {{ t('game.allGamesLoaded') }}
       </div>
     </div>
-    
+
     <!-- Game Modal -->
     <GameForm v-if="user" :isOpen="isModalOpen" :mode="GameStatus.NEW" @close="closeModal" />
   </Layout>

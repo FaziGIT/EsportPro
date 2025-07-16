@@ -12,7 +12,7 @@ import { GameStatus } from '#types/game'
 import { useFavoriteToggle } from '../../../resources/js/composables/useFavoriteToggle'
 
 const { t } = useI18n()
-const { user } = useAuth()
+const { user, isAdmin } = useAuth()
 const { game, tournaments } = useGameData()
 
 // Gestion des favoris
@@ -116,6 +116,9 @@ const finishedTournamentsCount = computed(() => {
 
 // Modal functions
 const navigateToEdit = () => {
+  if (!isAdmin.value) {
+    return
+  }
   isEditModalOpen.value = true
 }
 
@@ -162,9 +165,8 @@ const closeEditModal = () => {
             }}</span>
           </button>
 
-          <!-- Edit button (visible only when user is logged in) -->
           <button
-            v-if="user"
+            v-if="isAdmin"
             @click="navigateToEdit"
             class="font-semibold px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition bg-gray-600 text-white hover:bg-gray-700 flex items-center justify-center gap-2 text-sm sm:text-base w-full sm:w-auto cursor-pointer"
           >
@@ -369,7 +371,7 @@ const closeEditModal = () => {
 
     <!-- Game Edit Modal -->
     <GameForm
-      v-if="user"
+      v-if="isAdmin"
       :isOpen="isEditModalOpen"
       :mode="GameStatus.EDIT"
       :game="game as any"

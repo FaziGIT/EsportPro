@@ -5,6 +5,7 @@ import { getAllGamesWithoutImages } from '../repository/game.js'
 import { getAllTournamentsWithoutImages } from '../repository/tournament.js'
 import { gameUpdateValidator, gameValidator } from '#validators/game'
 import User from '#models/user'
+import { UserRole } from '#enums/user_role'
 
 export default class GamesController {
   public async index({ inertia }: HttpContext) {
@@ -35,23 +36,45 @@ export default class GamesController {
   }
 
   public async store({ request, i18n, response }: HttpContext) {
-    const data = await request.validateUsing(gameValidator, {
-      messagesProvider: i18n.createMessagesProvider(),
-    })
+    try {
+      const data = await request.validateUsing(gameValidator, {
+        messagesProvider: i18n.createMessagesProvider(),
+      })
 
-    const gameModel: Partial<Game> = {
-      name: data.name,
-      platform: data.platform,
+      const gameModel: Partial<Game> = {
+        name: data.name,
+        platform: data.platform,
+      }
+
+      // If the image is provided, we read the temporary file and convert it to a Uint8Array
+      if (data.image) {
+        gameModel.image = BufferToUint8Array(data.image.tmpPath!)
+      }
+
+      await Game.create(gameModel)
+
+      if (request.accepts(['html', 'json']) === 'json') {
+        return response.json({
+          success: true,
+          message: 'Game created successfully',
+        })
+      }
+      return response.redirect().back()
+    } catch (error) {
+      console.error('Error creating game:', error)
+
+      if (request.accepts(['html', 'json']) === 'json') {
+        return response.status(500).json({
+          error: true,
+          message: 'An error occurred while creating the game',
+        })
+      }
+
+      return response.status(500).json({
+        error: true,
+        message: 'An error occurred while creating the game',
+      })
     }
-
-    // If the image is provided, we read the temporary file and convert it to a Uint8Array
-    if (data.image) {
-      gameModel.image = BufferToUint8Array(data.image.tmpPath!)
-    }
-
-    await Game.create(gameModel)
-
-    return response.redirect().toRoute('/')
   }
 
   public async show({ params, inertia }: HttpContext) {
@@ -92,31 +115,54 @@ export default class GamesController {
     return response.status(200).json({ message })
   }
 
-  public async update({ params, request, i18n, response }: HttpContext) {
+  public async update({ params, request, i18n, response, auth }: HttpContext) {
     if (!params.id) {
       throw new Error('Game ID is required')
     }
 
-    const game = await Game.query().where('id', params.id).firstOrFail()
-
-    const data = await request.validateUsing(gameUpdateValidator, {
-      messagesProvider: i18n.createMessagesProvider(),
-    })
-
-    const gameModel: Partial<Game> = {
-      name: data.name,
-      platform: data.platform,
+    const user = auth.user!
+    if (user.role !== UserRole.Admin) {
+      return response.status(403).json({
+        error: true,
+        message:
+          'You are not authorized to update this game. Only administrators can modify games.',
+      })
     }
 
-    // If the image is provided, we read the temporary file and convert it to a Uint8Array
-    if (data.image) {
-      gameModel.image = BufferToUint8Array(data.image.tmpPath!)
+    try {
+      const game = await Game.query().where('id', params.id).firstOrFail()
+
+      const data = await request.validateUsing(gameUpdateValidator, {
+        messagesProvider: i18n.createMessagesProvider(),
+      })
+
+      const gameModel: Partial<Game> = {
+        name: data.name,
+        platform: data.platform,
+      }
+
+      // If the image is provided, we read the temporary file and convert it to a Uint8Array
+      if (data.image) {
+        gameModel.image = BufferToUint8Array(data.image.tmpPath!)
+      }
+
+      // Update the game
+      await game.merge(gameModel).save()
+      return response.redirect().back()
+    } catch (error) {
+      console.error('Error updating game:', error)
+      if (request.accepts(['html', 'json']) === 'json') {
+        return response.status(500).json({
+          error: true,
+          message: 'An error occurred while updating the game',
+        })
+      }
+
+      return response.status(500).json({
+        error: true,
+        message: 'An error occurred while updating the game',
+      })
     }
-
-    // Update the game
-    await game.merge(gameModel).save()
-
-    return response.redirect().back()
   }
 
   /**
