@@ -15,6 +15,7 @@ import Team from '#models/team'
 import User from '#models/user'
 import { TrashIcon } from '~/components/icons'
 import DeleteConfirmationModal from '~/components/DeleteConfirmationModal.vue'
+import { TournamentStatus } from '#types/tournament'
 
 const { t } = useI18n()
 const { user, isAdmin } = useAuth()
@@ -818,9 +819,10 @@ const winningTeam = computed(() => {
     <TournamentForm
       v-if="canEdit"
       :isOpen="isEditModalOpen"
-      mode="edit"
+      :mode="TournamentStatus.EDIT"
       :tournament="tournament as any"
       :games="props.games"
+      :need-reload="true"
       @close="closeEditModal"
     />
 

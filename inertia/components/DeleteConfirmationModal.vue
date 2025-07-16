@@ -30,6 +30,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  needReload: {
+    type: Boolean,
+    default: false,
+  },
   error: {
     type: String,
     default: '',
@@ -42,20 +46,26 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'confirm'])
 
-const closeTimer = ref<number | null>(null)
 const shouldDisableCancel = ref(false)
 
-// Surveiller également isDeleting pour désactiver le bouton d'annulation
+// Désactiver le bouton d'annulation pendant la suppression
 watch(() => props.isDeleting, (isDeleting) => {
   shouldDisableCancel.value = isDeleting
 })
 
-// Nettoyer le timer si la modal est fermée
-watch(() => props.isOpen, (isOpen) => {
-  if (!isOpen && closeTimer.value) {
-    clearTimeout(closeTimer.value)
-    closeTimer.value = null
-    shouldDisableCancel.value = false
+// Surveiller le succès pour fermer automatiquement et recharger la page
+watch(() => props.success, (newSuccess) => {
+  if (newSuccess) {
+    // Désactiver le bouton d'annulation quand on a un succès
+    shouldDisableCancel.value = true
+
+    // Fermeture automatique
+    setTimeout(() => {
+      emit('close')
+      if(props.needReload) {
+        window.location.reload()
+      }
+    }, 1500)
   }
 })
 
@@ -64,7 +74,6 @@ const handleConfirm = () => {
 }
 
 const handleClose = () => {
-  // Ne permettre la fermeture que si on n'est pas en train de supprimer
   if (!props.isDeleting && !props.success) {
     emit('close')
   }
@@ -123,9 +132,7 @@ const handleClose = () => {
                   v-if="success"
                   class="mt-3 p-2 bg-green-50 border border-green-200 text-green-700 rounded text-sm"
                 >
-                  <div class="flex items-center justify-between">
-                    <span>{{ success }}</span>
-                  </div>
+                  {{ success }}
                 </div>
               </div>
 

@@ -445,6 +445,7 @@ const deleteGame = async () => {
       :isOpen="isEditModalOpen"
       :mode="GameStatus.EDIT"
       :game="game as any"
+      :need-reload="true"
       @close="closeEditModal"
     />
 

@@ -23,6 +23,10 @@ const props = defineProps({
     type: Object as () => Partial<Game>,
     required: true,
   },
+  needReload: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const imageSource = computed(() => {
@@ -245,6 +249,7 @@ const playHeartAnimation = () => {
         :isOpen="isEditModalOpen"
         :mode="GameStatus.EDIT"
         :game="props.game as Game"
+        :need-reload="needReload"
         @close="closeEditModal"
       />
     </teleport>
@@ -260,6 +265,7 @@ const playHeartAnimation = () => {
         :isDeleting="isDeletingGame"
         :error="deleteError"
         :success="deleteSuccess"
+        :need-reload="needReload"
         @close="closeDeleteModal"
         @confirm="deleteGame"
       />

@@ -7,19 +7,31 @@ import { FormatType } from '#enums/format_type'
 import { TournamentFormData, TournamentStatus } from '#types/tournament'
 import { DateTime } from 'luxon'
 import Tournament from '#models/tournament'
+import Button from '~/components/Button.vue'
 
 const { t } = useI18n()
 
 // Props
-const props = defineProps<{
-  isOpen: boolean
-  mode: typeof TournamentStatus.EDIT | typeof TournamentStatus.NEW
-  tournament?: Tournament
-  games: Array<{
-    id: string
-    name: string
-  }>
-}>()
+const props = defineProps({
+  isOpen: {
+    type: Boolean
+  },
+  mode: {
+    type: Object as () => typeof TournamentStatus.EDIT | typeof TournamentStatus.NEW,
+  },
+  tournament: {
+    type: Object as () => Tournament | null,
+    default: null,
+  },
+  games: {
+    type: Array as () => Array<{ id: string; name: string }>,
+    default: () => [],
+  },
+  needReload: {
+    type: Boolean,
+    default: false
+  }
+})
 
 // Emits
 const emit = defineEmits(['close', 'submit'])
@@ -130,30 +142,32 @@ const submitForm = () => {
   form[method](submitUrl, {
     forceFormData: true,
     headers: {
-      'Accept': 'application/json',
+      Accept: 'application/json',
     },
     preserveScroll: true,
     preserveState: true,
     onSuccess: () => {
       // Afficher la notification de succès
       notificationType.value = 'success'
-      notificationMessage.value = props.mode === TournamentStatus.EDIT
-        ? t('tournament.updateSuccess')
-        : t('tournament.pendingValidation')
+      notificationMessage.value =
+        props.mode === TournamentStatus.EDIT
+          ? t('tournament.updateSuccess')
+          : t('tournament.pendingValidation')
       showNotification.value = true
 
-      setTimeout(() => {
-        emit('close')
+      emit('close')
+      if (props.mode === TournamentStatus.EDIT && props.needReload) {
         window.location.reload()
-      }, 3000)
+      }
     },
     onError: () => {
       form.imagePreview = imagePreview
       // Afficher la notification d'erreur
       notificationType.value = 'error'
-      notificationMessage.value = props.mode === TournamentStatus.EDIT
-        ? t('tournament.updateError')
-        : t('tournament.creationError')
+      notificationMessage.value =
+        props.mode === TournamentStatus.EDIT
+          ? t('tournament.updateError')
+          : t('tournament.creationError')
       showNotification.value = true
 
       setTimeout(() => {

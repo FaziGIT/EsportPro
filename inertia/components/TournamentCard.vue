@@ -31,6 +31,10 @@ const props = defineProps({
     type: Array as () => Array<{ id: string; name: string }>,
     default: () => [],
   },
+  needReload: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const canEdit = computed(() => {
@@ -240,6 +244,7 @@ const closeEditModal = () => {
         :mode="TournamentStatus.EDIT"
         :tournament="props.tournament"
         :games="props.games"
+        :need-reload="needReload"
         @close="closeEditModal"
       />
     </teleport>
@@ -254,6 +259,7 @@ const closeEditModal = () => {
         :isDeleting="isDeletingTournament"
         :error="deleteError"
         :success="deleteSuccess"
+        :need-reload="needReload"
         @close="closeDeleteModal"
         @confirm="deleteTournament"
       />
