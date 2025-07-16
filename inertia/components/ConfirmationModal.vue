@@ -147,7 +147,7 @@ const handleClose = () => {
               <div class="mt-4 flex justify-end gap-3">
                 <button
                   type="button"
-                  class="inline-flex justify-center rounded-md border border-transparent bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="inline-flex justify-center rounded-md border border-transparent bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   @click="handleClose"
                   :disabled="shouldDisableCancel"
                 >
@@ -155,7 +155,7 @@ const handleClose = () => {
                 </button>
                 <button
                   type="button"
-                  :class="`inline-flex justify-center rounded-md border border-transparent ${confirmButtonColor} px-4 py-2 text-sm font-medium text-white focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed`"
+                  :class="`inline-flex justify-center rounded-md border border-transparent ${confirmButtonColor} px-4 py-2 text-sm font-medium text-white focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer`"
                   @click="handleConfirm"
                   :disabled="isProcessing"
                 >
