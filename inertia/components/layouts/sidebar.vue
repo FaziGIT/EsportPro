@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Link, router } from '@inertiajs/vue3'
+import { Link } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import logo from '../../img/logo.png'
 import imageNotFound from '../../img/Image-not-found.png'
@@ -7,22 +7,10 @@ import { PlusIcon } from '../icons'
 import { useI18n } from '../../../resources/js/composables/useI18n'
 import { useAuth } from '../../../resources/js/composables/useAuth'
 import { useUserData } from '../../../resources/js/composables/usePageProps'
-import Game from '#models/game'
-import Tournament from '#models/tournament'
 
 const { t } = useI18n()
 const { isAuthenticated } = useAuth()
 const { userTournaments, userGames } = useUserData()
-
-interface SimpleGame extends Partial<Game> {
-  id: string
-  name: string
-}
-
-interface SimpleTournament extends Partial<Tournament> {
-  id: string
-  name: string
-}
 
 const isDropdownOpen = ref(false)
 const isTournamentsDropdownOpen = ref(false)
@@ -53,13 +41,6 @@ const toggleTournamentsDropdown = () => {
   isTournamentsDropdownOpen.value = !isTournamentsDropdownOpen.value
 }
 
-const handleTournamentClick = (tournament: SimpleTournament) => {
-  router.visit(`/tournaments/${tournament.id}`)
-}
-
-const handleGameClick = (game: SimpleGame) => {
-  router.visit(`/games/${game.id}`)
-}
 </script>
 
 <template>
@@ -89,10 +70,10 @@ const handleGameClick = (game: SimpleGame) => {
       </div>
 
       <div class="flex flex-col items-center space-y-3 relative mb-5">
-        <div
+        <Link
           v-for="tournament in displayedTournaments"
           :key="tournament.id"
-          @click.stop="handleTournamentClick(tournament as SimpleTournament)"
+          :href="`/tournaments/${tournament.id}`"
           class="w-12 h-12 rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-white hover:ring-opacity-70 transition-all duration-200 border-2 border-white border-opacity-30"
           :title="tournament.name"
         >
@@ -102,7 +83,7 @@ const handleGameClick = (game: SimpleGame) => {
             class="w-full h-full object-cover"
             @error="handleImageError"
           />
-        </div>
+        </Link>
 
         <div
           v-if="hiddenTournaments.length > 0"
@@ -130,13 +111,10 @@ const handleGameClick = (game: SimpleGame) => {
             class="absolute top-[77.5%] left-16 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-2 min-w-48 z-[60]"
             @click.stop
           >
-            <div
+            <Link
               v-for="tournament in hiddenTournaments"
               :key="tournament.id"
-              @click.stop="
-                handleTournamentClick(tournament as SimpleTournament);
-                isTournamentsDropdownOpen = false
-              "
+              :href="`/tournaments/${tournament.id}`"
               class="flex items-center space-x-3 px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors duration-150"
             >
               <div
@@ -150,7 +128,7 @@ const handleGameClick = (game: SimpleGame) => {
                 />
               </div>
               <span class="text-gray-800 font-medium">{{ tournament.name }}</span>
-            </div>
+            </Link>
           </div>
         </Transition>
       </div>
@@ -170,20 +148,20 @@ const handleGameClick = (game: SimpleGame) => {
       </div>
 
       <div class="flex flex-col items-center space-y-3 relative">
-        <div
+        <Link
           v-for="game in displayedGames"
           :key="game.id"
-          @click.stop="handleGameClick(game as SimpleGame)"
+          :href="`/games/${game.id}`"
           class="w-12 h-12 rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-[#5C4741] hover:ring-opacity-70 transition-all duration-200 border-2 border-[#5C4741] border-opacity-30"
           :title="game.name"
         >
           <img
             :src="getImageUrl('game', game.id)"
             :alt="game.name"
-            class="w-full h-full object-cover"
-            @error="handleImageError"
-          />
-        </div>
+              class="w-full h-full object-cover"
+              @error="handleImageError"
+            />
+        </Link>
 
         <div
           v-if="hiddenGames.length > 0"
@@ -211,13 +189,10 @@ const handleGameClick = (game: SimpleGame) => {
             class="absolute top-[77.5%] left-16 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-2 min-w-48 z-[60]"
             @click.stop
           >
-            <div
+            <Link
               v-for="game in hiddenGames"
               :key="game.id"
-              @click.stop="
-                handleGameClick(game as SimpleGame);
-                isDropdownOpen = false
-              "
+              :href="`/games/${game.id}`"
               class="flex items-center space-x-3 px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors duration-150"
             >
               <div
@@ -231,7 +206,7 @@ const handleGameClick = (game: SimpleGame) => {
                 />
               </div>
               <span class="text-gray-800 font-medium">{{ game.name }}</span>
-            </div>
+            </Link>
           </div>
         </Transition>
       </div>
