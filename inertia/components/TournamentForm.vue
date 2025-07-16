@@ -17,7 +17,7 @@ const props = defineProps({
     type: Boolean
   },
   mode: {
-    type: Object as () => typeof TournamentStatus.EDIT | typeof TournamentStatus.NEW,
+    type: String as () => typeof TournamentStatus.EDIT | typeof TournamentStatus.NEW,
   },
   tournament: {
     type: Object as () => Tournament | null,
