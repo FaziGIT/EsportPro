@@ -89,7 +89,7 @@ defineProps({
 
     <!-- Section des tournois créés par l'utilisateur -->
     <CreatedTournamentsSection
-      v-if="createdTournaments && createdTournaments.length > 0 && user.role === 'user'"
+      v-if="createdTournaments && createdTournaments.length > 0"
       :my-created-tournaments="createdTournaments"
       :games="games"
     />
