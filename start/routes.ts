@@ -21,7 +21,7 @@ const TournamentsController = () => import('#controllers/tournaments_controller'
 const GamesController = () => import('#controllers/games_controller')
 const ProfileController = () => import('#controllers/profile_controller')
 
-const ErrorController = () => import('#controllers/error_controller')
+const ErrorsController = () => import('#controllers/errors_controller')
 
 transmit.registerRoutes()
 
@@ -93,4 +93,4 @@ router
   .use(middleware.auth())
 
 // Error routes
-router.get('/unauthorized', [ErrorController, 'unauthorized'])
+router.get('/unauthorized', [ErrorsController, 'unauthorized'])
