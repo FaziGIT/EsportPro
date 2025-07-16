@@ -6,7 +6,7 @@
   "joinTeamOrTournament": "Rejoins une équipe ou un tournoi pour commencer à discuter.",
   "noChannelAvailable": "Aucun canal disponible",
   "noMessages": "Aucun message",
-  "messageLoading": "Chargement des messages...",
+  "loadingMessages": "Chargement des messages...",
   "loadingOlderMessages": "Chargement des messages plus anciens...",
   "noChannelsAvailable": "Aucun canal disponible"
 }

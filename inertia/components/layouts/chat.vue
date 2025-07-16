@@ -108,6 +108,17 @@ const setupSubscriptions = async () => {
   try {
     for (const channel of userChannels.value) {
       try {
+        // Check if we already have a subscription for this channel and clean it up first
+        const existingSubscription = subscriptions.get(channel.id)
+        if (existingSubscription) {
+          try {
+            await existingSubscription.delete()
+          } catch (error) {
+            console.warn(`Failed to cleanup existing subscription for ${channel.id}:`, error)
+          }
+          subscriptions.delete(channel.id)
+        }
+
         const subscription = transmit.subscription(`chat/${channel.id}`)
         await subscription.create()
 
@@ -129,22 +140,31 @@ const setupSubscriptions = async () => {
           // Find the corresponding chat index
           const chatIndex = chatList.value.findIndex((chat) => chat.id === channel.id)
           if (chatIndex !== -1) {
-            // Add message to corresponding chat
-            chatList.value[chatIndex].messages.push(formattedMessage)
+            // Check for duplicate messages using text + time + pseudo as unique identifier
+            const messageSignature = `${data.text}-${data.time}-${data.pseudo}`
+            const existingMessages = chatList.value[chatIndex].messages
+            const isDuplicate = existingMessages.some(
+              (msg) => `${msg.text}-${msg.time}-${msg.pseudo}` === messageSignature
+            )
 
-            // Update last message
-            chatList.value[chatIndex].lastMessage = data.text
+            if (!isDuplicate) {
+              // Add message to corresponding chat
+              chatList.value[chatIndex].messages.push(formattedMessage)
 
-            // If chat is not open or if it's not the active conversation,
-            // increment unread message counter
-            if (!chatStore.isChatOpen || activeChat.value !== chatIndex) {
-              chatList.value[chatIndex].unread += 1
-              updateTotalUnreadCount()
-            }
+              // Update last message
+              chatList.value[chatIndex].lastMessage = data.text
 
-            // Scroll to bottom if it's the active conversation
-            if (activeChat.value === chatIndex) {
-              nextTick(() => scrollToBottom())
+              // If chat is not open or if it's not the active conversation,
+              // increment unread message counter
+              if (!chatStore.isChatOpen || activeChat.value !== chatIndex) {
+                chatList.value[chatIndex].unread += 1
+                updateTotalUnreadCount()
+              }
+
+              // Scroll to bottom if it's the active conversation
+              if (activeChat.value === chatIndex) {
+                nextTick(() => scrollToBottom())
+              }
             }
           }
         })
@@ -162,13 +182,14 @@ const setupSubscriptions = async () => {
 
 // Clean up all subscriptions (like cleanup of useEffect in React)
 const cleanupSubscriptions = async () => {
-  // Iterate through all subscriptions and delete them (without await, like in React with void)
+  // Iterate through all subscriptions and delete them
   for (const [channelId, subscription] of subscriptions) {
     if (subscription && typeof subscription.delete === 'function') {
-      // Catch promise errors with catch
-      await subscription.delete().catch((error: any) => {
-        console.error(`Deletion error ignored for ${channelId}:`, error.message)
-      })
+      try {
+        await subscription.delete()
+      } catch (error: any) {
+        console.error(`Failed to delete subscription for ${channelId}:`, error.message)
+      }
     }
   }
 
