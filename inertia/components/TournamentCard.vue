@@ -39,12 +39,12 @@ const props = defineProps({
 
 const canEdit = computed(() => {
   if (!user.value) return false
-  return isAdmin || user.value.id === props.tournament.creatorId
+  return isAdmin.value || (user.value.id === props.tournament.creatorId)
 })
 
 const canDelete = computed(() => {
   if (!user.value) return false
-  return isAdmin || user.value.id === props.tournament.creatorId
+  return isAdmin.value || (user.value.id === props.tournament.creatorId)
 })
 
 const imageSource = computed(() => {
