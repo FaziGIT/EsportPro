@@ -12,7 +12,7 @@ import TournamentService from '../services/tournament_service.js'
 
 export default class ProfileController {
   public async index({ inertia, auth, response }: HttpContext) {
-    const user = auth.user
+    const user = auth.user!
     let tournaments: Tournament[] = []
     let favoriteGames: Game[] = []
     let pendingTournaments: Tournament[] = []
@@ -41,7 +41,9 @@ export default class ProfileController {
       if (tournamentIds.length > 0) {
         allUserTournaments = await getAllTournamentsWithoutImages()
           .whereIn('id', tournamentIds)
-          .preload('game')
+          .preload('game', (gameQuery) => {
+            gameQuery.select('id', 'name', 'platform')
+          })
           .preload('teams', (teamsQuery) => {
             teamsQuery.preload('players')
           })
@@ -120,14 +122,18 @@ export default class ProfileController {
       if (user.role === UserRole.Admin) {
         pendingTournaments = await getAllTournamentsWithoutImages()
           .where('isValidated', false)
-          .preload('game')
+          .preload('game', (gameQuery) => {
+            gameQuery.select('id', 'name', 'platform')
+          })
           .orderBy('created_at', 'asc')
       }
 
       // Récupération des tournois créés par l'utilisateur
       createdTournaments = await getAllTournamentsWithoutImages()
         .where('creatorId', user.id)
-        .preload('game')
+        .preload('game', (gameQuery) => {
+          gameQuery.select('id', 'name', 'platform')
+        })
         .orderBy('created_at', 'desc')
 
       return inertia.render('profile/index', {
