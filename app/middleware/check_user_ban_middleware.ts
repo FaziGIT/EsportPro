@@ -6,9 +6,9 @@ export default class CheckUserBanMiddleware {
   redirectTo = '/unauthorized'
 
   public async handle(ctx: HttpContext, next: NextFn) {
-    const { auth, response, request } = ctx
+    const { auth, response, request, session } = ctx
 
-    // Ne pas bloquer la route si c’est déjà la page /unauthorized
+    // Ne pas bloquer la route si c'est déjà la page /unauthorized
     if (request.url() === this.redirectTo) {
       return next()
     }
@@ -18,9 +18,18 @@ export default class CheckUserBanMiddleware {
     if (isLoggedIn) {
       const user = auth.user
 
-      // Si l'utilisateur est banni, rediriger
+      // Si l'utilisateur est banni, le déconnecter puis rediriger
       if (user && user.role === UserRole.Banned) {
-        return response.redirect().toPath(this.redirectTo)
+        try {
+          // Déconnecter l'utilisateur en utilisant la méthode correcte
+          await auth.use().logout()
+          session.forget('auth_user')
+
+          // Rediriger vers la page unauthorized
+          return response.redirect().toPath(this.redirectTo)
+        } catch (error) {
+          return response.redirect().toPath(this.redirectTo)
+        }
       }
     }
     return next()
