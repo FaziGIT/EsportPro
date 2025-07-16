@@ -25,5 +25,6 @@
   "nextTournaments": "Mes prochains tournois",
   "favoriteGames": "Mes jeux favoris",
   "noFavoriteGames": "Aucun jeu favori.",
-  "validCharactersOnly": "Lettres, chiffres, tirets uniquement"
+  "validCharactersOnly": "Lettres, chiffres, tirets uniquement",
+  "banUser": "Banni l'utilisateur"
 }

@@ -6,14 +6,16 @@ import { defineProps } from 'vue'
 import User from '#models/user'
 import Tournament from '#models/tournament'
 import Game from '#models/game'
-import { UserRole } from '#enums/user_role'
 import { useI18n } from '../../../resources/js/composables/useI18n'
 import CreatedTournamentsSection from '~/components/profile/CreatedTournamentsSection.vue'
 import GamesCarousel from '~/components/game/GamesCarousel.vue'
 import TournamentsCarousel from '~/components/tournament/TournamentsCarousel.vue'
 import UserStatsSection from '~/components/profile/UserStatsSection.vue'
+import AdminUserTable from '~/components/profile/AdminUserTable.vue'
+import { useAuth } from '../../../resources/js/composables/useAuth'
 
 const { t } = useI18n()
+const { isAdmin } = useAuth()
 
 defineProps({
   user: {
@@ -48,6 +50,10 @@ defineProps({
     type: Array as () => Game[],
     default: () => [],
   },
+  allUsers: {
+    type: Array as () => User[],
+    default: () => [],
+  },
 })
 </script>
 
@@ -67,9 +73,10 @@ defineProps({
 
     <!-- Section Admin: Tournois en attente de validation -->
     <PendingTournaments
-      v-if="user.role === UserRole.Admin"
+      v-if="isAdmin"
       :pendingTournaments="pendingTournaments"
     />
+    <AdminUserTable v-if="isAdmin" :users="allUsers"/>
 
     <!-- Section des prochains tournois -->
     <TournamentsCarousel

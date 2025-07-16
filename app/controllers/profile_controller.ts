@@ -3,6 +3,7 @@ import Tournament from '#models/tournament'
 import { DateTime, Duration } from 'luxon'
 import { UserRole } from '#enums/user_role'
 import Game from '#models/game'
+import User from '#models/user'
 import { GameStatistic } from '#types/game_statistics'
 import { getAllTournamentsWithoutImages } from '../repository/tournament.js'
 import { getAllGamesWithoutImages } from '../repository/game.js'
@@ -18,6 +19,11 @@ export default class ProfileController {
     let finishedTournaments: Tournament[] = []
     let gameStats: Record<string, GameStatistic> = {}
     let games: Game[] = []
+    let allUsers: User[] = []
+
+    if (user.role === UserRole.Admin) {
+      allUsers = await User.query().orderBy('created_at', 'desc')
+    }
 
     // Récupérer tous les jeux disponibles pour le formulaire d'édition
     games = await getAllGamesWithoutImages().orderBy('name', 'asc')
@@ -132,6 +138,7 @@ export default class ProfileController {
         finishedTournaments: finishedTournaments,
         gameStats: gameStats,
         games: games,
+        allUsers: allUsers,
       })
     }
 
@@ -144,6 +151,7 @@ export default class ProfileController {
       finishedTournaments: [],
       gameStats: {},
       games: games,
+      allUsers: allUsers,
     })
   }
 
@@ -274,5 +282,76 @@ export default class ProfileController {
         message: 'An error occurred while refusing the tournament',
       })
     }
+  }
+
+  public async getAllUsers({ auth, inertia }: HttpContext) {
+    const user = auth.user
+
+    if (!user || user.role !== UserRole.Admin) {
+      return inertia.render('errors/403')
+    }
+
+    const users = await User.query().orderBy('created_at', 'desc')
+
+    return inertia.render('profile/users', {
+      user,
+      users,
+    })
+  }
+
+  public async updateUserRole({ params, request, auth, response }: HttpContext) {
+    const currentUser = auth.user
+    if (!currentUser || currentUser.role !== UserRole.Admin) {
+      return response.unauthorized({ error: 'Unauthorized access' })
+    }
+
+    const user = await User.findOrFail(params.id)
+    const newRole = request.input('role')
+
+    if (!Object.values(UserRole).includes(newRole)) {
+      return response.badRequest({ error: 'Invalid role' })
+    }
+
+    user.role = newRole
+    await user.save()
+
+    return response.ok({ success: true, message: 'User role updated successfully' })
+  }
+
+  public async banUser({ params, auth, response }: HttpContext) {
+    const currentUser = auth.user
+    if (!currentUser || currentUser.role !== UserRole.Admin) {
+      return response.unauthorized({ error: 'Unauthorized access' })
+    }
+
+    const user = await User.findOrFail(params.id)
+
+    // Vérifier si l'utilisateur à bannir est un administrateur
+    if (user.role === UserRole.Admin) {
+      return response.forbidden({
+        error: true,
+        message: 'Les administrateurs ne peuvent pas être bannis',
+      })
+    }
+
+    user.role = UserRole.Banned
+    await user.save()
+
+    return response.ok({ success: true, message: 'User banned successfully' })
+  }
+
+  public async unbanUser({ params, auth, response }: HttpContext) {
+    const currentUser = auth.user
+    if (!currentUser || currentUser.role !== UserRole.Admin) {
+      return response.unauthorized({ error: 'Unauthorized access' })
+    }
+
+    const user = await User.findOrFail(params.id)
+
+    // Par défaut, on met l'utilisateur débanni en tant que User standard
+    user.role = UserRole.User
+    await user.save()
+
+    return response.ok({ success: true, message: 'User unbanned successfully' })
   }
 }

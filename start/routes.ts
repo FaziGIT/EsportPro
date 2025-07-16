@@ -21,6 +21,8 @@ const TournamentsController = () => import('#controllers/tournaments_controller'
 const GamesController = () => import('#controllers/games_controller')
 const ProfileController = () => import('#controllers/profile_controller')
 
+const ErrorController = () => import('#controllers/error_controller')
+
 transmit.registerRoutes()
 
 // Public routes
@@ -84,5 +86,11 @@ router
     router.post('/profile/update-data', [ProfileController, 'updateName'])
     router.post('/profile/tournaments/:id/validate', [ProfileController, 'validateTournament'])
     router.post('/profile/tournaments/:id/refuse', [ProfileController, 'refuseTournament'])
+    router.post('/profile/update-user-role/:id/:role', [ProfileController, 'updateUserRole'])
+    router.post('/profile/ban-user/:id/ban', [ProfileController, 'banUser'])
+    router.post('/profile/unban-user/:id/unban', [ProfileController, 'unbanUser'])
   })
   .use(middleware.auth())
+
+// Error routes
+router.get('/unauthorized', [ErrorController, 'unauthorized'])

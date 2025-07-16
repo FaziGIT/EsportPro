@@ -25,5 +25,6 @@
   "nextTournaments": "My upcoming tournaments",
   "favoriteGames": "My favorite games",
   "noFavoriteGames": "No favorite games.",
-  "validCharactersOnly": "Letters, numbers, hyphens only"
+  "validCharactersOnly": "Letters, numbers, hyphens only",
+  "banUser": "Banned the user"
 }

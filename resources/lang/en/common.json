@@ -5,5 +5,8 @@
   "confirmChange": "Confirm Change",
   "actions": "Actions",
   "delete": "Delete",
-  "confirmDelete": "Confirm Delete"
+  "confirmDelete": "Confirm Delete",
+  "unauthorized": "Unauthorized Access",
+  "youAreBanned": "Your account has been banned.",
+  "ban": "Ban"
 }
