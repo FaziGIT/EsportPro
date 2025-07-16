@@ -69,6 +69,7 @@
     "@adonisjs/vite": "^4.0.0",
     "@headlessui/vue": "^1.7.23",
     "@inertiajs/vue3": "^2.0.8",
+    "@sentry/vue": "^9.39.0",
     "@tailwindcss/vite": "^4.1.6",
     "@vinejs/vine": "^3.0.0",
     "@vue/server-renderer": "^3.5.13",

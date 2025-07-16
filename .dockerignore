@@ -1,1 +1,82 @@
-node_modules
+# ===========================================
+# .dockerignore - EsportPro
+# ===========================================
+
+# Git
+.git
+.gitignore
+.gitattributes
+*.gitkeep
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+README.md
+*.md
+docs/
+
+# IDE et éditeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Logs
+logs/
+*.log
+tmp/
+
+# Environment files
+.env*
+!.env.example
+
+# Coverage et tests
+coverage/
+.nyc_output/
+
+# Cache
+.cache/
+.parcel-cache/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Database
+*.sqlite
+*.db
+
+# Development files
+deploy.sh
+env.production.example
+
+# Backups
+*.backup
+*.bak
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.rar
+
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
