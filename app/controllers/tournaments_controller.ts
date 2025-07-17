@@ -14,6 +14,7 @@ import path from 'node:path'
 import { UserRole } from '#enums/user_role'
 import TournamentService from '#services/tournament_service'
 import ChatMessage from '#models/chat_message'
+import { FilterOptions } from '#enums/filter'
 
 // To get the imageNotFound path in the server
 const imageNotFound = path.join(process.cwd(), 'inertia', 'img', 'Image-not-found.png')
@@ -75,19 +76,28 @@ export default class TournamentsController {
   public async api({ request }: HttpContext) {
     const page = request.input('page', 1)
     const limit = request.input('limit', 20)
-    const sort = request.input('sort', 'closest')
+    const sort = request.input('sort', FilterOptions.DESC_DATE)
 
     const baseQuery = getAllTournamentsWithoutImages().where('is_validated', true)
 
     switch (sort) {
-      case 'furthest':
+      case FilterOptions.DESC_DATE:
         baseQuery.orderBy('start_date', 'desc')
         break
-      case 'closest':
+      case FilterOptions.ASC_DATE:
         baseQuery.orderBy('start_date', 'asc')
         break
-      case 'format':
-        baseQuery.orderBy('format', 'asc')
+      case FilterOptions.ASC_FORMAT:
+        baseQuery.orderByRaw('LOWER(format) ASC')
+        break
+      case FilterOptions.DESC_FORMAT:
+        baseQuery.orderByRaw('LOWER(format) DESC')
+        break
+      case FilterOptions.ASC_NAME:
+        baseQuery.orderByRaw('LOWER(name) ASC')
+        break
+      case FilterOptions.DESC_NAME:
+        baseQuery.orderByRaw('LOWER(name) DESC')
         break
     }
 

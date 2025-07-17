@@ -10,6 +10,8 @@ import Game from '#models/game'
 import GameCard from '~/components/GameCard.vue'
 import GameForm from '~/components/GameForm.vue'
 import { GameStatus } from '#types/game'
+import { FilterOptions } from '#enums/filter'
+import { OptionType } from '#types/option'
 
 const { t } = useI18n()
 const { user, isAdmin } = useAuth()
@@ -19,20 +21,21 @@ const page = ref(1)
 const loading = ref(false)
 const allLoaded = ref(false)
 
-const selectedFilter = ref('closest')
+const selectedFilter = ref(FilterOptions.ASC_NAME)
 const selectedLabel = ref(t('menu.ascendingName'))
 
 
 // Modal state
 const isModalOpen = ref(false)
 
-const options = [
-  { id: 'closest', name: t('menu.ascendingName') },
-  { id: 'furthest', name: t('menu.descendingName') },
-  { id: 'plateform', name: t('menu.platform') },
+const options : OptionType[] = [
+  { id: FilterOptions.ASC_NAME, name: t('menu.ascendingName') },
+  { id: FilterOptions.DESC_NAME, name: t('menu.descendingName') },
+  { id: FilterOptions.ASC_PLATFORM, name: t('menu.ascPlatform') },
+  { id: FilterOptions.DESC_PLATFORM, name: t('menu.descPlatform') },
 ]
 
-const selectOption = (option: { id: string; name: string }) => {
+const selectOption = (option: OptionType) => {
   selectedFilter.value = option.id
   selectedLabel.value = option.name
 }
