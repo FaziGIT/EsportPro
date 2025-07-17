@@ -73,6 +73,7 @@ const toggleFavorite = async () => {
   const success = await toggleFavoriteBase()
   if (success) {
     playHeartAnimation()
+    router.reload({ only: ['favoriteGames'] })
   }
 }
 
@@ -140,7 +141,6 @@ const deleteGame = async () => {
     setTimeout(() => {
       router.reload()
     }, 2000)
-
   } catch (error) {
     deleteError.value = error instanceof Error ? error.message : 'Une erreur est survenue'
   } finally {
