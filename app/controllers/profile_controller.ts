@@ -313,12 +313,13 @@ export default class ProfileController {
       return inertia.render('errors/404')
     }
 
-    // Vérifier si le profil est privé et si l'utilisateur actuel n'est pas admin ou le propriétaire du profil
+    // Vérifier si le profil est privé et si l'utilisateur n'est pas le propriétaire
     if (targetUser.isPrivate && (!currentUser || currentUser.id !== targetUser.id)) {
       return inertia.render('profile/index', {
         user: currentUser,
         targetUser: targetUser,
         isOwnProfile: currentUser?.id === targetUser.id,
+        isAdminViewing: currentUser?.role === UserRole.Admin,
         tournaments: [],
         favoriteGames: [],
         createdTournaments: [],
@@ -376,6 +377,7 @@ export default class ProfileController {
       user: currentUser,
       targetUser: targetUser,
       isOwnProfile: currentUser?.id === targetUser.id,
+      isAdminViewing: currentUser?.role === UserRole.Admin,
       tournaments: tournaments,
       favoriteGames: favoriteGames,
       createdTournaments: createdTournaments,
