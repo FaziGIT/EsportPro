@@ -175,35 +175,17 @@ export default class ProfileController {
   }
 
   public async updateName({ request, auth, response, i18n }: HttpContext) {
-    const user = auth.user
-    if (!user) {
-      return response.status(401).json({
-        error: true,
-        message: 'Unauthorized access',
-      })
-    }
+    // Valider les données avec le validateur personnalisé
+    const data = await request.validateUsing(userProfileValidator, {
+      messagesProvider: i18n.createMessagesProvider(),
+    })
 
-    try {
-      // Valider les données avec le validateur personnalisé
-      const data = await request.validateUsing(userProfileValidator, {
-        messagesProvider: i18n.createMessagesProvider(),
-      })
+    // Mettre à jour les données de l'utilisateur
+    auth.user!.firstName = data.firstName ?? null
+    auth.user!.lastName = data.lastName ?? null
+    await auth.user!.save()
 
-      // Mettre à jour les données de l'utilisateur
-      user.firstName = data.firstName
-      user.lastName = data.lastName
-      await user.save()
-
-      return response.json({
-        success: true,
-        message: 'Profile updated successfully',
-      })
-    } catch (error) {
-      return response.status(422).json({
-        error: true,
-        message: 'An error occurred while updating the profile',
-      })
-    }
+    return response.redirect().back()
   }
 
   public async validateTournament({ params, response, auth }: HttpContext) {

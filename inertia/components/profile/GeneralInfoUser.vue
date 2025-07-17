@@ -5,7 +5,6 @@ import User from '#models/user'
 import { defineProps, ref, watch } from 'vue'
 import { Link, router, useForm } from '@inertiajs/vue3'
 import UserInfoField from '~/components/UserInfoField.vue'
-import { getCsrfToken } from '~/utils'
 import { useI18n } from '../../../resources/js/composables/useI18n'
 import { TrashIcon } from '~/components/icons'
 import ConfirmationModal from '~/components/ConfirmationModal.vue'
@@ -18,7 +17,7 @@ const props = defineProps({
   },
 })
 
-const isPublic = ref(!props.user.isPrivate)
+const isPublic = ref(!props.user!.isPrivate)
 const showConfirm = ref(false)
 const pendingValue = ref(isPublic.value)
 const editing = ref(false)
@@ -30,12 +29,12 @@ const showDeleteAccountModal = ref(false)
 const isProcessingDelete = ref(false)
 
 const form = useForm({
-  firstName: props.user.firstName || '',
-  lastName: props.user.lastName || '',
+  firstName: props.user!.firstName || '',
+  lastName: props.user!.lastName || '',
 })
 
-const originalFirstName = ref(props.user.firstName)
-const originalLastName = ref(props.user.lastName)
+const originalFirstName = ref(props.user!.firstName)
+const originalLastName = ref(props.user!.lastName)
 
 const onSwitchClick = () => {
   pendingValue.value = !isPublic.value
@@ -86,23 +85,9 @@ const closeConfirmModal = () => {
 const updateData = async () => {
   if (form.processing) return
 
-  try {
-    const token = getCsrfToken()
-
-    const response = await fetch('/profile/update-data', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': token || '',
-      },
-      body: JSON.stringify({
-        firstName: form.firstName,
-        lastName: form.lastName,
-      }),
-    })
-
-    if (response.ok) {
+  await form.post('/profile/update-data', {
+    preserveScroll: true,
+    onSuccess: () => {
       originalFirstName.value = form.firstName
       originalLastName.value = form.lastName
       editing.value = false
@@ -111,27 +96,22 @@ const updateData = async () => {
       notificationMessage.value = t('profile.updateSuccess')
       showNotification.value = true
 
+      router.reload({ only: ['profile'] })
+
       setTimeout(() => {
         showNotification.value = false
       }, 3000)
-    } else {
+    },
+    onError: () => {
       notificationType.value = 'error'
       notificationMessage.value = t('profile.updateError')
       showNotification.value = true
 
       setTimeout(() => {
         showNotification.value = false
-      }, 5000)
-    }
-  } catch (error) {
-    notificationType.value = 'error'
-    notificationMessage.value = t('profile.updateError')
-    showNotification.value = true
-
-    setTimeout(() => {
-      showNotification.value = false
-    }, 5000)
-  }
+      }, 3000)
+    },
+  })
 }
 
 const switchEditMode = () => {
@@ -160,12 +140,11 @@ const closeDeleteModal = () => {
 const deleteAccount = () => {
   isProcessingDelete.value = true
   router.delete('/profile/delete-account', {
-    onSuccess: () => {
-    },
+    onSuccess: () => {},
     onError: () => {
       isProcessingDelete.value = false
       closeDeleteModal()
-    }
+    },
   })
 }
 
@@ -185,7 +164,7 @@ watch(
 
 <template>
   <div class="flex justify-between items-center pt-12 pb-4">
-    <p class="text-2xl font-semibold">{{ t('profile.generalInfo')}}</p>
+    <p class="text-2xl font-semibold">{{ t('profile.generalInfo') }}</p>
     <button @click="switchEditMode" class="hover:opacity-70 cursor-pointer">
       <EditSVG class="w-6 h-6" />
     </button>
@@ -230,8 +209,8 @@ watch(
       />
     </div>
     <div class="p-8 flex flex-col gap-3 w-full md:w-1/3">
-      <UserInfoField class="pb-2" :label="t('profile.username')" :value="user?.pseudo" />
-      <UserInfoField :label="t('profile.email')" :value="user?.email" />
+      <UserInfoField class="pb-2" :label="t('profile.username')" :value="user!.pseudo" />
+      <UserInfoField :label="t('profile.email')" :value="user!.email" />
     </div>
     <div class="p-8 flex flex-col gap-3 w-full md:w-1/3">
       <div class="flex flex-wrap">
@@ -251,7 +230,7 @@ watch(
           />
         </button>
       </div>
-        <Link
+      <Link
         href="/logout"
         method="post"
         :title="t('auth.logout')"

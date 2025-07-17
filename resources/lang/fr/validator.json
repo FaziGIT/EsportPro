@@ -23,7 +23,9 @@
       "gameId": "sélection du jeu",
       "isOnline": "mode en ligne",
       "image": "image",
-      "platform": "plateforme"
+      "platform": "plateforme",
+      "firstName": "prénom",
+      "lastName": "nom"
     },
     "messages": {
       "required": "Le champ {field} est requis.",
@@ -39,7 +41,8 @@
       "afterField": "Le champ {field} doit être postérieur à {otherField}.",
       "requiredWhen": "Le champ {field} est requis quand {otherField} est {value}.",
       "file.size": "Le {field} doit faire moins de {size}.",
-      "file.extnames": "Le {field} doit être un fichier image valide (jpg, jpeg, png)."
+      "file.extnames": "Le {field} doit être un fichier image valide (jpg, jpeg, png)",
+      "regex": "Le {field} doit contenir uniquement des lettres, des espaces et des tirets."
     }
   }
 }

@@ -15,15 +15,23 @@ const emit = defineEmits(['update:value'])
 const inputValue = ref(props.value || '')
 const valueRef = ref<HTMLElement | null>(null)
 
-watch(() => props.value, (newValue) => {
-  inputValue.value = newValue || ''
-})
-
-watch(() => props.isEditable, (newValue) => {
-  if (newValue) {
-    inputValue.value = props.value || ''
+watch(
+  () => props.value,
+  (newValue) => {
+    if (!props.isEditable) {
+      inputValue.value = newValue || ''
+    }
   }
-})
+)
+
+watch(
+  () => props.isEditable,
+  (newValue) => {
+    if (newValue) {
+      inputValue.value = props.value || ''
+    }
+  }
+)
 
 const updateValue = () => {
   emit('update:value', inputValue.value)
