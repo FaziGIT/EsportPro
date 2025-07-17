@@ -7,6 +7,7 @@ import { gameUpdateValidator, gameValidator } from '#validators/game'
 import User from '#models/user'
 import { UserRole } from '#enums/user_role'
 import TournamentService from '#services/tournament_service'
+import { FilterOptions } from '#enums/filter'
 
 export default class GamesController {
   public async index({ inertia }: HttpContext) {
@@ -16,19 +17,22 @@ export default class GamesController {
   public async api({ request }: HttpContext) {
     const page = request.input('page', 1)
     const limit = request.input('limit', 20)
-    const sort = request.input('sort', 'closest')
+    const sort = request.input('sort', FilterOptions.ASC_NAME)
 
     const baseQuery = getAllGamesWithoutImages().preload('favoriteOfUsers')
 
     switch (sort) {
-      case 'furthest':
-        baseQuery.orderBy('name', 'desc')
+      case FilterOptions.DESC_NAME:
+        baseQuery.orderByRaw('LOWER(name) DESC')
         break
-      case 'closest':
-        baseQuery.orderBy('name', 'asc')
+      case FilterOptions.ASC_NAME:
+        baseQuery.orderByRaw('LOWER(name) ASC')
         break
-      case 'platform':
-        baseQuery.orderBy('plateform', 'asc')
+      case FilterOptions.ASC_PLATFORM:
+        baseQuery.orderByRaw('LOWER(platform) ASC')
+        break
+      case FilterOptions.DESC_PLATFORM:
+        baseQuery.orderByRaw('LOWER(platform) DESC')
         break
     }
 

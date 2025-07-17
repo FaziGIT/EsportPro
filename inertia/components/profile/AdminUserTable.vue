@@ -7,18 +7,16 @@ import { useI18n } from '../../../resources/js/composables/useI18n'
 import { router } from '@inertiajs/vue3'
 import { getCsrfToken } from '~/utils'
 import ConfirmationModal from '~/components/ConfirmationModal.vue'
+import User from "#models/user";
 
 const { t } = useI18n()
 
-defineProps<{
-  users: {
-    id: string
-    firstName: string
-    lastName: string
-    email: string
-    role: string
-  }[]
-}>()
+defineProps({
+  users : {
+    type: Array as () => User[],
+    default: [],
+  }
+})
 
 const processingUser = ref('')
 const showConfirm = ref(false)

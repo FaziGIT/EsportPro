@@ -19,6 +19,10 @@ defineProps({
     type: Array as () => Game[],
     default: () => [],
   },
+  isOwnProfile: {
+    type: Boolean,
+    default: true,
+  }
 })
 
 const getTagsStatusText = (isValidated: boolean, isFinished: boolean) => {
@@ -44,7 +48,9 @@ const getTournamentStyleTags = (isValidated: boolean, isFinished: boolean) => {
 
 <template>
   <div class="mt-12">
-    <p class="text-2xl font-semibold mb-4">{{ t('profile.createdTournaments') }}</p>
+    <p class="text-2xl font-semibold mb-4">
+      {{ isOwnProfile ? t('profile.createdTournaments') : t('profile.userCreatedTournaments') }}
+    </p>
     <div class="py-8">
       <Carousel
         class="w-full"
@@ -65,6 +71,7 @@ const getTournamentStyleTags = (isValidated: boolean, isFinished: boolean) => {
         >
           <div class="relative w-full">
             <div
+              v-if="isOwnProfile"
               :class="[
                   'absolute top-2 left-2 z-20 px-2 py-1 rounded-md text-xs font-medium',
                   getTournamentStyleTags(tournament.isValidated, isTournamentFinished(tournament)),

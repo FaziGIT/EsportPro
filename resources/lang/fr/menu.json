@@ -1,8 +1,10 @@
 {
   "increasingDate": "Date croissante",
   "decreasingDate": "Date décroissante",
-  "format": "Format",
+  "ascendingFormat": "Format croissant",
+  "descendingFormat": "Format décroissant",
   "ascendingName": "Nom croissant",
   "descendingName": "Nom décroissant",
-  "platform": "Plateforme"
+  "ascendigPlatform": "Plateforme croissante",
+  "descendigPlatform": "Plateforme décroissante"
 }

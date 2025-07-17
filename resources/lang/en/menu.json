@@ -1,8 +1,10 @@
 {
   "increasingDate": "Increasing Date",
   "decreasingDate": "Decreasing Date",
-  "format": "Format",
+  "ascendingFormat": "Ascending Format",
+  "descendingFormat": "Descending Format",
   "ascendingName": "Ascending Name",
   "descendingName": "Descending Name",
-  "platform": "Platform"
+  "ascendigPlatform": "Ascending Platform",
+  "descendigPlatform": "Descending Platform"
 }

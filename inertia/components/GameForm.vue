@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, defineEmits, defineProps, ref, watch, onUnmounted } from 'vue'
-import { useForm } from '@inertiajs/vue3'
+import { router, useForm } from '@inertiajs/vue3'
 import { useI18n } from '../../resources/js/composables/useI18n'
 import { GamePlatform } from '#enums/game_platform'
 import { GameFormData, GameStatus } from '#types/game'
@@ -91,19 +91,17 @@ const submitForm = () => {
       Accept: 'application/json',
     },
     preserveScroll: true,
-    preserveState: true,
+    preserveState: false,
     onSuccess: () => {
       notificationType.value = 'success'
       notificationMessage.value =
         props.mode === GameStatus.EDIT ? t('game.updateSuccess') : t('game.creationSuccess')
       showNotification.value = true
 
-      setTimeout(() => {
-        emit('close')
-        if (props.mode === TournamentStatus.EDIT && props.needReload) {
-          window.location.reload()
-        }
-      }, 3000)
+      emit('close')
+      if (props.needReload) {
+        router.reload({ only :['games'] })
+      }
     },
     onError: (errors) => {
       form.imagePreview = imagePreview
@@ -120,7 +118,7 @@ const submitForm = () => {
 
       setTimeout(() => {
         showNotification.value = false
-      }, 5000)
+      }, 3000)
     },
     onFinish: () => {
       processingForm.value = false

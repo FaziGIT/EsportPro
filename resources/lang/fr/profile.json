@@ -1,5 +1,6 @@
 {
   "createdTournaments": "Mes tournois créés",
+  "userCreatedTournaments": "Tournois créés",
   "myStats": "Mes statistiques",
   "totalTournaments": "Total des tournois",
   "tournamentWinRate": "Taux de victoire",
@@ -15,6 +16,9 @@
   "updateStatusError": "Une erreur est survenue lors de la mise à jour du statut",
   "generalInfo": "Mes informations générales",
   "myProfile": "Mon profil",
+  "userProfile": "Profil de {user}",
+  "userTournaments": "Tournois rejoints",
+  "userFavoriteGames": "Jeux favoris",
   "firstName": "Prénom",
   "lastName": "Nom",
   "username": "Mon pseudo",
@@ -32,5 +36,7 @@
   "confirmDeleteAccount": "Confirmer la suppression du compte",
   "deleteAccountWarning": "Cette action supprimera définitivement votre compte ainsi que toutes vos données. Tous les tournois que vous avez créés seront également supprimés.",
   "deleteAccountIrreversible": "Cette action est irréversible.",
-  "confirmDelete": "Supprimer mon compte"
+  "confirmDelete": "Supprimer mon compte",
+  "privateProfile": "Profil privé",
+  "privateProfileMessage": "Cet utilisateur a choisi de rendre son profil privé. Les détails de son activité ne sont pas visibles."
 }

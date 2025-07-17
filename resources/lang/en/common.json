@@ -8,5 +8,9 @@
   "confirmDelete": "Confirm Delete",
   "unauthorized": "Unauthorized Access",
   "youAreBanned": "Your account has been banned.",
-  "ban": "Ban"
+  "ban": "Ban",
+  "unban": "Unban",
+  "bannedRole": "Banned",
+  "userRole": "User",
+  "adminRole": "Administrator"
 }

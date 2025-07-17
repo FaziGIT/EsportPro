@@ -11,6 +11,8 @@ import { ChevronDown } from '~/components/icons'
 import TournamentForm from '~/components/TournamentForm.vue'
 import Game from '#models/game'
 import { TournamentStatus } from '#types/tournament'
+import { FilterOptions } from '#enums/filter'
+import { OptionType } from '#types/option'
 
 const { t } = useI18n()
 const { user } = useAuth()
@@ -25,19 +27,22 @@ const page = ref(1)
 const loading = ref(false)
 const allLoaded = ref(false)
 
-const selectedFilter = ref('closest')
+const selectedFilter = ref(FilterOptions.ASC_DATE)
 const selectedLabel = ref(t('menu.increasingDate'))
 
 // Modal state
 const isModalOpen = ref(false)
 
-const options = [
-  { id: 'closest', name: t('menu.increasingDate') },
-  { id: 'furthest', name: t('menu.decreasingDate') },
-  { id: 'format', name: t('menu.format') },
+const options : OptionType[] = [
+  { id: FilterOptions.ASC_DATE, name: t('menu.increasingDate') },
+  { id: FilterOptions.DESC_DATE, name: t('menu.decreasingDate') },
+  { id: FilterOptions.ASC_PLATFORM, name: t('menu.ascendingFormat') },
+  { id: FilterOptions.DESC_PLATFORM, name: t('menu.descendingFormat') },
+  { id: FilterOptions.ASC_NAME, name: t('menu.ascendingName') },
+  { id: FilterOptions.DESC_NAME, name: t('menu.descendingName') },
 ]
 
-const selectOption = (option: { id: string; name: string }) => {
+const selectOption = (option: OptionType) => {
   selectedFilter.value = option.id
   selectedLabel.value = option.name
 }
