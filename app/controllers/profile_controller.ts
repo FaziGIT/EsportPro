@@ -32,7 +32,13 @@ export default class ProfileController {
     if (user) {
       // Charger les équipes de l'utilisateur
       await user.load('teams')
-      await user.load('favoriteGames')
+
+      // Récupération des jeux favoris de l'utilisateur
+      favoriteGames = await getAllGamesWithoutImages()
+        .preload('favoriteOfUsers')
+        .whereHas('favoriteOfUsers', (query) => {
+          query.where('user_id', user.id)
+        })
 
       // Utiliser le service pour récupérer les tournois
       const userTournaments = await TournamentService.getUserTournaments(user)
@@ -49,9 +55,6 @@ export default class ProfileController {
           message: 'An error occurred while calculating game statistics',
         })
       }
-
-      // Récupération des jeux favoris de l'utilisateur
-      favoriteGames = user.favoriteGames.slice().sort((a, b) => a.name.localeCompare(b.name))
 
       // Récupération des tournois en attente de validation pour les admins
       if (user.role === UserRole.Admin) {
