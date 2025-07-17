@@ -5,7 +5,7 @@ export const useChatStore = defineStore('chat', {
     isChatOpen: false,
     scrollPosition: 0,
     activeChat: 0,
-    refreshChannels: 0, // Counter to trigger channel refresh
+    refreshChannels: 0,
   }),
   actions: {
     toggleChat() {

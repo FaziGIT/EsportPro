@@ -23,7 +23,9 @@
       "gameId": "game selection",
       "isOnline": "online mode",
       "image": "image",
-      "platform": "platform"
+      "platform": "platform",
+      "firstName": "first name",
+      "lastName": "last name"
     },
     "messages": {
       "required": "The {field} field cannot be empty. Please fill it out.",
@@ -39,7 +41,8 @@
       "afterField": "The {field} must be after {otherField}.",
       "requiredWhen": "The {field} is required when {otherField} is {value}.",
       "file.size": "The {field} must be smaller than {size}.",
-      "file.extnames": "The {field} must be a valid image file (jpg, jpeg, png)."
+      "file.extnames": "The {field} must be a valid image file (jpg, jpeg, png)",
+      "regex": "The {field} must contain only letters, spaces, and hyphens."
     }
   }
 }

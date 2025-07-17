@@ -13,6 +13,7 @@ import { getAllGamesWithoutImages } from '../repository/game.js'
 import path from 'node:path'
 import { UserRole } from '#enums/user_role'
 import TournamentService from '#services/tournament_service'
+import ChatMessage from '#models/chat_message'
 
 // To get the imageNotFound path in the server
 const imageNotFound = path.join(process.cwd(), 'inertia', 'img', 'Image-not-found.png')
@@ -476,21 +477,21 @@ export default class TournamentsController {
         await channelTeam.related('team').associate(team)
         await channelTeam.save()
       }
+    }
 
-      // Create a channel for the tournament if don't exist, and add the tournament to the channel
-      let channelTournament = await Channel.query().where('tournament_id', params.id).first()
-      if (!channelTournament) {
-        channelTournament = await Channel.create({
-          name: tournament.name,
-          entityType: ChannelEntityType.Tournament,
-          tournamentId: tournament.id,
-          teamId: null,
-        })
+    // Create a channel for the tournament if don't exist, and add the tournament to the channel
+    let channelTournament = await Channel.query().where('tournament_id', params.id).first()
+    if (!channelTournament) {
+      channelTournament = await Channel.create({
+        name: tournament.name,
+        entityType: ChannelEntityType.Tournament,
+        tournamentId: tournament.id,
+        teamId: null,
+      })
 
-        // Add the tournament to the channel
-        await channelTournament.related('tournament').associate(tournament)
-        await channelTournament.save()
-      }
+      // Add the tournament to the channel
+      await channelTournament.related('tournament').associate(tournament)
+      await channelTournament.save()
     }
 
     // Return updated data for dynamic refresh
@@ -518,7 +519,10 @@ export default class TournamentsController {
     }
 
     const user = auth.user!
-    const tournament = await Tournament.query().where('id', params.id).firstOrFail()
+    const tournament = await Tournament.query()
+      .where('id', params.id)
+      .preload('channel')
+      .firstOrFail()
 
     // Check if tournament has started
     if (tournament.isStarted) {
@@ -532,6 +536,7 @@ export default class TournamentsController {
         query.where('user_id', user.id)
       })
       .preload('players')
+      .preload('channel')
       .first()
 
     if (!userTeam) {
@@ -543,6 +548,22 @@ export default class TournamentsController {
 
     // Reload players to get updated count
     await userTeam.load('players')
+
+    // Delete all the messsage of the user in the team channel
+    if (userTeam.channel) {
+      await ChatMessage.query()
+        .where('user_id', user.id)
+        .where('channel_id', userTeam.channel.id)
+        .delete()
+    }
+
+    // Delete all the messsage of the user in the tournament channel
+    if (tournament.channel) {
+      await ChatMessage.query()
+        .where('user_id', user.id)
+        .where('channel_id', tournament.channel.id)
+        .delete()
+    }
 
     // If team becomes empty, reset the team name to default
     if (userTeam.players.length === 0) {
@@ -556,6 +577,9 @@ export default class TournamentsController {
       const defaultName = `Team ${teamIndex + 1}`
 
       await userTeam.merge({ name: defaultName }).save()
+
+      // Delete the channel of the team
+      await userTeam.related('channel').query().delete()
     }
 
     // Return updated data for dynamic refresh
@@ -567,6 +591,11 @@ export default class TournamentsController {
       .preload('team2')
       .preload('winner')
       .orderBy('created_at', 'asc')
+
+    // If all the teams are empty, delete the channel of the tournament
+    if (updatedTeams.every((team) => team.players.length === 0)) {
+      await Channel.query().where('tournament_id', params.id).delete()
+    }
 
     // Return JSON response with updated data
     return response.json({

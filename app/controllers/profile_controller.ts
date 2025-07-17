@@ -12,7 +12,7 @@ import TournamentService from '../services/tournament_service.js'
 
 export default class ProfileController {
   public async index({ inertia, auth, response }: HttpContext) {
-    const user = auth.user
+    const user = auth.user!
     let tournaments: Tournament[] = []
     let favoriteGames: Game[] = []
     let pendingTournaments: Tournament[] = []
@@ -41,7 +41,9 @@ export default class ProfileController {
       if (tournamentIds.length > 0) {
         allUserTournaments = await getAllTournamentsWithoutImages()
           .whereIn('id', tournamentIds)
-          .preload('game')
+          .preload('game', (gameQuery) => {
+            gameQuery.select('id', 'name', 'platform')
+          })
           .preload('teams', (teamsQuery) => {
             teamsQuery.preload('players')
           })
@@ -120,14 +122,18 @@ export default class ProfileController {
       if (user.role === UserRole.Admin) {
         pendingTournaments = await getAllTournamentsWithoutImages()
           .where('isValidated', false)
-          .preload('game')
+          .preload('game', (gameQuery) => {
+            gameQuery.select('id', 'name', 'platform')
+          })
           .orderBy('created_at', 'asc')
       }
 
       // Récupération des tournois créés par l'utilisateur
       createdTournaments = await getAllTournamentsWithoutImages()
         .where('creatorId', user.id)
-        .preload('game')
+        .preload('game', (gameQuery) => {
+          gameQuery.select('id', 'name', 'platform')
+        })
         .orderBy('created_at', 'desc')
 
       return inertia.render('profile/index', {
@@ -169,35 +175,17 @@ export default class ProfileController {
   }
 
   public async updateName({ request, auth, response, i18n }: HttpContext) {
-    const user = auth.user
-    if (!user) {
-      return response.status(401).json({
-        error: true,
-        message: 'Unauthorized access',
-      })
-    }
+    // Valider les données avec le validateur personnalisé
+    const data = await request.validateUsing(userProfileValidator, {
+      messagesProvider: i18n.createMessagesProvider(),
+    })
 
-    try {
-      // Valider les données avec le validateur personnalisé
-      const data = await request.validateUsing(userProfileValidator, {
-        messagesProvider: i18n.createMessagesProvider(),
-      })
+    // Mettre à jour les données de l'utilisateur
+    auth.user!.firstName = data.firstName ?? null
+    auth.user!.lastName = data.lastName ?? null
+    await auth.user!.save()
 
-      // Mettre à jour les données de l'utilisateur
-      user.firstName = data.firstName
-      user.lastName = data.lastName
-      await user.save()
-
-      return response.json({
-        success: true,
-        message: 'Profile updated successfully',
-      })
-    } catch (error) {
-      return response.status(422).json({
-        error: true,
-        message: 'An error occurred while updating the profile',
-      })
-    }
+    return response.redirect().back()
   }
 
   public async validateTournament({ params, response, auth }: HttpContext) {

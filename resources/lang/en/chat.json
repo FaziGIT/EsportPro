@@ -6,7 +6,7 @@
   "joinTeamOrTournament": "Join a team or tournament to start chatting",
   "noChannelAvailable": "No channel available",
   "noMessages": "No messages",
-  "messageLoading": "Loading messages...",
+  "loadingMessages": "Loading messages...",
   "loadingOlderMessages": "Loading older messages...",
   "noChannelsAvailable": "No channels available"
 }
