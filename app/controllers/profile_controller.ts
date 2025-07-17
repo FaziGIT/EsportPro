@@ -1,6 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Tournament from '#models/tournament'
-import { DateTime, Duration } from 'luxon'
 import { UserRole } from '#enums/user_role'
 import Game from '#models/game'
 import User from '#models/user'
@@ -34,86 +33,21 @@ export default class ProfileController {
       await user.load('teams')
       await user.load('favoriteGames')
 
-      // Récupérer les IDs des tournois de l'utilisateur
-      const tournamentIds = user.teams.map((team) => team.tournamentId).filter((id) => id !== null)
+      // Utiliser le service pour récupérer les tournois
+      const userTournaments = await TournamentService.getUserTournaments(user)
+      tournaments = userTournaments.activeTournaments
+      finishedTournaments = userTournaments.finishedTournaments
+      const allUserTournaments = userTournaments.allTournaments
 
-      let allUserTournaments: Tournament[] = []
-      if (tournamentIds.length > 0) {
-        allUserTournaments = await getAllTournamentsWithoutImages()
-          .whereIn('id', tournamentIds)
-          .preload('game', (gameQuery) => {
-            gameQuery.select('id', 'name', 'platform')
-          })
-          .preload('teams', (teamsQuery) => {
-            teamsQuery.preload('players')
-          })
+      // Calculer les statistiques par jeu en utilisant le service
+      try {
+        gameStats = TournamentService.calculateGameStatistics(allUserTournaments, user.id)
+      } catch (error) {
+        return response.status(500).json({
+          error: true,
+          message: 'An error occurred while calculating game statistics',
+        })
       }
-
-      // Un tournoi est considéré comme terminé s'il a un winnerId ou si sa date de fin est passée
-      finishedTournaments = allUserTournaments.filter((tournament) => {
-        const isEnded = tournament.endDate < DateTime.now()
-        const hasWinner = !!tournament.winnerId
-        return isEnded || hasWinner
-      })
-
-      // Les tournois en cours sont ceux qui ne sont pas terminés
-      tournaments = allUserTournaments
-        .filter((tournament) => !finishedTournaments.includes(tournament))
-        .sort((a, b) => a.endDate.valueOf() - b.endDate.valueOf())
-
-      // Calcul des statistiques par jeu
-      const gameStatsMap: Record<string, GameStatistic> = {}
-
-      allUserTournaments.forEach((tournament) => {
-        if (!tournament.game) return
-
-        const gameId = tournament.game.id
-        if (!gameStatsMap[gameId]) {
-          gameStatsMap[gameId] = {
-            totalMatches: 0,
-            wins: 0,
-            totalMillis: 0,
-            gameName: tournament.game.name,
-          }
-        }
-
-        // Incrémenter le nombre de matchs
-        gameStatsMap[gameId].totalMatches++
-
-        // Vérifier si l'utilisateur a gagné ce tournoi
-        if (tournament.winnerId) {
-          const userTeam = tournament.teams?.find((team) =>
-            team.players?.some((player) => player?.id === user.id)
-          )
-
-          // Si l'équipe de l'utilisateur est l'équipe gagnante
-          if (userTeam && tournament.winnerId === userTeam.id) {
-            gameStatsMap[gameId].wins++
-          }
-        }
-
-        // Calculer le temps de jeu uniquement pour les tournois terminés
-        try {
-          const isEnded = tournament.endDate < DateTime.now()
-          const hasWinner = !!tournament.winnerId
-
-          if (isEnded && hasWinner && tournament.startDate && tournament.endDate) {
-            const durationInMillis = Duration.fromMillis(
-              tournament.endDate.valueOf() - tournament.startDate.valueOf()
-            )
-            if (durationInMillis.valueOf() > 0) {
-              gameStatsMap[gameId].totalMillis += durationInMillis.valueOf()
-            }
-          }
-        } catch (error) {
-          return response.status(500).json({
-            error: true,
-            message: 'An error occurred while calculating game statistics',
-          })
-        }
-      })
-
-      gameStats = gameStatsMap
 
       // Récupération des jeux favoris de l'utilisateur
       favoriteGames = user.favoriteGames.slice().sort((a, b) => a.name.localeCompare(b.name))
@@ -273,21 +207,6 @@ export default class ProfileController {
     }
   }
 
-  public async getAllUsers({ auth, inertia }: HttpContext) {
-    const user = auth.user
-
-    if (!user || user.role !== UserRole.Admin) {
-      return inertia.render('errors/403')
-    }
-
-    const users = await User.query().orderBy('created_at', 'desc')
-
-    return inertia.render('profile/users', {
-      user,
-      users,
-    })
-  }
-
   public async updateUserRole({ params, request, auth, response }: HttpContext) {
     const currentUser = auth.user
     if (!currentUser || currentUser.role !== UserRole.Admin) {
@@ -384,7 +303,7 @@ export default class ProfileController {
     }
   }
 
-  public async viewProfile({ params, inertia, auth }: HttpContext) {
+  public async viewProfile({ params, inertia, auth, response }: HttpContext) {
     const pseudo = params.pseudo
     const currentUser = auth.user
 
@@ -404,7 +323,7 @@ export default class ProfileController {
         favoriteGames: [],
         createdTournaments: [],
         finishedTournaments: [],
-        gameStats: [],
+        gameStats: {},
         games: [],
         pendingTournaments: [],
         allUsers: [],
@@ -425,82 +344,21 @@ export default class ProfileController {
     await targetUser.load('teams')
     await targetUser.load('favoriteGames')
 
-    // Récupérer les IDs des tournois de l'utilisateur cible
-    const tournamentIds = targetUser.teams
-      .map((team) => team.tournamentId)
-      .filter((id) => id !== null)
+    // Utiliser le service pour récupérer les tournois
+    const userTournaments = await TournamentService.getUserTournaments(targetUser)
+    tournaments = userTournaments.activeTournaments
+    finishedTournaments = userTournaments.finishedTournaments
+    const allUserTournaments = userTournaments.allTournaments
 
-    let allUserTournaments: Tournament[] = []
-    if (tournamentIds.length > 0) {
-      allUserTournaments = await getAllTournamentsWithoutImages()
-        .whereIn('id', tournamentIds)
-        .preload('game')
-        .preload('teams', (teamsQuery) => {
-          teamsQuery.preload('players')
-        })
+    // Calculer les statistiques par jeu en utilisant le service
+    try {
+      gameStats = TournamentService.calculateGameStatistics(allUserTournaments, targetUser.id)
+    } catch (error) {
+      return response.status(500).json({
+        error: true,
+        message: 'An error occurred while calculating game statistics',
+      })
     }
-
-    finishedTournaments = allUserTournaments.filter((tournament) => {
-      const isEnded = tournament.endDate < DateTime.now()
-      const hasWinner = !!tournament.winnerId
-      return isEnded || hasWinner
-    })
-
-    // Les tournois en cours sont ceux qui ne sont pas terminés
-    tournaments = allUserTournaments
-      .filter((tournament) => !finishedTournaments.includes(tournament))
-      .sort((a, b) => a.endDate.valueOf() - b.endDate.valueOf())
-
-    // Calcul des statistiques par jeu
-    const gameStatsMap: Record<string, GameStatistic> = {}
-
-    allUserTournaments.forEach((tournament) => {
-      if (!tournament.game) return
-
-      const gameId = tournament.game.id
-      if (!gameStatsMap[gameId]) {
-        gameStatsMap[gameId] = {
-          totalMatches: 0,
-          wins: 0,
-          totalMillis: 0,
-          gameName: tournament.game.name,
-        }
-      }
-
-      // Incrémenter le nombre de matchs
-      gameStatsMap[gameId].totalMatches++
-
-      // Vérifier si l'utilisateur a gagné ce tournoi
-      if (tournament.winnerId) {
-        const userTeam = tournament.teams?.find((team) =>
-          team.players?.some((player) => player?.id === targetUser.id)
-        )
-
-        // Si l'équipe de l'utilisateur est l'équipe gagnante
-        if (userTeam && tournament.winnerId === userTeam.id) {
-          gameStatsMap[gameId].wins++
-        }
-      }
-
-      // Calculer le temps de jeu uniquement pour les tournois terminés
-      try {
-        const isEnded = tournament.endDate < DateTime.now()
-        const hasWinner = !!tournament.winnerId
-
-        if (isEnded && hasWinner && tournament.startDate && tournament.endDate) {
-          const durationInMillis = Duration.fromMillis(
-            tournament.endDate.valueOf() - tournament.startDate.valueOf()
-          )
-          if (durationInMillis.valueOf() > 0) {
-            gameStatsMap[gameId].totalMillis += durationInMillis.valueOf()
-          }
-        }
-      } catch (error) {
-        console.error('Error calculating game statistics:', error)
-      }
-    })
-
-    gameStats = gameStatsMap
 
     // Récupération des jeux favoris de l'utilisateur
     favoriteGames = targetUser.favoriteGames.slice().sort((a, b) => a.name.localeCompare(b.name))
@@ -509,7 +367,9 @@ export default class ProfileController {
     createdTournaments = await getAllTournamentsWithoutImages()
       .where('creatorId', targetUser.id)
       .where('isValidated', true)
-      .preload('game')
+      .preload('game', (gameQuery) => {
+        gameQuery.select('id', 'name', 'platform')
+      })
       .orderBy('created_at', 'desc')
 
     return inertia.render('profile/index', {
