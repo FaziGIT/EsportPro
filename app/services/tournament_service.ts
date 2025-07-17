@@ -6,6 +6,8 @@ import User from '#models/user'
 import Tournament from '#models/tournament'
 import { DateTime, Duration } from 'luxon'
 import { GameStatistic } from '#types/game_statistics'
+import Team from '#models/team'
+import ChatMessage from '#models/chat_message'
 
 export default class TournamentService {
   static async deleteTournamentById(tournamentId: string, currentUser: User) {
@@ -124,5 +126,108 @@ export default class TournamentService {
     })
 
     return gameStatsMap
+  }
+
+  static async leaveTournament(tournamentId: string, user: User) {
+    try {
+      const tournament = await Tournament.query()
+        .where('id', tournamentId)
+        .preload('channel')
+        .firstOrFail()
+
+      // Vérifier si le tournoi a commencé
+      if (tournament.isStarted) {
+        return {
+          success: false,
+          error: 'Cannot leave tournament after it has started',
+        }
+      }
+
+      // Trouver l'équipe de l'utilisateur dans ce tournoi
+      const userTeam = await Team.query()
+        .where('tournament_id', tournamentId)
+        .whereHas('players', (query) => {
+          query.where('user_id', user.id)
+        })
+        .preload('players')
+        .preload('channel')
+        .first()
+
+      if (!userTeam) {
+        return {
+          success: false,
+          error: 'User is not registered for this tournament',
+        }
+      }
+
+      // Retirer l'utilisateur de l'équipe
+      await userTeam.related('players').detach([user.id])
+
+      // Recharger les joueurs pour obtenir le nombre mis à jour
+      await userTeam.load('players')
+
+      // Supprimer tous les messages de l'utilisateur dans le canal de l'équipe
+      if (userTeam.channel) {
+        await ChatMessage.query()
+          .where('user_id', user.id)
+          .where('channel_id', userTeam.channel.id)
+          .delete()
+      }
+
+      // Supprimer tous les messages de l'utilisateur dans le canal du tournoi
+      if (tournament.channel) {
+        await ChatMessage.query()
+          .where('user_id', user.id)
+          .where('channel_id', tournament.channel.id)
+          .delete()
+      }
+
+      // Si l'équipe devient vide, réinitialiser le nom de l'équipe par défaut
+      if (userTeam.players.length === 0) {
+        // Obtenir toutes les équipes de ce tournoi pour déterminer le numéro d'équipe
+        const allTeams = await Team.query()
+          .where('tournament_id', tournamentId)
+          .orderBy('created_at', 'asc')
+
+        // Trouver la position de cette équipe pour générer le nom par défaut
+        const teamIndex = allTeams.findIndex((team) => team.id === userTeam.id)
+        const defaultName = `Team ${teamIndex + 1}`
+
+        await userTeam.merge({ name: defaultName }).save()
+
+        // Supprimer le canal de l'équipe
+        await userTeam.related('channel').query().delete()
+      }
+
+      // Récupérer les données mises à jour
+      const updatedTeams = await Team.query()
+        .where('tournament_id', tournamentId)
+        .preload('players')
+
+      const matches = await Match.query()
+        .where('tournament_id', tournamentId)
+        .preload('team1')
+        .preload('team2')
+        .preload('winner')
+        .orderBy('created_at', 'asc')
+
+      // Si toutes les équipes sont vides, supprimer le canal du tournoi
+      if (updatedTeams.every((team) => team.players.length === 0)) {
+        await Channel.query().where('tournament_id', tournamentId).delete()
+      }
+
+      return {
+        success: true,
+        teams: updatedTeams,
+        matches: matches,
+        message: 'Successfully left the tournament',
+      }
+    } catch (error) {
+      console.error('Error leaving tournament:', error)
+      return {
+        success: false,
+        error: 'An error occurred while leaving the tournament',
+      }
+    }
   }
 }

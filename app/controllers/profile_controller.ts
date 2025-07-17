@@ -9,7 +9,6 @@ import { getAllGamesWithoutImages } from '../repository/game.js'
 import { userProfileValidator } from '#validators/user_validator'
 import TournamentService from '../services/tournament_service.js'
 import { DateTime } from 'luxon'
-import TournamentsController from './tournaments_controller.js'
 
 export default class ProfileController {
   public async index({ inertia, auth, response }: HttpContext) {
@@ -23,7 +22,7 @@ export default class ProfileController {
     let games: Game[] = []
     let allUsers: User[] = []
 
-    if (user?.role === UserRole.Admin) {
+    if (user!.role === UserRole.Admin) {
       allUsers = await User.query().orderBy('created_at', 'desc')
     }
 
@@ -259,26 +258,14 @@ export default class ProfileController {
         return !isFinished
       })
 
-      const tournamentsController = new TournamentsController()
-
+      // Faire quitter l'utilisateur de tous les tournois actifs où il n'est pas le créateur
       for (const team of activeTeams) {
         const tournament = team.tournament
         if (!tournament) continue
 
         // Si l'utilisateur n'est pas le créateur du tournoi, le faire quitter celui-ci
         if (tournament.creatorId !== user.id) {
-          // Créer un contexte simulé pour appeler la méthode leave
-          const leaveContext = {
-            params: { id: tournament.id },
-            auth: { user: user },
-            response: {
-              badRequest: () => null,
-              forbidden: () => null,
-              json: () => null,
-            },
-          } as unknown as HttpContext
-
-          await tournamentsController.leave(leaveContext)
+          await TournamentService.leaveTournament(tournament.id, user)
         }
       }
 
