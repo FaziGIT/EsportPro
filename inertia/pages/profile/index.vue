@@ -131,7 +131,7 @@ const isPrivateProfile = computed(() => {
     </div>
 
     <!-- Afficher GeneralInfoUser uniquement si c'est le profil de l'utilisateur courant -->
-    <GeneralInfoUser v-if="isOwnProfile" :user="user" :is-own-profile="isOwnProfile" />
+    <GeneralInfoUser v-if="isOwnProfile" :user="user" />
 
     <!-- N'afficher le contenu du profil que s'il n'est pas privé ou s'il appartient à l'utilisateur connecté -->
     <template v-if="!isPrivateProfile">

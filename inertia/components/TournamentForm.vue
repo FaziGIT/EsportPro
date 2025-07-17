@@ -7,7 +7,6 @@ import { FormatType } from '#enums/format_type'
 import { TournamentFormData, TournamentStatus } from '#types/tournament'
 import { DateTime } from 'luxon'
 import Tournament from '#models/tournament'
-import Button from '~/components/Button.vue'
 
 const { t } = useI18n()
 
@@ -159,6 +158,9 @@ const submitForm = () => {
       if (props.mode === TournamentStatus.EDIT && props.needReload) {
         window.location.reload()
       }
+      setTimeout(() => {
+        showNotification.value = false
+      }, 4000)
     },
     onError: () => {
       form.imagePreview = imagePreview
@@ -283,6 +285,26 @@ watch(
   (newValue) => {
     if (newValue) {
       document.addEventListener('keydown', handleEscapeKey)
+    } else {
+      document.removeEventListener('keydown', handleEscapeKey)
+    }
+  }
+)
+
+watch(
+  () => props.isOpen,
+  (newValue) => {
+    if (newValue) {
+      document.addEventListener('keydown', handleEscapeKey)
+
+      // reset form when opening in NEW mode
+      if (props.mode === TournamentStatus.NEW) {
+        const newData = initializeFormData()
+        Object.keys(newData).forEach((key) => {
+          ;(form as any)[key] = (newData as any)[key]
+        })
+        imageLoadError.value = false
+      }
     } else {
       document.removeEventListener('keydown', handleEscapeKey)
     }

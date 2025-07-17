@@ -156,7 +156,7 @@ const closeModal = () => {
     </div>
 
     <!-- Game Modal -->
-    <GameForm v-if="user" :isOpen="isModalOpen" :mode="GameStatus.NEW" @close="closeModal" />
+    <GameForm v-if="user" :isOpen="isModalOpen" :mode="GameStatus.NEW" :need-reload="true" @close="closeModal" />
   </Layout>
 </template>
 
