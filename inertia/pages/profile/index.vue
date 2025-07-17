@@ -16,6 +16,7 @@ import { useAuth } from '../../../resources/js/composables/useAuth'
 import { UserRole } from '#enums/user_role'
 import { getCsrfToken } from '~/utils'
 import ConfirmationModal from '~/components/ConfirmationModal.vue'
+import { router } from '@inertiajs/vue3'
 
 const { t } = useI18n()
 const { isAdmin } = useAuth()
@@ -125,78 +126,57 @@ const canUnbanUser = computed(() => {
          props.targetUser?.role === UserRole.Banned
 })
 
-// États pour les modals de ban/unban
-const showBanConfirm = ref(false)
-const showUnbanConfirm = ref(false)
+// États pour la modal de ban/unban
+const showModal = ref(false)
 const isProcessing = ref(false)
 const showNotification = ref(false)
 const notificationMessage = ref('')
 const notificationType = ref('success')
+const modalConfig = ref({
+  action: '',
+  title: '',
+  confirmMessage: '',
+  warningMessage: '',
+  confirmButtonText: '',
+  confirmButtonColor: ''
+})
 
-const openBanConfirmModal = () => {
-  if (!canBanUser.value || !props.targetUser) return
-  showBanConfirm.value = true
-}
+const openActionModal = (action: 'ban' | 'unban') => {
+  if (action === 'ban' && (!canBanUser.value || !props.targetUser)) return
+  if (action === 'unban' && (!canUnbanUser.value || !props.targetUser)) return
 
-const closeBanConfirmModal = () => {
-  showBanConfirm.value = false
-}
-
-const confirmBan = async () => {
-  if (!canBanUser.value || !props.targetUser) return
-
-  isProcessing.value = true
-
-  try {
-    const token = getCsrfToken()
-    const response = await fetch(`/profile/ban-user/${props.targetUser.id}/ban`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-CSRF-TOKEN': token || '',
-      },
-    })
-
-    if (response.ok) {
-      showNotification.value = true
-      notificationMessage.value = 'Utilisateur banni avec succès'
-      notificationType.value = 'success'
-      setTimeout(() => {
-        window.location.reload()
-      }, 1500)
-    } else {
-      showNotification.value = true
-      notificationMessage.value = 'Un administrateur ne peut être banni'
-      notificationType.value = 'error'
-    }
-  } catch (error) {
-    showNotification.value = true
-    notificationMessage.value = 'Une erreur est survenue lors du bannissement'
-    notificationType.value = 'error'
-  } finally {
-    isProcessing.value = false
-    closeBanConfirmModal()
+  modalConfig.value = {
+    action,
+    title: action === 'ban' ? 'Confirmer le bannissement' : 'Confirmer le débannissement',
+    confirmMessage: action === 'ban'
+      ? 'Êtes-vous sûr de vouloir bannir l\'utilisateur'
+      : 'Êtes-vous sûr de vouloir débannir l\'utilisateur',
+    warningMessage: action === 'ban'
+      ? 'Cette action empêchera l\'utilisateur d\'accéder à la plateforme.'
+      : 'Cette action permettra à l\'utilisateur d\'accéder à nouveau à la plateforme.',
+    confirmButtonText: action === 'ban' ? t('common.ban') : 'Débannir',
+    confirmButtonColor: action === 'ban' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
   }
+
+  showModal.value = true
 }
 
-const openUnbanConfirmModal = () => {
-  if (!canUnbanUser.value || !props.targetUser) return
-  showUnbanConfirm.value = true
+const closeModal = () => {
+  showModal.value = false
 }
 
-const closeUnbanConfirmModal = () => {
-  showUnbanConfirm.value = false
-}
-
-const confirmUnban = async () => {
-  if (!canUnbanUser.value || !props.targetUser) return
+const confirmAction = async () => {
+  if (!props.targetUser) return
 
   isProcessing.value = true
+  const action = modalConfig.value.action
+  const endpoint = action === 'ban'
+    ? `/profile/ban-user/${props.targetUser.id}/ban`
+    : `/profile/unban-user/${props.targetUser.id}/unban`
 
   try {
     const token = getCsrfToken()
-    const response = await fetch(`/profile/unban-user/${props.targetUser.id}/unban`, {
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -207,23 +187,30 @@ const confirmUnban = async () => {
 
     if (response.ok) {
       showNotification.value = true
-      notificationMessage.value = 'Utilisateur débanni avec succès'
+      notificationMessage.value = action === 'ban'
+        ? 'Utilisateur banni avec succès'
+        : 'Utilisateur débanni avec succès'
       notificationType.value = 'success'
+      router.reload({only : ['gameStats', 'tournaments', 'createdTournaments', 'favoriteGames', 'targetUser']})
       setTimeout(() => {
-        window.location.reload()
-      }, 1500)
+        showNotification.value = false
+      }, 2000)
     } else {
       showNotification.value = true
-      notificationMessage.value = 'Une erreur est survenue lors du débannissement'
+      notificationMessage.value = action === 'ban'
+        ? 'Un administrateur ne peut être banni'
+        : 'Une erreur est survenue lors du débannissement'
       notificationType.value = 'error'
     }
   } catch (error) {
     showNotification.value = true
-    notificationMessage.value = 'Une erreur est survenue lors du débannissement'
+    notificationMessage.value = action === 'ban'
+      ? 'Une erreur est survenue lors du bannissement'
+      : 'Une erreur est survenue lors du débannissement'
     notificationType.value = 'error'
   } finally {
     isProcessing.value = false
-    closeUnbanConfirmModal()
+    closeModal()
   }
 }
 </script>
@@ -248,17 +235,17 @@ const confirmUnban = async () => {
       <div v-if="!isOwnProfile && isAdminViewing" class="flex space-x-2">
         <button
           v-if="canBanUser"
-          @click="openBanConfirmModal"
-          class="px-3 py-1 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors"
+          @click="openActionModal('ban')"
+          class="px-3 py-1 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors cursor-pointer"
         >
-          {{ t('admin.users.ban') }}
+          {{ t('common.ban') }}
         </button>
         <button
           v-if="canUnbanUser"
-          @click="openUnbanConfirmModal"
-          class="px-3 py-1 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors"
+          @click="openActionModal('unban')"
+          class="px-3 py-1 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors cursor-pointer"
         >
-          {{ t('admin.users.unban') }}
+          {{ t('common.unban') }}
         </button>
       </div>
     </div>
@@ -341,31 +328,17 @@ const confirmUnban = async () => {
     </template>
   </Layout>
 
-  <!-- Modal de confirmation pour le bannissement -->
+  <!-- Modal de confirmation unifiée pour le bannissement et le débannissement -->
   <ConfirmationModal
-    :isOpen="showBanConfirm"
-    :title="'Confirmer le bannissement'"
-    :confirmMessage="'Êtes-vous sûr de vouloir bannir l\'utilisateur'"
+    :isOpen="showModal"
+    :title="modalConfig.title"
+    :confirmMessage="modalConfig.confirmMessage"
     :itemName="displayedUser?.pseudo || ''"
-    :warningMessage="'Cette action empêchera l\'utilisateur d\'accéder à la plateforme.'"
+    :warningMessage="modalConfig.warningMessage"
     :isProcessing="isProcessing"
-    :confirmButtonText="t('common.ban')"
-    :confirmButtonColor="'bg-red-600 hover:bg-red-700'"
-    @close="closeBanConfirmModal"
-    @confirm="confirmBan"
-  />
-
-  <!-- Modal de confirmation pour le débannissement -->
-  <ConfirmationModal
-    :isOpen="showUnbanConfirm"
-    :title="'Confirmer le débannissement'"
-    :confirmMessage="'Êtes-vous sûr de vouloir débannir l\'utilisateur'"
-    :itemName="displayedUser?.pseudo || ''"
-    :warningMessage="'Cette action permettra à l\'utilisateur d\'accéder à nouveau à la plateforme.'"
-    :isProcessing="isProcessing"
-    :confirmButtonText="'Débannir'"
-    :confirmButtonColor="'bg-green-600 hover:bg-green-700'"
-    @close="closeUnbanConfirmModal"
-    @confirm="confirmUnban"
+    :confirmButtonText="modalConfig.confirmButtonText"
+    :confirmButtonColor="modalConfig.confirmButtonColor"
+    @close="closeModal"
+    @confirm="confirmAction"
   />
 </template>

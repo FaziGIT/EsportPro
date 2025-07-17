@@ -9,6 +9,7 @@
   "unauthorized": "Accès interdit",
   "youAreBanned": "Votre compte a été banni.",
   "ban": "Bannir",
+  "unban": "Débannir",
   "bannedRole": "Banni",
   "userRole": "Utilisateur",
   "adminRole": "Administrateur"
