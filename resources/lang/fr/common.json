@@ -8,5 +8,8 @@
   "confirmDelete": "Confirmer la suppression",
   "unauthorized": "Accès interdit",
   "youAreBanned": "Votre compte a été banni.",
-  "ban": "Bannir"
+  "ban": "Bannir",
+  "bannedRole": "Banni",
+  "userRole": "Utilisateur",
+  "adminRole": "Administrateur"
 }

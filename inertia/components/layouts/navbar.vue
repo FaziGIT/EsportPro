@@ -18,6 +18,9 @@ interface SearchResult {
   pseudo?: string
 }
 
+const { t } = useI18n()
+const { user } = useAuth()
+
 const isMenuOpen = ref(false)
 const searchQuery = ref('')
 const searchResults = ref<SearchResult[]>([])
@@ -88,7 +91,7 @@ async function performSearch(query: string) {
         results.push({
           ...user,
           type: 'user',
-          url: `/profile/${user.pseudo}`,
+          url: `/profile/user/${user.pseudo}`,
         })
       })
     }
@@ -214,8 +217,6 @@ onUnmounted(() => {
   document.removeEventListener('keydown', handleGlobalKeyDown)
 })
 
-const { t } = useI18n()
-const { user } = useAuth()
 </script>
 
 <template>
@@ -394,7 +395,7 @@ const { user } = useAuth()
       </div>
 
       <!-- User Profile -->
-      <div v-else class="flex items-center justify-end w-1/3">
+      <div v-if="user" class="flex items-center justify-end w-1/3">
         <Link href="/profile" class="flex items-center cursor-pointer px-4">
           <Profile />
           <span class="text-[#5C4741] font-semibold pl-1">{{ user.pseudo }}</span>
@@ -537,7 +538,7 @@ const { user } = useAuth()
             />
           </div>
           <!-- User Profile -->
-          <div v-else class="py-2">
+          <div v-if="user" class="py-2">
             <Button
               redirection-path="/profile"
               color="#D6B7B0"

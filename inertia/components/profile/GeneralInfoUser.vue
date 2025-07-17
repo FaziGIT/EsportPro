@@ -45,7 +45,7 @@ const confirmChange = async () => {
   isProcessing.value = true
 
   try {
-    await router.post(
+    router.post(
       '/profile/privacy',
       {
         isPrivate: !pendingValue.value,

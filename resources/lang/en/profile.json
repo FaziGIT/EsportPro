@@ -1,5 +1,6 @@
 {
   "createdTournaments": "My created tournaments",
+  "userCreatedTournaments": "Created tournaments",
   "myStats": "My statistics",
   "totalTournaments": "Total tournaments",
   "tournamentWinRate": "Win rate",
@@ -15,6 +16,9 @@
   "updateStatusError": "An error occurred while updating the status",
   "generalInfo": "My general information",
   "myProfile": "My profile",
+  "userProfile": "{user}'s Profile",
+  "userTournaments": "Joined tournaments",
+  "userFavoriteGames": "Favorite games",
   "firstName": "First name",
   "lastName": "Last name",
   "username": "My username",
@@ -32,5 +36,7 @@
   "confirmDeleteAccount": "Confirm account deletion",
   "deleteAccountWarning": "This action will permanently delete your account and all your data. All tournaments you have created will also be deleted.",
   "deleteAccountIrreversible": "This action is irreversible.",
-  "confirmDelete": "Delete my account"
+  "confirmDelete": "Delete my account",
+  "privateProfile": "Private Profile",
+  "privateProfileMessage": "This user has chosen to make their profile private. Details of their activity are not visible."
 }
