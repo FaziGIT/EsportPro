@@ -8,6 +8,8 @@ import { getAllTournamentsWithoutImages } from '../repository/tournament.js'
 import { getAllGamesWithoutImages } from '../repository/game.js'
 import { userProfileValidator } from '#validators/user_validator'
 import TournamentService from '../services/tournament_service.js'
+import { DateTime } from 'luxon'
+import TournamentsController from './tournaments_controller.js'
 
 export default class ProfileController {
   public async index({ inertia, auth, response }: HttpContext) {
@@ -232,20 +234,81 @@ export default class ProfileController {
       return response.unauthorized({ error: 'Unauthorized access' })
     }
 
-    const user = await User.findOrFail(params.id)
+    try {
+      const user = await User.findOrFail(params.id)
 
-    // Vérifier si l'utilisateur à bannir est un administrateur
-    if (user.role === UserRole.Admin) {
-      return response.forbidden({
+      // Vérifier si l'utilisateur à bannir est un administrateur
+      if (user.role === UserRole.Admin) {
+        return response.forbidden({
+          error: true,
+          message: 'Les administrateurs ne peuvent pas être bannis',
+        })
+      }
+
+      await user.load('teams', (teamsQuery) => {
+        teamsQuery.preload('tournament')
+      })
+
+      const currentDate = DateTime.now()
+      const activeTeams = user.teams.filter((team) => {
+        const tournament = team.tournament
+        if (!tournament) return false
+
+        const isFinished =
+          tournament.winnerId || (tournament.endDate && tournament.endDate < currentDate)
+        return !isFinished
+      })
+
+      const tournamentsController = new TournamentsController()
+
+      for (const team of activeTeams) {
+        const tournament = team.tournament
+        if (!tournament) continue
+
+        // Si l'utilisateur n'est pas le créateur du tournoi, le faire quitter celui-ci
+        if (tournament.creatorId !== user.id) {
+          // Créer un contexte simulé pour appeler la méthode leave
+          const leaveContext = {
+            params: { id: tournament.id },
+            auth: { user: user },
+            response: {
+              badRequest: () => null,
+              forbidden: () => null,
+              json: () => null,
+            },
+          } as unknown as HttpContext
+
+          await tournamentsController.leave(leaveContext)
+        }
+      }
+
+      // Suppression les tournois non terminés créés par l'utilisateur
+      const createdTournaments = await getAllTournamentsWithoutImages()
+        .where('creatorId', user.id)
+        .preload('teams', (teamsQuery) => {
+          teamsQuery.preload('players')
+        })
+        .preload('channel')
+
+      for (const tournament of createdTournaments) {
+        const isFinished =
+          tournament.winnerId || (tournament.endDate && tournament.endDate < currentDate)
+
+        if (!isFinished) {
+          await TournamentService.deleteTournamentById(tournament.id, currentUser)
+        }
+      }
+
+      user.role = UserRole.Banned
+      await user.save()
+
+      return response.ok({ success: true, message: 'User banned successfully' })
+    } catch (error) {
+      return response.internalServerError({
         error: true,
-        message: 'Les administrateurs ne peuvent pas être bannis',
+        message: 'An error occurred while banning the user',
       })
     }
-
-    user.role = UserRole.Banned
-    await user.save()
-
-    return response.ok({ success: true, message: 'User banned successfully' })
   }
 
   public async unbanUser({ params, auth, response }: HttpContext) {
