@@ -16,11 +16,16 @@ import User from '#models/user'
 import { TrashIcon } from '~/components/icons'
 import ConfirmationModal from '~/components/ConfirmationModal.vue'
 import { TournamentStatus } from '#types/tournament'
+import Match from '#models/match'
+import Tournament from '#models/tournament'
 
 const { t } = useI18n()
 const { user, isAdmin } = useAuth()
 const { tournament, teams, matches } = useTournamentData()
 const chatStore = useChatStore()
+
+// Need to Omit some fields (like relation fields) to avoid type errors
+type UserType = Omit<User, 'gameInfos' | 'teams' | 'messages' | 'favoriteGames'>
 
 const props = defineProps<{
   games: Array<{
@@ -745,12 +750,11 @@ const winningTeam = computed(() => {
 
           <!-- Bracket section -->
           <div class="w-full overflow-hidden">
-            <!-- I dont know how to fix this error, he dont want to use the Adonis model types -->
             <TournamentBracket
-              :teams="teams as any"
-              :matches="matches as any"
-              :tournament="tournament as any"
-              :user="user as any"
+              :teams="teams as Team[]"
+              :matches="matches as Match[]"
+              :tournament="tournament as Tournament"
+              :user="user as User"
               :isAdmin="isAdmin"
               @matchUpdated="handleMatchUpdated"
             />
@@ -835,7 +839,7 @@ const winningTeam = computed(() => {
       v-if="canEdit"
       :isOpen="isEditModalOpen"
       :mode="TournamentStatus.EDIT"
-      :tournament="tournament as any"
+      :tournament="tournament as Tournament"
       :games="props.games"
       :need-reload="true"
       @close="closeEditModal"
