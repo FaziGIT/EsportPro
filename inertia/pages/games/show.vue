@@ -70,7 +70,7 @@ const goToTournament = (tournamentId: string) => {
 
 const isTournamentFinished = (tournament: Tournament): boolean => {
   try {
-    const endDate = DateTime.fromISO(String(tournament.endDate))
+    const endDate = DateTime.fromISO(String(tournament.endDate), { zone: 'utc' })
     return DateTime.now() > endDate
   } catch (error) {
     return false
@@ -79,7 +79,7 @@ const isTournamentFinished = (tournament: Tournament): boolean => {
 
 const isTournamentStarted = (tournament: Tournament): boolean => {
   try {
-    const startDate = DateTime.fromISO(String(tournament.startDate))
+    const startDate = DateTime.fromISO(String(tournament.startDate), { zone: 'utc' })
     return DateTime.now() >= startDate && !isTournamentFinished(tournament)
   } catch (error) {
     return false
@@ -88,7 +88,7 @@ const isTournamentStarted = (tournament: Tournament): boolean => {
 
 const formatDate = (date: DateTime | string | Date): string => {
   try {
-    const dateTime = DateTime.fromISO(String(date))
+    const dateTime = DateTime.fromISO(String(date), { zone: 'utc' })
     return dateTime.toFormat('dd/MM/yyyy HH:mm')
   } catch (error) {
     return 'N/A'

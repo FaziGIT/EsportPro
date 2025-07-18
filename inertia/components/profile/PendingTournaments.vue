@@ -185,7 +185,7 @@ function cancelRefuse() {
                 {{ tournament.city ?? t('tournament.online') }}{{ tournament.country ? ', ' + tournament.country : '' }}
               </td>
               <td class="px-4 py-3 text-sm text-gray-700 truncate">
-                {{ DateTime.fromISO(tournament.startDate.toString()).toFormat('dd/MM/yyyy') }} - {{ DateTime.fromISO(tournament.endDate.toString()).toFormat('dd/MM/yyyy') }}
+                {{ DateTime.fromISO(tournament.startDate.toString(), { zone: 'utc' }).toFormat('dd/MM/yyyy') }} - {{ DateTime.fromISO(tournament.endDate.toString(), { zone: 'utc' }).toFormat('dd/MM/yyyy') }}
               </td>
               <td class="px-4 py-3 text-sm">
                 <div class="flex flex-row gap-1">

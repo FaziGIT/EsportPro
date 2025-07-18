@@ -53,7 +53,7 @@ const initializeFormData = (): TournamentFormData => {
       if (!date) return null
 
       try {
-        const luxonDate = DateTime.fromISO(date)
+        const luxonDate = DateTime.fromISO(date, { zone: 'utc' })
 
         return luxonDate.toFormat("yyyy-MM-dd'T'HH:mm")
       } catch (error) {
