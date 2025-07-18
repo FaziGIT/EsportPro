@@ -12,6 +12,7 @@ import GameForm from '~/components/GameForm.vue'
 import { GameStatus } from '#types/game'
 import { FilterOptions } from '#enums/filter'
 import { OptionType } from '#types/option'
+import AppHead from '~/components/layouts/AppHead.vue'
 
 const { t } = useI18n()
 const { user, isAdmin } = useAuth()
@@ -90,6 +91,11 @@ const closeModal = () => {
 </script>
 
 <template>
+  <AppHead
+    :title="t('game.ourGames')"
+    :description="t('game.seeAllGames')"
+  />
+
   <Layout>
     <div class="text-2xl sm:text-3xl lg:text-4xl font-semibold text-center py-6">{{ t('game.ourGames') }}</div>
 

@@ -38,5 +38,6 @@
   "deleteAccountIrreversible": "This action is irreversible.",
   "confirmDelete": "Delete my account",
   "privateProfile": "Private Profile",
-  "privateProfileMessage": "This user has chosen to make their profile private. Details of their activity are not visible."
+  "privateProfileMessage": "This user has chosen to make their profile private. Details of their activity are not visible.",
+  "metaDescriptionUserProfile": "Discover {user}'s profile on EsportPro."
 }

@@ -101,5 +101,7 @@
   "confirmRefuse": "Confirmer le refus",
   "confirmRefuseMessage": "Vous etes-vous sûr de vouloir refuser ce tournoi ? Cette action est irréversible.",
   "noCurrentTournaments": "Aucun tournoi en cours",
-  "confirmDeleteMessage": "Êtes-vous sûr de vouloir supprimer ce tournoi ?"
+  "confirmDeleteMessage": "Êtes-vous sûr de vouloir supprimer ce tournoi ?",
+  "metaDescription": "Découvrez ou participez au tournoi : {tournamentName} {nbParticipant} joueur(s)",
+  "seeALlTournaments": "Voir tout nos tournois disponibles sur la plateforme."
 }

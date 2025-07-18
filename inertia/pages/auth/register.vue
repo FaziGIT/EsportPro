@@ -3,6 +3,7 @@ import Layout from '~/components/layouts/layout.vue'
 import background from '~/img/auth/bg.png'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import { useI18n } from '../../../resources/js/composables/useI18n'
+import AppHead from '~/components/layouts/AppHead.vue'
 
 const form = useForm({
   pseudo: null,
@@ -14,7 +15,10 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <Head :title="t('auth.register')" />
+  <AppHead
+    :title="t('auth.register')"
+    :description="t('auth.metaDescriptionRegister')"
+  />
 
   <Layout>
     <div class="flex mt-16 flex-col items-center">
