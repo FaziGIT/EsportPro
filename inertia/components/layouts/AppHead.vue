@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 
-defineProps({
+const props = defineProps({
   title: {
     type: String,
   },
@@ -20,6 +20,10 @@ const currentUrl = ref('')
 onMounted(() => {
   currentUrl.value = window.location.href
 })
+
+const imageToUse = computed(() => {
+  return props.image || 'https://esportpro.cloud/og/home.png'
+})
 </script>
 
 <template>
@@ -31,13 +35,13 @@ onMounted(() => {
     <meta property="og:type" content="website" />
     <meta property="og:title" :content="title" />
     <meta property="og:description" :content="description" />
-    <meta property="og:image" v-if="image" :content="image" />
+    <meta property="og:image" :content="imageToUse" />
     <meta property="og:url" v-if="currentUrl" :content="currentUrl" />
 
     <!-- Twitter Card -->
-    <meta name="twitter:card" :content="image ? 'summary_large_image' : 'summary'" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" :content="title" />
     <meta name="twitter:description" :content="description" />
-    <meta name="twitter:image" v-if="image" :content="image" />
+    <meta name="twitter:image" :content="imageToUse" />
   </Head>
 </template>
