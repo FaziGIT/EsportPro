@@ -20,8 +20,8 @@ const ChatController = () => import('#controllers/chat_controller')
 const TournamentsController = () => import('#controllers/tournaments_controller')
 const GamesController = () => import('#controllers/games_controller')
 const ProfileController = () => import('#controllers/profile_controller')
-
 const ErrorsController = () => import('#controllers/errors_controller')
+const ResetPasswordsController = () => import('#controllers/reset_passwords_controller')
 
 const SitemapController = () => import('#controllers/sitemap_controller')
 
@@ -37,6 +37,12 @@ router.post('/login', [LoginController, 'store'])
 router.get('/register', [RegisterController, 'index'])
 router.post('/register', [RegisterController, 'store'])
 router.post('/logout', [LogoutController]).use(middleware.auth())
+
+// Password reset routes
+router.get('/forgot-password', [ResetPasswordsController, 'showForgotPasswordForm'])
+router.post('/forgot-password', [ResetPasswordsController, 'sendResetPasswordEmail'])
+router.get('/reset-password/:token', [ResetPasswordsController, 'showResetForm'])
+router.post('/reset-password/:token', [ResetPasswordsController, 'resetPassword'])
 
 // Chat routes (authenticated)
 router

@@ -2,7 +2,7 @@
 import EditSVG from '~/components/icons/EditSVG.vue'
 import Button from '~/components/Button.vue'
 import User from '#models/user'
-import { defineProps, ref, watch } from 'vue'
+import { defineProps, ref } from 'vue'
 import { Link, router, useForm } from '@inertiajs/vue3'
 import UserInfoField from '~/components/UserInfoField.vue'
 import { useI18n } from '../../../resources/js/composables/useI18n'
@@ -102,15 +102,6 @@ const updateData = async () => {
         showNotification.value = false
       }, 3000)
     },
-    onError: () => {
-      notificationType.value = 'error'
-      notificationMessage.value = t('profile.updateError')
-      showNotification.value = true
-
-      setTimeout(() => {
-        showNotification.value = false
-      }, 3000)
-    },
   })
 }
 
@@ -147,19 +138,6 @@ const deleteAccount = () => {
     },
   })
 }
-
-watch(
-  () => props.user,
-  (newUser) => {
-    if (newUser) {
-      form.firstName = newUser.firstName || ''
-      form.lastName = newUser.lastName || ''
-      originalFirstName.value = newUser.firstName
-      originalLastName.value = newUser.lastName
-    }
-  },
-  { deep: true }
-)
 </script>
 
 <template>
@@ -194,14 +172,14 @@ watch(
     <div class="p-8 flex flex-col gap-3 w-full md:w-1/3">
       <UserInfoField
         class="pb-2"
-        :label="t('profile.lastName')"
+        :label="t('profile.firstName')"
         :value="form.firstName"
         :isEditable="editing"
         :error="form.errors.firstName"
         @update:value="form.firstName = $event"
       />
       <UserInfoField
-        :label="t('profile.firstName')"
+        :label="t('profile.lastName')"
         :value="form.lastName"
         :isEditable="editing"
         :error="form.errors.lastName"
