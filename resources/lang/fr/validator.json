@@ -42,7 +42,11 @@
       "requiredWhen": "Le champ {field} est requis quand {otherField} est {value}.",
       "file.size": "Le {field} doit faire moins de {size}.",
       "file.extnames": "Le {field} doit être un fichier image valide (jpg, jpeg, png)",
-      "regex": "Le {field} doit contenir uniquement des lettres, des espaces et des tirets."
+      "lastName.regex": "Le {field} doit contenir uniquement des lettres, des espaces et des tirets.",
+      "firstName.regex": "Le {field} doit contenir uniquement des lettres, des espaces et des tirets.",
+      "password.regex": "Le {field} doit contenir au moins une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial.",
+      "password_confirmation.regex": "Le {field} doit contenir au moins une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial.",
+      "sameAs": "Le champ {field} doit correspondre à {otherField}."
     }
   }
 }

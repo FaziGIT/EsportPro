@@ -43,13 +43,24 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_DATABASE=${DB_DATABASE}
       - SESSION_DRIVER=${SESSION_DRIVER}
+      # Redis configuration for BullMQ
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      # SMTP configuration for email sending
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
     networks:
       - esportpro-network
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     healthcheck:
-      test: ["CMD", "node", "ace", "list:routes"]
+      test: [ "CMD", "node", "ace", "list:routes" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -68,7 +79,7 @@ services:
     networks:
       - esportpro-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_DATABASE}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_DATABASE}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -109,7 +120,7 @@ services:
     networks:
       - esportpro-network
     healthcheck:
-      test: ["CMD", "sh", "-c", "pgrep mariadbd"]
+      test: [ "CMD", "sh", "-c", "pgrep mariadbd" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -136,7 +147,7 @@ services:
       - db
       - redis
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/_health/"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/_health/" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -147,7 +158,7 @@ services:
     image: glitchtip/glitchtip:latest
     container_name: esportpro-glitchtip-worker
     restart: unless-stopped
-    command: ["./bin/run-celery-with-beat.sh"]
+    command: [ "./bin/run-celery-with-beat.sh" ]
     environment:
       - DATABASE_URL=postgres://${GLITCHTIP_DB_USER:-glitchtip}:${GLITCHTIP_DB_PASSWORD:-glitchtip_password}@db:5432/${GLITCHTIP_DB_NAME:-glitchtip}
       - REDIS_URL=redis://redis:6379/0
@@ -171,7 +182,7 @@ services:
     networks:
       - esportpro-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -196,4 +207,4 @@ volumes:
 
 networks:
   esportpro-network:
-    driver: bridge 
+    driver: bridge

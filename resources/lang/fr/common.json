@@ -12,5 +12,6 @@
   "unban": "Débannir",
   "bannedRole": "Banni",
   "userRole": "Utilisateur",
-  "adminRole": "Administrateur"
+  "adminRole": "Administrateur",
+  "loading": "Chargement"
 }
