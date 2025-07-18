@@ -18,9 +18,7 @@ const valueRef = ref<HTMLElement | null>(null)
 watch(
   () => props.value,
   (newValue) => {
-    if (!props.isEditable) {
-      inputValue.value = newValue || ''
-    }
+    inputValue.value = newValue || ''
   }
 )
 
