@@ -90,9 +90,11 @@ router
     router.post('/profile/ban-user/:id/ban', [ProfileController, 'banUser'])
     router.post('/profile/unban-user/:id/unban', [ProfileController, 'unbanUser'])
     router.delete('/profile/delete-account', [ProfileController, 'deleteAccount'])
-    router.get('/profile/user/:pseudo', [ProfileController, 'viewProfile'])
+    // router.get('/profile/user/:pseudo', [ProfileController, 'viewProfile'])
   })
   .use(middleware.auth())
+
+router.get('/profile/user/:pseudo', [ProfileController, 'viewProfile'])
 
 // Error routes
 router.get('/unauthorized', [ErrorsController, 'unauthorized'])
