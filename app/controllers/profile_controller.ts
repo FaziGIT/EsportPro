@@ -9,6 +9,7 @@ import { getAllGamesWithoutImages } from '../repository/game.js'
 import { userProfileValidator } from '#validators/user_validator'
 import TournamentService from '../services/tournament_service.js'
 import { DateTime } from 'luxon'
+import mail from '@adonisjs/mail/services/main'
 
 export default class ProfileController {
   public async index({ inertia, auth, response }: HttpContext) {
@@ -345,6 +346,69 @@ export default class ProfileController {
       session.forget('auth_user')
 
       await user.delete()
+
+      await mail.sendLater((message) => {
+        message
+          .to(user.email)
+          .from('mailing.mathis@gmail.com')
+          .subject('Account Deletion - EsportPro').html(`
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa;">
+              <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                <div style="text-align: center; margin-bottom: 30px;">
+                  <h1 style="color: #5C4741; margin: 0; font-size: 28px; font-weight: bold;">Account Deletion Confirmation</h1>
+                  <div style="width: 50px; height: 3px; background-color: #D6B7B0; margin: 15px auto;"></div>
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                  <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0;">Hello <strong>${user.pseudo}</strong>,</p>
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                  <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0 0 15px 0;">
+                    We're writing to confirm that your EsportPro account has been successfully deleted as requested.
+                  </p>
+                  <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0 0 15px 0;">
+                    We're sorry to see you go! Your gaming journey with us has come to an end, but the memories remain.
+                  </p>
+                </div>
+
+                <div style="background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+                  <h3 style="margin: 0 0 15px 0; font-size: 18px;">⚠️ What has been deleted:</h3>
+                  <ul style="margin: 0; padding-left: 20px;">
+                    <li style="margin-bottom: 8px;">Your profile and personal information</li>
+                    <li style="margin-bottom: 8px;">Tournament history and statistics</li>
+                    <li style="margin-bottom: 8px;">Team memberships and created tournaments</li>
+                    <li style="margin-bottom: 8px;">Favorite games and preferences</li>
+                    <li style="margin-bottom: 0;">All associated data and achievements</li>
+                  </ul>
+                </div>
+
+                <div style="background-color: #d1ecf1; border: 1px solid #b8daff; color: #0c5460; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+                  <p style="margin: 0; font-size: 15px; line-height: 1.5;">
+                    <strong>💡 Changed your mind?</strong><br>
+                    If you decide to return to competitive gaming in the future, you're always welcome to create a new account and rejoin our community of esports enthusiasts.
+                  </p>
+                </div>
+
+                <div style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 30px;">
+                  <p style="color: #666; font-size: 14px; line-height: 1.5; margin: 0 0 10px 0;">
+                    Thank you for being part of the EsportPro community. We wish you all the best in your future gaming adventures!
+                  </p>
+                  <p style="color: #666; font-size: 14px; line-height: 1.5; margin: 0;">
+                    Best regards,<br>
+                    <strong>The EsportPro Team</strong>
+                  </p>
+                </div>
+              </div>
+
+              <div style="text-align: center; margin-top: 20px;">
+                <p style="color: #999; font-size: 12px; margin: 0;">
+                  This email was sent to ${user.email} to confirm your account deletion. No further action is required.
+                </p>
+              </div>
+            </div>
+          `)
+      })
 
       return response.redirect().toPath('/')
     } catch (error) {
