@@ -12,6 +12,7 @@ import GamesCarousel from '~/components/game/GamesCarousel.vue'
 import TournamentsCarousel from '~/components/tournament/TournamentsCarousel.vue'
 import UserStatsSection from '~/components/profile/UserStatsSection.vue'
 import AdminUserTable from '~/components/profile/AdminUserTable.vue'
+import TwoFactorSettings from '~/components/profile/TwoFactorSettings.vue'
 import { useAuth } from '../../../resources/js/composables/useAuth'
 import { UserRole } from '#enums/user_role'
 import { getCsrfToken } from '~/utils'
@@ -276,6 +277,11 @@ const confirmAction = async () => {
 
     <!-- Afficher GeneralInfoUser uniquement si c'est le profil de l'utilisateur courant -->
     <GeneralInfoUser v-if="isOwnProfile" :user="user" />
+
+    <!-- 2FA Settings (only for own profile) -->
+    <div v-if="isOwnProfile" class="mt-8">
+      <TwoFactorSettings />
+    </div>
 
     <!-- N'afficher le contenu du profil que s'il n'est pas privé ou s'il appartient à l'utilisateur connecté -->
     <template v-if="!isPrivateProfile">
