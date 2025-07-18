@@ -138,7 +138,7 @@ const tournamentStarted = computed(() => {
   try {
     let startDate: DateTime
 
-    startDate = DateTime.fromISO(String(tournament.value.startDate))
+    startDate = DateTime.fromISO(String(tournament.value.startDate), { zone: 'utc' })
 
     return DateTime.now() >= startDate
   } catch (error) {
@@ -166,7 +166,7 @@ const canStartTournament = computed(() => {
 
   // Check if it's past the start date
   try {
-    const startDate = DateTime.fromISO(String(tournament.value.startDate))
+    const startDate = DateTime.fromISO(String(tournament.value.startDate)).toLocal()
 
     return DateTime.now() >= startDate
   } catch (error) {
@@ -413,7 +413,7 @@ const tournamentFinished = computed(() => {
   if (tournament.value.winnerId) return true
 
   try {
-    let endDate: DateTime = DateTime.fromISO(String(tournament.value.endDate))
+    let endDate: DateTime = DateTime.fromISO(String(tournament.value.endDate), { zone: 'utc' })
     return DateTime.now() >= endDate
   } catch (error) {
     console.error('Error checking tournament end date:', error)
@@ -821,11 +821,11 @@ const winningTeam = computed(() => {
                 <p class="text-gray-700 text-sm">
                   <span class="font-medium">{{ t('tournament.startDate') }}:</span>
                   {{
-                    DateTime.fromISO(tournament.startDate.toString()).toFormat('dd/MM/yyyy HH:mm')
+                    DateTime.fromISO(tournament.startDate.toString(), { zone: 'utc' }).toFormat('dd/MM/yyyy HH:mm')
                   }}
                   <br />
                   <span class="font-medium">{{ t('tournament.endDate') }}:</span>
-                  {{ DateTime.fromISO(tournament.endDate.toString()).toFormat('dd/MM/yyyy HH:mm') }}
+                  {{ DateTime.fromISO(tournament.endDate.toString(), { zone: 'utc' }).toFormat('dd/MM/yyyy HH:mm') }}
                 </p>
               </div>
             </div>

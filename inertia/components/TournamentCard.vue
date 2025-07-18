@@ -223,7 +223,7 @@ const closeEditModal = () => {
             }}
           </p>
           <p class="text-sm text-gray-600">
-            {{ DateTime.fromISO(tournament.startDate.toString()).toFormat('dd/MM/yyyy HH:mm') }}
+            {{ DateTime.fromISO(tournament.startDate.toString(), { zone: 'utc' }).toFormat('dd/MM/yyyy HH:mm') }}
           </p>
         </div>
         <div class="">
