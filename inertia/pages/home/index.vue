@@ -9,6 +9,7 @@ import GamesCarousel from '~/components/game/GamesCarousel.vue'
 import TournamentsCarousel from '~/components/tournament/TournamentsCarousel.vue'
 import 'vue3-carousel/dist/carousel.css'
 import { Slide } from 'vue3-carousel'
+import AppHead from '~/components/layouts/AppHead.vue'
 
 const { t } = useI18n()
 
@@ -31,6 +32,10 @@ defineProps({
 </script>
 
 <template>
+  <AppHead
+    :title="t('home.home')"
+    :description="t('home.welcomeMessage')" />
+
   <Layout class="bg-[#fafafa]">
     <TournamentsCarousel
       :list-tournaments="tournaments"

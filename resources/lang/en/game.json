@@ -37,5 +37,7 @@
   "creationError": "An error occurred while creating the game",
   "unauthorizedUpdate": "You are not authorized to update this game. Only administrators can modify games.",
   "confirmDeleteMessage": "Are you sure you want to delete this game?",
-  "deleteWarning": "Warning: This action will also delete all tournaments associated with this game"
+  "deleteWarning": "Warning: This action will also delete all tournaments associated with this game",
+  "metaDescription": "Discover available tournaments for the game {gameName}. With {nbTournaments} tournament(s) available, participate in exciting competitions and showcase your skills!",
+  "seeAllGames": "See all our available games on the platform."
 }

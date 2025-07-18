@@ -18,6 +18,7 @@ import ConfirmationModal from '~/components/ConfirmationModal.vue'
 import { TournamentStatus } from '#types/tournament'
 import Match from '#models/match'
 import Tournament from '#models/tournament'
+import AppHead from '~/components/layouts/AppHead.vue'
 
 const { t } = useI18n()
 const { user, isAdmin } = useAuth()
@@ -427,6 +428,12 @@ const winningTeam = computed(() => {
 })
 </script>
 <template>
+  <AppHead
+    :title="tournament.name"
+    :description="t('tournament.metaDescription', {tournamentName: tournament.name, nbParticipants: tournament.numberParticipants}) + ' - ' + tournament.format"
+    :image="imageSource"
+  />
+
   <Layout>
     <div class="px-4 sm:px-6 py-6">
       <!-- Success notification -->
