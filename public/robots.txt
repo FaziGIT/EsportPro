@@ -1,0 +1,22 @@
+User-agent: *
+
+# Autorisé
+Allow: /
+Allow: /tournaments/
+Allow: /games/
+Allow: /search
+Allow: /login
+Allow: /register
+Allow: /profile/user/
+
+# Bloqué
+Disallow: /api/
+Disallow: /profile
+Disallow: /chat/
+Disallow: /teams/
+Disallow: /*?*
+Disallow: /*/edit
+Disallow: /*/delete
+
+# Sitemap
+Sitemap: https://esportpro.cloud/sitemap.xml

@@ -3,5 +3,7 @@
   "unvaliableCurrentlyTournament" : "No tournaments are currently available.",
   "showAllTournaments": "Show all tournaments",
   "ourGames": "Our Games",
-  "showAllGames": "Show all games"
+  "showAllGames": "Show all games",
+  "welcomeMessage": "Welcome to EsportPro, our esports tournament platform.",
+  "home": "Home"
 }

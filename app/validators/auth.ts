@@ -11,6 +11,9 @@ export const registerValidator = vine.compile(
   vine.object({
     pseudo: vine.string().minLength(3).unique({ table: 'users', column: 'pseudo' }),
     email: vine.string().email().unique({ table: 'users', column: 'email' }),
-    password: vine.string().minLength(8),
+    password: vine
+      .string()
+      .minLength(8)
+      .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/), // At least 8 characters, one uppercase, one lowercase, one number, one special character
   })
 )

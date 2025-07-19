@@ -13,6 +13,7 @@ import Game from '#models/game'
 import { TournamentStatus } from '#types/tournament'
 import { FilterOptions } from '#enums/filter'
 import { OptionType } from '#types/option'
+import AppHead from '~/components/layouts/AppHead.vue'
 
 const { t } = useI18n()
 const { user } = useAuth()
@@ -99,6 +100,11 @@ const closeModal = () => {
 </script>
 
 <template>
+  <AppHead
+    :title="t('tournament.tournaments')"
+    :description="t('tournament.seeAllTournaments')"
+  />
+
   <Layout>
     <div class="text-2xl sm:text-3xl lg:text-4xl font-semibold text-center py-6">{{ t('tournament.tournaments') }}</div>
 

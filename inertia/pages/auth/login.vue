@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import Layout from '~/components/layouts/layout.vue'
 import background from '~/img/auth/bg.png'
-import { Head, Link, useForm } from '@inertiajs/vue3'
+import { Link, useForm } from '@inertiajs/vue3'
 import { useI18n } from '../../../resources/js/composables/useI18n'
 import { useErrors } from '../../../resources/js/composables/useErrors'
 import { ref } from 'vue'
+import AppHead from '~/components/layouts/AppHead.vue'
 
 const { errors } = useErrors()
 const { t } = useI18n()
@@ -26,7 +27,10 @@ const showRecoveryInput = ref(false)
 </script>
 
 <template>
-  <Head :title="t('auth.login')" />
+  <AppHead
+    :title="t('auth.login')"
+    :description="t('auth.metaDescriptionLogin')"
+  />
 
   <Layout>
     <div class="flex mt-16 flex-col items-center">
@@ -126,7 +130,6 @@ const showRecoveryInput = ref(false)
                   </p>
                 </div>
               </div>
-
               <div class="flex flex-col items-start mt-4 gap-1 w-full">
                 <label class=" text-sm md:text-base font-normal" for="password">{{
                   t('auth.password')
@@ -148,7 +151,12 @@ const showRecoveryInput = ref(false)
                   </p>
                 </div>
               </div>
-
+            <Link
+              href="/forgot-password"
+              class="text-[#5C4741] underline decoration-[#5C4741] underline-offset-6 font-altone mt-6 md:mt-8 text-xs md:text-sm"
+            >
+              {{ t('auth.forgotPassword') }}
+            </Link>
               <Link
                 href="#"
                 class="text-[#5C4741] underline decoration-[#5C4741] underline-offset-6  mt-6 md:mt-8 text-xs md:text-sm"

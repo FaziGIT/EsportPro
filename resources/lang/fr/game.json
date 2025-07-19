@@ -37,5 +37,7 @@
   "creationError": "Une erreur est survenue lors de la création du jeu",
   "unauthorizedUpdate": "Vous n'êtes pas autorisé à modifier ce jeu. Seuls les administrateurs peuvent le faire.",
   "confirmDeleteMessage": "Êtes-vous sûr de vouloir supprimer ce jeu ?",
-  "deleteWarning": "Attention : Cette action supprimera également tous les tournois associés à ce jeu."
+  "deleteWarning": "Attention : Cette action supprimera également tous les tournois associés à ce jeu.",
+  "metaDescription": "Découvrez les tournois disponibles pour le jeu {gameName}. Avec {nbTournaments} tournoi(s) disponible participez à des compétitions passionnantes et montrez vos compétences !",
+  "seeAllGames": "Voir tous nos jeux disponibles sur la plateforme."
 }

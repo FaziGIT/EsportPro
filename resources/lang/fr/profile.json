@@ -71,4 +71,5 @@
   "invalidVerificationCode": "Code de vérification invalide",
   "errorVerifyingCode": "Erreur lors de la vérification du code",
   "errorDisabling2FA": "Erreur lors de la désactivation de la 2FA"
+  "metaDescriptionUserProfile": "Découvrez le profil de {user} sur EsportPro."
 }

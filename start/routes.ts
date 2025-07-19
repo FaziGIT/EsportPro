@@ -23,6 +23,9 @@ const ProfileController = () => import('#controllers/profile_controller')
 const TwofaController = () => import('#controllers/twofa_controller')
 
 const ErrorsController = () => import('#controllers/errors_controller')
+const ResetPasswordsController = () => import('#controllers/reset_passwords_controller')
+
+const SitemapController = () => import('#controllers/sitemap_controller')
 
 transmit.registerRoutes()
 
@@ -49,6 +52,11 @@ router
   })
   .prefix('/api')
   .use(middleware.auth())
+// Password reset routes
+router.get('/forgot-password', [ResetPasswordsController, 'showForgotPasswordForm'])
+router.post('/forgot-password', [ResetPasswordsController, 'sendResetPasswordEmail'])
+router.get('/reset-password/:token', [ResetPasswordsController, 'showResetForm'])
+router.post('/reset-password/:token', [ResetPasswordsController, 'resetPassword'])
 
 // Chat routes (authenticated)
 router
@@ -104,9 +112,13 @@ router
     router.post('/profile/ban-user/:id/ban', [ProfileController, 'banUser'])
     router.post('/profile/unban-user/:id/unban', [ProfileController, 'unbanUser'])
     router.delete('/profile/delete-account', [ProfileController, 'deleteAccount'])
-    router.get('/profile/user/:pseudo', [ProfileController, 'viewProfile'])
   })
   .use(middleware.auth())
 
+router.get('/profile/user/:pseudo', [ProfileController, 'viewProfile'])
+
 // Error routes
 router.get('/unauthorized', [ErrorsController, 'unauthorized'])
+
+// Sitemap route
+router.get('/sitemap.xml', [SitemapController, 'generate'])

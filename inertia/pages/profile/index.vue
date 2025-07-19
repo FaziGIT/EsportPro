@@ -18,6 +18,7 @@ import { UserRole } from '#enums/user_role'
 import { getCsrfToken } from '~/utils'
 import ConfirmationModal from '~/components/ConfirmationModal.vue'
 import { router } from '@inertiajs/vue3'
+import AppHead from '~/components/layouts/AppHead.vue'
 
 const { t } = useI18n()
 const { isAdmin } = useAuth()
@@ -217,6 +218,11 @@ const confirmAction = async () => {
 </script>
 
 <template>
+  <AppHead
+    :title="pageTitle"
+    :description="t('profile.metaDescriptionUserProfile', { user: displayedUser?.pseudo || '' })"
+  />
+
   <Layout class="bg-[#fafafa]">
     <div class="flex justify-between items-center">
       <div class="flex items-center">

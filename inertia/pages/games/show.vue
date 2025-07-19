@@ -13,6 +13,7 @@ import { useFavoriteToggle } from '../../../resources/js/composables/useFavorite
 import { TrashIcon } from '~/components/icons'
 import { getCsrfToken } from '~/utils'
 import ConfirmationModal from '~/components/ConfirmationModal.vue'
+import AppHead from '~/components/layouts/AppHead.vue'
 
 const { t } = useI18n()
 const { user, isAdmin } = useAuth()
@@ -186,6 +187,12 @@ const deleteGame = async () => {
 }
 </script>
 <template>
+  <AppHead
+    :title="game.name"
+    :description="t('game.metaDescription', { gameName: game.name, tournamentsCount: tournaments.length })"
+    :image="imageSource"
+  />
+
   <Layout>
     <div class="px-4 sm:px-6 py-6">
       <!-- Header with title -->

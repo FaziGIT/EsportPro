@@ -29,12 +29,16 @@ export default class HomeController {
 
     const tournaments = await getAllTournamentsWithoutImages()
       .where('is_validated', true)
-      .where('name', 'like', `%${query}%`)
+      .whereRaw('LOWER(name) LIKE ?', [`%${query.toLowerCase()}%`])
       .limit(5)
 
-    const games = await getAllGamesWithoutImages().where('name', 'like', `%${query}%`).limit(5)
+    const games = await getAllGamesWithoutImages()
+      .whereRaw('LOWER(name) LIKE ?', [`%${query.toLowerCase()}%`])
+      .limit(5)
 
-    const users = await User.query().where('pseudo', 'like', `%${query}%`).limit(5)
+    const users = await User.query()
+      .whereRaw('LOWER(pseudo) LIKE ?', [`%${query.toLowerCase()}%`])
+      .limit(5)
 
     return { tournaments, games, users }
   }

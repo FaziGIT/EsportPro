@@ -71,4 +71,5 @@
   "invalidVerificationCode": "Invalid verification code",
   "errorVerifyingCode": "Error verifying code",
   "errorDisabling2FA": "Error disabling 2FA"
+  "metaDescriptionUserProfile": "Discover {user}'s profile on EsportPro."
 }

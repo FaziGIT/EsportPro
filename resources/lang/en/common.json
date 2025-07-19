@@ -12,5 +12,6 @@
   "unban": "Unban",
   "bannedRole": "Banned",
   "userRole": "User",
-  "adminRole": "Administrator"
+  "adminRole": "Administrator",
+  "loading": "Loading"
 }
