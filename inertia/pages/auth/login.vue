@@ -151,19 +151,12 @@ const showRecoveryInput = ref(false)
                   </p>
                 </div>
               </div>
-            <Link
-              href="/forgot-password"
-              class="text-[#5C4741] underline decoration-[#5C4741] underline-offset-6 font-altone mt-6 md:mt-8 text-xs md:text-sm"
-            >
-              {{ t('auth.forgotPassword') }}
-            </Link>
               <Link
-                href="#"
-                class="text-[#5C4741] underline decoration-[#5C4741] underline-offset-6  mt-6 md:mt-8 text-xs md:text-sm"
+                href="/forgot-password"
+                class="text-[#5C4741] underline decoration-[#5C4741] underline-offset-6 font-altone mt-6 md:mt-8 text-xs md:text-sm"
               >
                 {{ t('auth.forgotPassword') }}
               </Link>
-
               <div class="flex gap-4 md:gap-7 mt-8 md:mt-12 w-full flex-col md:flex-row">
                 <Link
                   href="/register"
