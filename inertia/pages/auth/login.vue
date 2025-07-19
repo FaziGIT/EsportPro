@@ -30,8 +30,7 @@ const showRecoveryInput = ref(false)
 
   <Layout>
     <div class="flex mt-16 flex-col items-center">
-      <h1 class="md:text-6xl text-4xl font-altone">{{ t('auth.login') }}</h1>
-
+      <h1 class="md:text-6xl text-4xl ">{{ t('auth.login') }}</h1>
       <div
         v-if="errors && errors.E_INVALID_CREDENTIALS"
         class="w-full max-w-[calc(100%-2rem)] md:w-[700px] mx-auto px-4 md:px-0 mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md"
@@ -92,7 +91,7 @@ const showRecoveryInput = ref(false)
           <div v-if="!pendingTwoFa" class="w-full md:w-1/2 flex flex-col items-center justify-center p-6 md:p-10">
             <form @submit.prevent="form.post('/login')" class="w-full">
               <div class="flex flex-col items-start gap-1 w-full">
-                <label class="font-altone text-sm md:text-base font-normal" for="email">
+                <label class=" text-sm md:text-base font-normal" for="email">
                   {{ t('auth.emailPseudo') }}
                 </label>
                 <input
@@ -129,7 +128,7 @@ const showRecoveryInput = ref(false)
               </div>
 
               <div class="flex flex-col items-start mt-4 gap-1 w-full">
-                <label class="font-altone text-sm md:text-base font-normal" for="password">{{
+                <label class=" text-sm md:text-base font-normal" for="password">{{
                   t('auth.password')
                 }}</label>
                 <input
@@ -152,7 +151,7 @@ const showRecoveryInput = ref(false)
 
               <Link
                 href="#"
-                class="text-[#5C4741] underline decoration-[#5C4741] underline-offset-6 font-altone mt-6 md:mt-8 text-xs md:text-sm"
+                class="text-[#5C4741] underline decoration-[#5C4741] underline-offset-6  mt-6 md:mt-8 text-xs md:text-sm"
               >
                 {{ t('auth.forgotPassword') }}
               </Link>
@@ -160,14 +159,14 @@ const showRecoveryInput = ref(false)
               <div class="flex gap-4 md:gap-7 mt-8 md:mt-12 w-full flex-col md:flex-row">
                 <Link
                   href="/register"
-                  class="bg-[#D6B7B0] px-4 py-2 rounded-lg font-altone text-sm md:text-base text-black flex-1 cursor-pointer text-center"
+                  class="bg-[#D6B7B0] px-4 py-2 rounded-lg  text-sm md:text-base text-black flex-1 cursor-pointer text-center"
                 >
                   {{ t('auth.register') }}
                 </Link>
                 <button
                   type="submit"
                   :disabled="form.processing"
-                  class="bg-[#5C4741] text-white px-4 py-2 rounded-lg font-altone text-sm md:text-base flex-1 cursor-pointer"
+                  class="bg-[#5C4741] text-white px-4 py-2 rounded-lg  text-sm md:text-base flex-1 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {{ t('auth.login') }}
                 </button>
@@ -179,15 +178,15 @@ const showRecoveryInput = ref(false)
           <div v-else class="w-full md:w-1/2 flex flex-col items-center justify-center p-6 md:p-10">
             <form @submit.prevent="twofaForm.post('/login/verify-2fa')" class="w-full">
               <div class="text-center mb-6">
-                <h2 class="text-xl font-altone mb-2">Two-Factor Authentication</h2>
+                <h2 class="text-xl  mb-2">{{ t('auth.twoFactor') }}</h2>
                 <p class="text-sm text-gray-600">
-                  {{ showRecoveryInput ? 'Enter a recovery code' : 'Enter the 6-digit code from your authenticator app' }}
+                  {{ showRecoveryInput ? t('auth.enterRecoveryCode') : t('auth.enterTwoFactorCode') }}
                 </p>
               </div>
 
               <div class="flex flex-col items-start gap-1 w-full">
-                <label class="font-altone text-sm md:text-base font-normal" for="twofa-code">
-                  {{ showRecoveryInput ? 'Recovery Code' : '2FA Code' }}
+                <label class=" text-sm md:text-base font-normal" for="twofa-code">
+                  {{ showRecoveryInput ? t('auth.recoveryCode') : t('auth.twoFactorCode') }}
                 </label>
                 <input
                   type="text"
@@ -229,25 +228,25 @@ const showRecoveryInput = ref(false)
                 <button
                   type="button"
                   @click="showRecoveryInput = !showRecoveryInput"
-                  class="text-[#5C4741] underline decoration-[#5C4741] underline-offset-6 font-altone text-xs md:text-sm"
+                  class="text-[#5C4741] underline decoration-[#5C4741] underline-offset-6  text-xs md:text-sm"
                 >
-                  {{ showRecoveryInput ? 'Use authenticator code' : 'Use recovery code' }}
+                  {{ showRecoveryInput ? t('auth.useAuthenticatorCode') : t('auth.useRecoveryCode') }}
                 </button>
               </div>
 
               <div class="flex gap-4 md:gap-7 mt-8 md:mt-12 w-full flex-col md:flex-row">
                 <Link
                   href="/login/clear-2fa"
-                  class="bg-[#D6B7B0] px-4 py-2 rounded-lg font-altone text-sm md:text-base text-black flex-1 cursor-pointer text-center"
+                  class="bg-[#D6B7B0] px-4 py-2 rounded-lg  text-sm md:text-base text-black flex-1 cursor-pointer text-center"
                 >
-                  Back to Login
+                  {{ t('auth.backToLogin') }}
                 </Link>
                 <button
                   type="submit"
                   :disabled="twofaForm.processing"
-                  class="bg-[#5C4741] text-white px-4 py-2 rounded-lg font-altone text-sm md:text-base flex-1 cursor-pointer"
+                  class="bg-[#5C4741] text-white px-4 py-2 rounded-lg  text-sm md:text-base flex-1 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Verify
+                  {{ t('auth.verify') }}
                 </button>
               </div>
             </form>
