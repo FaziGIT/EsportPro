@@ -86,10 +86,17 @@ export default class ChatsController {
     }
 
     // Get user with their relations
+    // It is used to get all the channel that the user has access to when the tournament is not finished and the team is in a tournament is not finished -> See below for the logic
     const userWithRelations = await User.query()
       .where('id', user.id)
       .preload('teams', (teamQuery) => {
-        teamQuery.preload('tournament')
+        teamQuery
+          .whereHas('tournament', (tournamentQuery) => {
+            tournamentQuery.whereNull('winner_id')
+          })
+          .preload('tournament', (tournamentQuery) => {
+            tournamentQuery.whereNull('winner_id')
+          })
       })
       .firstOrFail()
 

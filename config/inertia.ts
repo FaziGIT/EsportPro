@@ -35,7 +35,7 @@ const inertiaConfig = defineConfig({
 
         await ctx.auth.user.load('teams', (teamsQuery: any) => {
           teamsQuery.preload('tournament', (tournamentQuery: any) => {
-            tournamentQuery.select(['id', 'name'])
+            tournamentQuery.select(['id', 'name', 'winnerId'])
           })
         })
 
@@ -45,6 +45,7 @@ const inertiaConfig = defineConfig({
             (tournament: Tournament, index: number, self: Tournament[]) =>
               index === self.findIndex((t: Tournament) => t.id === tournament.id)
           )
+          .filter((tournament: Tournament) => tournament.winnerId === null) // tournament not finished
 
         return tournaments.map((tournament: Tournament) => ({
           id: tournament.id,
