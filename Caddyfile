@@ -1,0 +1,105 @@
+{$DOMAIN:esportpro.cloud} {
+    # Logs
+    log {
+        output file /var/log/caddy/access.log
+        format json
+    }
+
+    reverse_proxy esportpro-app:3333 {
+        header_up Host {host}
+        header_up X-Real-IP {remote}
+        header_up X-Forwarded-For {remote}
+        header_up X-Forwarded-Port {server_port}
+        header_up X-Forwarded-Proto {scheme}
+        
+        # Support WebSocket for Transmit
+        header_up Connection {>Connection}
+        header_up Upgrade {>Upgrade}
+        
+        # Health check
+        health_uri /
+        health_interval 30s
+        health_timeout 10s
+    }
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' matomo.esportpro.cloud browser.glitchtip-cdn.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: matomo.esportpro.cloud; font-src 'self'; connect-src 'self' ws: wss: matomo.esportpro.cloud browser.glitchtip-cdn.com glitchtip.esportpro.cloud"
+        
+        -Server
+    }
+
+    encode gzip
+
+    @static {
+        path *.css *.js *.png *.jpg *.jpeg *.gif *.ico *.svg *.woff *.woff2 *.ttf *.eot
+    }
+    header @static Cache-Control "public, max-age=31536000"
+}
+
+# Matomo Analytics
+matomo.{$DOMAIN:esportpro.cloud} {
+    # Logs
+    log {
+        output file /var/log/caddy/matomo.log
+        format json
+    }
+
+    reverse_proxy esportpro-matomo:80 {
+        header_up Host {host}
+        header_up X-Real-IP {remote}
+        header_up X-Forwarded-For {remote}
+        header_up X-Forwarded-Port {server_port}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        
+        -Server
+    }
+
+    encode gzip
+}
+
+# Glitchtip Error Tracking
+glitchtip.{$DOMAIN:esportpro.cloud} {
+    # Logs
+    log {
+        output file /var/log/caddy/glitchtip.log
+        format json
+    }
+
+    reverse_proxy esportpro-glitchtip:8000 {
+        header_up Host {host}
+        header_up X-Real-IP {remote}
+        header_up X-Forwarded-For {remote}
+        header_up X-Forwarded-Port {server_port}
+        header_up X-Forwarded-Proto {scheme}
+        
+        # Health check
+        health_uri /_health/
+        health_interval 30s
+        health_timeout 10s
+    }
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        
+        -Server
+    }
+
+    encode gzip
+} 

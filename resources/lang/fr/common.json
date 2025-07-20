@@ -1,0 +1,17 @@
+{
+  "save": "Sauvegarder",
+  "cancel": "Annuler",
+  "confirm": "Confirmer",
+  "confirmChange": "Confirmer le changement",
+  "actions": "Actions",
+  "delete": "Supprimer",
+  "confirmDelete": "Confirmer la suppression",
+  "unauthorized": "Accès interdit",
+  "youAreBanned": "Votre compte a été banni.",
+  "ban": "Bannir",
+  "unban": "Débannir",
+  "bannedRole": "Banni",
+  "userRole": "Utilisateur",
+  "adminRole": "Administrateur",
+  "loading": "Chargement"
+}

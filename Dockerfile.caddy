@@ -1,0 +1,10 @@
+FROM caddy:2.8-alpine
+
+# Copy the Caddyfile into the container
+COPY Caddyfile /etc/caddy/Caddyfile
+
+# Expose the ports
+EXPOSE 80 443
+
+# Default command
+CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"] 

@@ -1,0 +1,7 @@
+export { default as HeartIconSvg } from './HeartIconSVG.vue'
+export { default as ChevronDown } from './ChevronDown.vue'
+export { default as Edit } from './EditSVG.vue'
+export { default as Profile } from './Profile.vue'
+export { default as PlusIcon } from './PlusIcon.vue'
+export { default as TrashIcon } from './TrashIcon.vue'
+export { default as BanIcon } from './BanIcon.vue'
