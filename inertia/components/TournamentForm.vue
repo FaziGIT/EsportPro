@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, defineEmits, defineProps, ref, watch, onUnmounted } from 'vue'
+import { computed, defineEmits, defineProps, onUnmounted, ref, watch } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import { useI18n } from '../../resources/js/composables/useI18n'
 import { TierType } from '#enums/tier_type'
@@ -13,7 +13,7 @@ const { t } = useI18n()
 // Props
 const props = defineProps({
   isOpen: {
-    type: Boolean
+    type: Boolean,
   },
   mode: {
     type: String as () => typeof TournamentStatus.EDIT | typeof TournamentStatus.NEW,
@@ -28,8 +28,8 @@ const props = defineProps({
   },
   needReload: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 // Emits
@@ -255,7 +255,7 @@ watch(
     if (!newValue) {
       form.numberPlayersPerTeam = null
     } else if (form.numberPlayersPerTeam === null) {
-      form.numberPlayersPerTeam = 5
+      form.numberPlayersPerTeam = 1
     }
   }
 )
@@ -319,11 +319,15 @@ onUnmounted(() => {
   <!-- Modal only renders when isOpen is true -->
   <div v-if="isOpen">
     <!-- Notification -->
-    <div v-if="showNotification"
-         class="fixed top-4 right-4 z-[60] px-4 py-3 rounded flex items-center shadow-lg max-w-md"
-         :class="notificationType === 'success' ?
-                'bg-green-100 border border-green-400 text-green-700' :
-                'bg-red-100 border border-red-400 text-red-700'">
+    <div
+      v-if="showNotification"
+      class="fixed top-4 right-4 z-[60] px-4 py-3 rounded flex items-center shadow-lg max-w-md"
+      :class="
+        notificationType === 'success'
+          ? 'bg-green-100 border border-green-400 text-green-700'
+          : 'bg-red-100 border border-red-400 text-red-700'
+      "
+    >
       <span>{{ notificationMessage }}</span>
       <button
         @click="showNotification = false"
@@ -987,11 +991,15 @@ onUnmounted(() => {
   </div>
 
   <!-- Notification outside of modal so it remains visible after modal closes -->
-  <div v-if="showNotification && !isOpen"
-       class="fixed top-4 right-4 z-[60] px-4 py-3 rounded flex items-center shadow-lg max-w-md"
-       :class="notificationType === 'success' ?
-              'bg-green-100 border border-green-400 text-green-700' :
-              'bg-red-100 border border-red-400 text-red-700'">
+  <div
+    v-if="showNotification && !isOpen"
+    class="fixed top-4 right-4 z-[60] px-4 py-3 rounded flex items-center shadow-lg max-w-md"
+    :class="
+      notificationType === 'success'
+        ? 'bg-green-100 border border-green-400 text-green-700'
+        : 'bg-red-100 border border-red-400 text-red-700'
+    "
+  >
     <span>{{ notificationMessage }}</span>
     <button
       @click="showNotification = false"
