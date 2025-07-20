@@ -20,6 +20,8 @@ const ChatController = () => import('#controllers/chat_controller')
 const TournamentsController = () => import('#controllers/tournaments_controller')
 const GamesController = () => import('#controllers/games_controller')
 const ProfileController = () => import('#controllers/profile_controller')
+const TwofaController = () => import('#controllers/twofa_controller')
+
 const ErrorsController = () => import('#controllers/errors_controller')
 const ResetPasswordsController = () => import('#controllers/reset_passwords_controller')
 
@@ -38,6 +40,18 @@ router.get('/register', [RegisterController, 'index'])
 router.post('/register', [RegisterController, 'store'])
 router.post('/logout', [LogoutController]).use(middleware.auth())
 
+// 2FA routes
+router.post('/login/verify-2fa', [LoginController, 'verify2fa'])
+router.get('/login/clear-2fa', [LoginController, 'clearTwoFa'])
+router
+  .group(() => {
+    router.get('/2fa/status', [TwofaController, 'status'])
+    router.post('/2fa/enable', [TwofaController, 'enable'])
+    router.post('/2fa/confirm', [TwofaController, 'confirm'])
+    router.post('/2fa/disable', [TwofaController, 'disable'])
+  })
+  .prefix('/api')
+  .use(middleware.auth())
 // Password reset routes
 router.get('/forgot-password', [ResetPasswordsController, 'showForgotPasswordForm'])
 router.post('/forgot-password', [ResetPasswordsController, 'sendResetPasswordEmail'])
