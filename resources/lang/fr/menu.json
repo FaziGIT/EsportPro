@@ -5,6 +5,6 @@
   "descendingFormat": "Format décroissant",
   "ascendingName": "Nom croissant",
   "descendingName": "Nom décroissant",
-  "ascendigPlatform": "Plateforme croissante",
-  "descendigPlatform": "Plateforme décroissante"
+  "ascPlatform": "Plateforme croissante",
+  "descPlatform": "Plateforme décroissante"
 }
