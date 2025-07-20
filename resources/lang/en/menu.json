@@ -5,6 +5,6 @@
   "descendingFormat": "Descending Format",
   "ascendingName": "Ascending Name",
   "descendingName": "Descending Name",
-  "ascendigPlatform": "Ascending Platform",
-  "descendigPlatform": "Descending Platform"
+  "ascPlatform": "Ascending Platform",
+  "descPlatform": "Descending Platform"
 }
